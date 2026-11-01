@@ -1091,21 +1091,13 @@ def _parse_office(path, claim):
 
 
 def _parse_pdf(path, claim):
-    from . import ingest
-    blocks, page_count, detail = ingest.parse_pdf(path, claim['document_id'], include_quality=True)
-    import pymupdf
-    document = pymupdf.open(path)
-    try:
-        page_sizes = {index + 1: (float(page.rect.width), float(page.rect.height))
-                      for index, page in enumerate(document)}
-    finally:
-        document.close()
-    ingest._ensure_pdf_adapter()
-    result = parse_contract.dispatch('application/pdf', pdf_path=path,
-                                     doc_id=claim['document_id'], blocks=blocks,
-                                     page_sizes=page_sizes, detail=detail,
-                                     parser_version=ingest.PARSER_VERSION)
-    return result, {'pages': page_count}
+    """PDF parse: the built-in ``pdf-native`` plugin owns the composition.
+
+    The function stays module-level and behind ``PARSERS['.pdf']`` because tests patch
+    both; the plugin is imported here so importing this module stays light.
+    """
+    from .plugins import pdf_plugin
+    return pdf_plugin.parse(path, claim['document_id'], claim['source_sha256'], claim)
 
 
 def _measurement_id(data):

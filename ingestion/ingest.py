@@ -140,9 +140,16 @@ def _pdf_contract_payload(*, pdf_path, doc_id, blocks, page_sizes, detail, parse
 
 
 def _ensure_pdf_adapter():
-    """Register the PDF adapter once; routing then finds it by detected media type."""
+    """Register the PDF adapter once; routing then finds it by detected media type.
+
+    Bootstrapping the plugin context here keeps the legacy call sites (which only know
+    this function) and the parser registry in step: whoever routes a PDF has both.
+    """
     from datamind import parse_contract
 
+    from .plugins import default_context
+
+    default_context()
     if _PDF_ADAPTER not in parse_contract.registered_adapters():
         parse_contract.register_adapter(
             _PDF_ADAPTER, media_types=["application/pdf"],
@@ -199,9 +206,15 @@ def _ohr_contract_payload(*, record, doc_id, source_name, parser_version, source
 
 
 def _ensure_ohr_adapter():
-    """Register the OHR-Bench JSON adapter once (explicit dispatch: JSON has no signature)."""
+    """Register the OHR-Bench JSON adapter once (explicit dispatch: JSON has no signature).
+
+    Like its PDF counterpart, it bootstraps the plugin context so both worlds agree.
+    """
     from datamind import parse_contract
 
+    from .plugins import default_context
+
+    default_context()
     if OHR_ADAPTER not in parse_contract.registered_adapters():
         parse_contract.register_adapter(
             OHR_ADAPTER, media_types=[OHR_MEDIA_TYPE], capabilities=["native_text"],
