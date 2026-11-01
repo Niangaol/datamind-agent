@@ -4,8 +4,8 @@
 **基线提交**：`e4e2ebf`（`git rev-parse --short HEAD` 只读读取）
 **API 版本**：0.39.0（见 `/openapi.json`，本文件不改动运行时代码）
 **对应官方要求**：中级任务难题②「可扩展要素提取：不依赖 Few-Shot 大提示词，新增领域可低成本扩展」（赛题 PDF 第 5 页）
-**机读报告**：[reports/extensible_fields_v1.json](../reports/extensible_fields_v1.json)
-**结论卡**：[reports/cards/wp5a_extensible.md](../reports/cards/wp5a_extensible.md)
+**机读报告**：reports/extensible_fields_v1.json
+**结论卡**：reports/cards/wp5a_extensible.md
 
 ---
 
@@ -158,5 +158,5 @@ cd "/Users/caicai/DataMind Agent"
 | E8/F8 质量加分 | 引擎 0 行改动、原领域不受影响的可核对证据 | 官方分数 |
 | F4（复杂 NL2SQL 支撑） | 字段定位复用同一 `Catalog.retrieve` 的证据 | 跨库泛化结论 |
 
-> 所有数字来自 [reports/extensible_fields_v1.json](../reports/extensible_fields_v1.json) 的实测输出；
+> 所有数字来自 reports/extensible_fields_v1.json 的实测输出；
 > 本文件不声明任何官方分值。

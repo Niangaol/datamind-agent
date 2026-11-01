@@ -1,6 +1,0 @@
-Temporary Qdrant 1.12.4 module integration; isolated storage and synthetic embeddings.
-PASS unauthenticated GET /collections rejected: HTTP 401
-PASS wrong API key rejected by production client factory
-PASS authenticated production factory connected to empty isolated instance
-FAIL HTTPException: 409: {'error_code': 'PDF_INDEX_VECTOR_MISMATCH'}
-Cleanup temporary container: removed

@@ -2,8 +2,8 @@
 
 **前端版本说明（2026-10-10）**：本文旧版 `web/app.js`、`web/multifile.js` 的修复与 UI 测试属于历史记录；这些文件已退役删除，不能作为新版 Vue 页面已实现相同行为的证明。后端修复保留，旧源码可从 Git 历史查阅；迁移计划见 [前端评估](FRONTEND_NEXT_STEPS_20261010.md)。
 
-修复依据：[project_audit_20261008_2d9ab18_review.md](../reports/project_audit_20261008_2d9ab18_review.md)（复审基线 `2d9ab18`，API 0.30.0），按复审 §7 给出的排期与验收标准执行。
-逐条机器可读记录见 [reports/audit_fix_verification.json](../reports/audit_fix_verification.json)。
+修复依据：project_audit_20261008_2d9ab18_review.md（复审基线 `2d9ab18`，API 0.30.0），按复审 §7 给出的排期与验收标准执行。
+逐条机器可读记录见 reports/audit_fix_verification.json。
 
 **执行方式**：F01/F04/F07 由主代理实现；F02、F03+F11、F05+F06、F08+F09 由四个并行子代理实现，每个子代理被限定**只能写指定文件**、禁止仓库级格式化与 git 写操作。所有改动均由主代理独立复核并跑测试。
 

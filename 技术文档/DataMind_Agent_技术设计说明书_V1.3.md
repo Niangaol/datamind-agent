@@ -605,7 +605,7 @@ SQL 源查询使用只读角色；工业 schema 位于元数据库，逻辑上�
 - [V1.2 技术设计说明书](DataMind_Agent_技术设计说明书_V1.2.md)：原设计与全部历史实施记录，保留原文。
 - [进度总览](../PROGRESS.md)、[README](../README.md)：实现范围、启动方式与当前边界。
 - [工业规则数据契约](../data/industrial_demo/CONTRACT.md)、[工业模型问数契约](../data/industrial_demo/QUERY_CONTRACT.md)：业务键、粒度、时间、单位与支持范围。
-- [赛题原始资料](<../赛题/8 赛题八：网信产业应用赛道-多模态数据驱动的可解释精准问数问答智能体（中电云计算技术有限公司）.pdf>)：正式提交前核对；官方基础/中级任务与评分项到本仓库实现的**逐条映射**见 [docs/OFFICIAL_REQUIREMENTS_MAPPING.md](../docs/OFFICIAL_REQUIREMENTS_MAPPING.md)（含页码与"已实现/部分/未实现"判定）。
+- 赛题原始资料：正式提交前核对；官方基础/中级任务与评分项到本仓库实现的**逐条映射**见 docs/OFFICIAL_REQUIREMENTS_MAPPING.md（含页码与"已实现/部分/未实现"判定）。
 
 ### 17.2 参考内容如何转化为项目设计
 
@@ -644,7 +644,7 @@ SQL 源查询使用只读角色；工业 schema 位于元数据库，逻辑上�
 | API/前端/Trace | SQL/RAG/限定工业、SSE/回放/引用，新增 `/#cad`、`/#dimensions`、`/#files`、`/#authority` 与多文档问答 | 上传/统一 Adapter/通用 Locator 接口与交互 |
 | Office/工程通用适配 | 已实现（限定）：DOCX/PPTX/XLSX（`ingestion/office.py`）与原生 DXF（`ingestion/cad_adapter.py`）适配器已注册并映射进统一契约（API 0.29.0/0.30.0），块存 `document_contract_blocks` | 图纸 PDF/DWG 转换、合并单元格/公式语义、各格式样本与评测、接入事实抽取与检索 |
 | V-CAR/国产小视觉级联 | 通用依赖计划、统一预算、局部修复、断点恢复、进程组节点执行、HTTP 入口与机制消融（API 0.24.0，`datamind/vcar.py`、`datamind/ablation.py`、`POST /v1/plans/execute`）已实现；真实视觉级联/视觉载荷未接入 | 真实视觉载荷与模型规模对比、跨主机租约 |
-| 正式交付与多用户部署 | 未完成（权重清单与官方要求映射已补） | 交付包（ZIP/答辩 PPT/Word+PDF 技术文档）、新机复现与认证部署；模型权重清单见 [docs/MODEL_WEIGHTS.md](../docs/MODEL_WEIGHTS.md)、官方任务/评分项映射见 [docs/OFFICIAL_REQUIREMENTS_MAPPING.md](../docs/OFFICIAL_REQUIREMENTS_MAPPING.md) |
+| 正式交付与多用户部署 | 未完成（权重清单与官方要求映射已补） | 交付包（ZIP/答辩 PPT/Word+PDF 技术文档）、新机复现与认证部署；模型权重清单见 [docs/MODEL_WEIGHTS.md](../docs/MODEL_WEIGHTS.md)、官方任务/评分项映射见 docs/OFFICIAL_REQUIREMENTS_MAPPING.md |
 
 ### 18.2 历史实验分母与证据
 

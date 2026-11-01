@@ -6,7 +6,7 @@
 
 [快速开始](#快速开始) · [新版前端](#新版前端) · [开发与验证](#开发与验证) · [文档导航](#文档导航)
 
-校内初赛提交文件统一放在 [交付/校内初赛_20261014](交付/校内初赛_20261014/)，保留 10 月 14 日的两份 Word/PDF 原稿，源码、数据及 Windows/macOS 完整演示环境于 2026 年 10 月 19 日整理。演示入口在 `04_完整演示程序/`：先准备 Docker Desktop，Windows 运行 `run.bat`，Mac 运行 `run.command`；镜像、向量/OCR/公式模型及初始数据库随包提供，模型 API Key 在启动后自行填写。文件用途与验证范围见 [当前交付清单](docs/DELIVERY_CHECKLIST.md)；另一套 `DataMind-Agent-Competition-Docs/` 为备选扩展稿。
+**项目状态（2026-11-01）**：面向赛题八的参赛版本已归档冻结。本仓库保留可运行的源码、演示数据、测试与设计文档；竞赛交付包、过程报告与评审计分材料已从工作区移除，如需追溯可查阅 Git 历史。Windows / macOS 一键演示包不再随仓库提供，本机运行方式见下文。
 
 ## 能力与边界
 
@@ -169,7 +169,7 @@ SQL、RAG 与扫描 OCR 的核心依赖由启动脚本安装。严格复现已�
 .venv/bin/python scripts/status_sync.py --check
 ```
 
-`scripts/test_isolated.py` 会覆写 [最近回归记录](reports/latest_regression.json)，包括使用 `--pattern` 的专项运行。发布完整回归结果时，应以最后一次**无参数全量运行**的记录为准，同时检查 `failures`、`errors` 和验证提交；执行数的 `N/N` 写法不代表通过率，也不是模型准确率。
+`scripts/test_isolated.py` 会覆写机读回归记录 `reports/latest_regression.json`（`reports/` 为运行产物目录，不随仓库保留），包括使用 `--pattern` 的专项运行。发布完整回归结果时，应以最后一次**无参数全量运行**的记录为准，同时检查 `failures`、`errors` 和验证提交；执行数的 `N/N` 写法不代表通过率，也不是模型准确率。
 
 | 记录项 | 值 |
 | --- | --- |
@@ -177,24 +177,22 @@ SQL、RAG 与扫描 OCR 的核心依赖由启动脚本安装。严格复现已�
 | 完整隔离回归 | **1658/1658**（最近存档的全量执行口径，结果以机读记录为准） |
 | 验证基线 | 提交 `dab1233` 由 `scripts/test_isolated.py` 在克隆元数据库上运行 |
 
-此回归记录对应**旧前端退役前的提交**，不能作为当前 Vue 页面迁移完成或当前 HEAD 已全量验收的证明。阶段评测、真实模型结果与合成样本边界见 [PROGRESS](PROGRESS.md) 及对应的 `reports/` 文件；不要跨阶段拼接成绩。
+此回归记录对应**旧前端退役前的提交**，不能作为当前 Vue 页面迁移完成或当前 HEAD 已全量验收的证明。阶段评测、真实模型结果与合成样本边界见 [PROGRESS](PROGRESS.md)；不要跨阶段拼接成绩。
 
 ## 目录结构
 
 ```text
 datamind/       Agent、SQL/RAG、核验、认证、证据图与 HTTP/SSE API
 frontend/       Vue 3 + TypeScript 页面源码与 npm 依赖锁
-web/vue/        由后端提供的前端构建产物
+web/vue/        前端构建产物，由 `npm run deploy` 生成，不入库
 ingestion/      解析适配器、摄取、索引、上传管道与 worker
 db/             元数据库迁移、业务演示数据与 Catalog
 deploy/         PostgreSQL / Qdrant 的 Compose 配置及初始化 SQL
 data/           演示材料、知识库 manifest、冻结评测集与契约
-scripts/        启动、验证、评测、模型准备及交付工具
+scripts/        启动、验证、评测与模型准备工具
 tests/          组件、契约、API 与隔离回归测试
 docs/           功能规范、部署边界与前端计划
-reports/        带基线和口径的评测、审计与验证记录
 技术文档/       技术设计与历史实施说明
-交付/           已有竞赛交付材料
 ```
 
 Chinook SQL 随仓库提供，演示知识库见 [manifest](data/knowledge_base/manifest.json)。OHR-Bench 原始 Parquet 为可选外部数据，不影响已有抽样材料的演示；重新抽样时放置于 `OHR-Bench/OHR-Bench_v2.parquet`，使用 [抽样脚本](ingestion/sample_ohrbench.py)。模型权重、虚拟环境、密钥和开发缓存不随源码交付。
@@ -210,6 +208,5 @@ Chinook SQL 随仓库提供，演示知识库见 [manifest](data/knowledge_base/
 | 私有 PDF | [离线准备](docs/PDF_PREPARATION.md) · [快照登记](docs/PDF_SNAPSHOT_REGISTRY.md) · [知识发布](docs/PDF_KNOWLEDGE_PUBLICATION.md) · [私有检索与回答](docs/PDF_PRIVATE_SEARCH.md) |
 | CAD 与尺寸 | [图纸资产流程](data/cad_demo/ASSET_WORKFLOW.md) · [关联复核](data/cad_demo/ASSOCIATION_REVIEW_WORKFLOW.md) · [尺寸核验](data/cad_demo/DIMENSION_SERVICE_WORKFLOW.md) |
 | 编排与性能 | [V-CAR](docs/VCAR.md) · [任务预算](docs/TASK_BUDGET.md) · [多轮上下文](docs/MULTI_TURN.md) · [性能](docs/PERFORMANCE.md) |
-| 竞赛交付与缺口 | [官方要求映射](docs/OFFICIAL_REQUIREMENTS_MAPPING.md) · [交付清单](docs/DELIVERY_CHECKLIST.md) · [差距台账](docs/SCORE_GAP_LEDGER.md) |
 
 项目默认面向本机演示，API 与容器端口绑定回环地址。跨机或生产部署前，请按 [部署边界](docs/DEPLOYMENT_BOUNDARIES.md) 配置认证、代理、数据库角色与密钥；历史文档中的页面操作和阶段成绩按其对应版本理解。

@@ -7,9 +7,9 @@
 | 项 | 值 |
 |---|---|
 | 代码 API | **0.39.0**；仓库只保留 `main` 分支，与远端同步 |
-| 完整隔离回归 | **1658/1658**（**这是分母口径**：最近一次全量执行 1658 项；是否全绿只看 [reports/latest_regression.json](reports/latest_regression.json) 的 `failures`/`errors`；源库未修改；由 `scripts/test_isolated.py` 在克隆库上执行）。**新增测试会改变这个分母，每次都要同步本表** |
+| 完整隔离回归 | **1658/1658**（**这是分母口径**：最近一次全量执行 1658 项；是否全绿只看 reports/latest_regression.json 的 `failures`/`errors`；源库未修改；由 `scripts/test_isolated.py` 在克隆库上执行）。**新增测试会改变这个分母，每次都要同步本表** |
 | 验证基线 | 提交 `dab1233` 由 `scripts/test_isolated.py` 在克隆元数据库上运行 |
-| 审计缺陷 | **原审计反例（F01–F12）已修复**（F10 曾延后，已于 0.36.0 修复；另含修复过程中自查发现的 F12 与我自己引入并修复的回归 R1），见 [docs/AUDIT_FIXES.md](docs/AUDIT_FIXES.md) 与 [reports/audit_fix_verification.json](reports/audit_fix_verification.json)。**这不表示缺陷类别已穷尽**：2026-10-09 的独立复查（[reports/project_audit_20261009_561316c.md](reports/project_audit_20261009_561316c.md)）在同一基线上又复现了 R01–R05（SQL 作用域/表达式校验、待复核契约匿名可读、任务代次、审批≠可检索），正按批次修复 |
+| 审计缺陷 | **原审计反例（F01–F12）已修复**（F10 曾延后，已于 0.36.0 修复；另含修复过程中自查发现的 F12 与我自己引入并修复的回归 R1），见 [docs/AUDIT_FIXES.md](docs/AUDIT_FIXES.md) 与 reports/audit_fix_verification.json。**这不表示缺陷类别已穷尽**：2026-10-09 的独立复查（reports/project_audit_20261009_561316c.md）在同一基线上又复现了 R01–R05（SQL 作用域/表达式校验、待复核契约匿名可读、任务代次、审批≠可检索），正按批次修复 |
 | 模型接入 | **直连上游**（`https://api.deepseek.com/v1`，配置存于 `app_settings`）；**不依赖本地网关**，仓库内的 `gateway/`（vendored New API，997 个文件）与 `new-api-local` 容器已移除 |
 | 未决外部依赖 | T6 授权真实输入；V-CAR 真实视觉载荷与模型规模对比（上游仅文本模型、无本地权重目录） |
 | 设计主入口 | [V1.3 技术设计说明书](技术文档/DataMind_Agent_技术设计说明书_V1.3.md)（0.39.0 基线）；历史阶段记录保留在 [V1.2 说明书](技术文档/DataMind_Agent_技术设计说明书_V1.2.md) §18.12–18.33 |
