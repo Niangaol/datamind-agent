@@ -1,0 +1,542 @@
+{
+  "suite_version": "ohrbench-existing-v1",
+  "data_version": "14-existing-OHR-Bench-v2-samples",
+  "label_frozen_at": "2026-10-10T10:26:25.540398+00:00",
+  "method": "Manually selected factual questions and source excerpts from existing gt_text; alternatives frozen before first model call. No model judge. A pass requires completed answer, all frozen factual checks, exact source identity/page/hash, continuous verbatim quotes, and answer-bearing gold terms in valid citations. Table case ohr-006 additionally requires the year header in cited excerpts.",
+  "scope": "ohrbench_kb only, real existing public index. 13 content questions search all eligible collection chunks. rag-011 question contains ohr-005 and production select_documents narrows it; report separately. No manually supplied document_refs and no gold injected into model prompts.",
+  "limitations": [
+    "Only 14 pre-extracted pages and one chosen fact per page; not original OHR-Bench benchmark or its official QA annotations.",
+    "gt_text knowledge ingestion is tested; no PDF/image OCR invocation is performed.",
+    "Term checks do not establish arbitrary semantic entailment. Valid citations and source identity are independently checked.",
+    "First per-case production result is retained; production ask_documents may make its built-in two attempts."
+  ],
+  "cases": [
+    {
+      "case_id": "existing-ohr-001",
+      "sample_id": "ohr-001",
+      "domain": "academic",
+      "question": "Which stone implements were not found at Omori by the parties working for the University?",
+      "answer_checks": [
+        [
+          "arrow head",
+          "arrowhead",
+          "箭头",
+          "箭镞"
+        ],
+        [
+          "flake",
+          "石片"
+        ],
+        [
+          "chip",
+          "碎片"
+        ]
+      ],
+      "required_evidence_checks": [
+        [
+          "arrow head"
+        ],
+        [
+          "flake"
+        ],
+        [
+          "chip"
+        ]
+      ],
+      "gold_evidence_excerpts": [
+        "Not a single arrow head, flake or chip has been found by the various parties who have been there in the interests of the University;"
+      ],
+      "document_prefix": "[ohr-001/OHR-Bench/academic]",
+      "source_file": "data/ohr_bench_samples/ohr-001_academic_academic_DUDE_72a8558a002eb1c2875c38388854b4de_p17.json",
+      "source_sha256": "914a099ae5f183b78407e30c05a82377961c09fd843fff5144f348f3a623be0f",
+      "gt_text_sha256": "f47174fe12309379489291b143af2f19b5d82527edbe0fe013d6b06381a8de0a",
+      "noise_text_sha256": "9296051065e136a265b082e26303683af05c15549d10cc71c2a345c52d4e3b43",
+      "source_page_idx": 17,
+      "page": 18,
+      "explicit_sample_scope_in_question": false,
+      "reused_case_origin": null
+    },
+    {
+      "case_id": "existing-ohr-002",
+      "sample_id": "ohr-002",
+      "domain": "academic",
+      "question": "For the dual label assignments strategy in YOLO, which head is discarded during inference and which head makes predictions?",
+      "answer_checks": [
+        [
+          "one-to-many",
+          "一对多"
+        ],
+        [
+          "discard",
+          "丢弃",
+          "舍弃",
+          "移除"
+        ],
+        [
+          "one-to-one",
+          "一对一"
+        ]
+      ],
+      "required_evidence_checks": [
+        [
+          "one-to-many"
+        ],
+        [
+          "one-to-one"
+        ]
+      ],
+      "gold_evidence_excerpts": [
+        "During inference, we discard the one-to-many head and utilize the one-to-one head to make predictions."
+      ],
+      "document_prefix": "[ohr-002/OHR-Bench/academic]",
+      "source_file": "data/ohr_bench_samples/ohr-002_academic_academic_2405.14458v1_p2.json",
+      "source_sha256": "fde13dd254e8e320c893ebd07aa3173282ed13a2e93dc463a7461db1f264f810",
+      "gt_text_sha256": "366f30bfe4bcd1bb5ca9e9aa82467fabedd7ce4f0ce7ec1643dcd5c74aca7e4a",
+      "noise_text_sha256": "2904c1cfb5843d20af1e78a2a16f126015c9df953ba262acf2f998e026c8c72d",
+      "source_page_idx": 2,
+      "page": 3,
+      "explicit_sample_scope_in_question": false,
+      "reused_case_origin": null
+    },
+    {
+      "case_id": "existing-ohr-003",
+      "sample_id": "ohr-003",
+      "domain": "administration",
+      "question": "Whom does the insurance endorsement INCLUDE TREASURERS OR TAX COLLECTORS AS EMPLOYEES add to the definition of employee?",
+      "answer_checks": [
+        [
+          "treasurers",
+          "财务主管",
+          "司库",
+          "财务官"
+        ],
+        [
+          "tax collectors",
+          "税务征收员",
+          "收税员",
+          "税收征收员"
+        ]
+      ],
+      "required_evidence_checks": [
+        [
+          "treasurers"
+        ],
+        [
+          "tax collectors"
+        ]
+      ],
+      "gold_evidence_excerpts": [
+        "The definition of \"employee\" is amended to include your treasurers or tax collectors shown in the Schedule."
+      ],
+      "document_prefix": "[ohr-003/OHR-Bench/administration]",
+      "source_file": "data/ohr_bench_samples/ohr-003_administration_administration_DUDE_0875f9cd143bcf389bd1c48dce433857_p23.json",
+      "source_sha256": "4cf2382b17638480d7096a5e8434b08e9b595f066ce4ed4730477414038634d0",
+      "gt_text_sha256": "ee2634ac3776d6dc15fa20852cc5cb156b9163b8dc04328a5406bfd81645dd4c",
+      "noise_text_sha256": "305747ba0fe5e4fdaf1866167a7a65cdfcf53b186019c9aac5974078e67b53ff",
+      "source_page_idx": 23,
+      "page": 24,
+      "explicit_sample_scope_in_question": false,
+      "reused_case_origin": null
+    },
+    {
+      "case_id": "existing-ohr-004",
+      "sample_id": "ohr-004",
+      "domain": "administration",
+      "question": "Who submitted the complaint against Aaron Reardon on February 22, 2012?",
+      "answer_checks": [
+        [
+          "Anne K. Block",
+          "Anne K Block"
+        ]
+      ],
+      "required_evidence_checks": [
+        [
+          "Anne K. Block"
+        ]
+      ],
+      "gold_evidence_excerpts": [
+        "Complaint against Aaron Reardon submitted by Anne K. Block, on February 22, 2012."
+      ],
+      "document_prefix": "[ohr-004/OHR-Bench/administration]",
+      "source_file": "data/ohr_bench_samples/ohr-004_administration_administration_DUDE_61c8c8330f3895123e136140bda9991e_p8.json",
+      "source_sha256": "3568e3c1f18a544894864c8babeeb9a76e83ece7f38a910ae131e61c67a4e0cb",
+      "gt_text_sha256": "83c6005d8b11637a92591695a5eebe1eaa72b7524824a48a94b3a45bdcbe952c",
+      "noise_text_sha256": "bd9e6d0d6514c50358e2fbc9ba11aafe92fa7dfa0e01a624adb7fa7477b27661",
+      "source_page_idx": 8,
+      "page": 9,
+      "explicit_sample_scope_in_question": false,
+      "reused_case_origin": null
+    },
+    {
+      "case_id": "rag-011",
+      "sample_id": "ohr-005",
+      "domain": "finance",
+      "question": "According to OHR-Bench finance sample ohr-005, what topic and years does the document discuss?",
+      "answer_checks": [
+        [
+          "Sales/Use Tax",
+          "Sales and Use Tax"
+        ],
+        [
+          "Capital Program"
+        ],
+        [
+          "2017"
+        ],
+        [
+          "2021"
+        ]
+      ],
+      "required_evidence_checks": [
+        [
+          "Sales/Use Tax"
+        ],
+        [
+          "Capital Program"
+        ],
+        [
+          "2017"
+        ],
+        [
+          "2021"
+        ]
+      ],
+      "gold_evidence_excerpts": [
+        "Sales/Use Tax Analysis for the 2017-2021 Capital Program (Cash Basis)"
+      ],
+      "document_prefix": "[ohr-005/OHR-Bench/finance]",
+      "source_file": "data/ohr_bench_samples/ohr-005_finance_finance_DUDE_fc03b3768346584a3fa425c656bfe748_p0.json",
+      "source_sha256": "0e7db9f20ac82bbd07ae29884fdd21a7ffc994eef9adf953fbfe54e311a8ff77",
+      "gt_text_sha256": "62bb3eaed06bd12b00f0bc707349997db54e5c10ab3560224d571fe4b25d316c",
+      "noise_text_sha256": "36a500a7da4915fa43d6c987277306a19e8c7194dbee3ef811fae210a2bee63e",
+      "source_page_idx": 0,
+      "page": 1,
+      "explicit_sample_scope_in_question": true,
+      "reused_case_origin": "data/evaluation/rag_v2.json#rag-011"
+    },
+    {
+      "case_id": "existing-ohr-006",
+      "sample_id": "ohr-006",
+      "domain": "finance",
+      "question": "What is the Grant Income for 2004 in the operating statement of CO-OPERATIVE FEDERATION OF VICTORIA LTD?",
+      "answer_checks": [
+        [
+          "11,621",
+          "11621"
+        ],
+        [
+          "2004"
+        ]
+      ],
+      "required_evidence_checks": [
+        [
+          "2004"
+        ],
+        [
+          "Grant Income"
+        ],
+        [
+          "11,621"
+        ]
+      ],
+      "gold_evidence_excerpts": [
+        "2004 & 2003",
+        "Grant Income & 2 & 11,621 & 21,498"
+      ],
+      "document_prefix": "[ohr-006/OHR-Bench/finance]",
+      "source_file": "data/ohr_bench_samples/ohr-006_finance_finance_DUDE_747c6792875022c83dbce7927ceff57e_p3.json",
+      "source_sha256": "95e2ed7b696ccd67ac82e7f4cde612c77782822c5a6c2d53450f69e1a0ff9883",
+      "gt_text_sha256": "08318a51fd15a2285615e2f70f8f7c0af3ed53101bf9e6190ca79b82e4f31e04",
+      "noise_text_sha256": "42374e7be76982619645d7c5c79a7321f0ec0c940894f819d8c5201b748c82f7",
+      "source_page_idx": 3,
+      "page": 4,
+      "explicit_sample_scope_in_question": false,
+      "reused_case_origin": null
+    },
+    {
+      "case_id": "existing-ohr-007",
+      "sample_id": "ohr-007",
+      "domain": "law",
+      "question": "Under Article 9.8 of the WPD and CNS Development Agreement, in which city and state must disputes be litigated?",
+      "answer_checks": [
+        [
+          "Houston",
+          "休斯顿"
+        ],
+        [
+          "Texas",
+          "德克萨斯",
+          "得克萨斯"
+        ]
+      ],
+      "required_evidence_checks": [
+        [
+          "Houston"
+        ],
+        [
+          "Texas"
+        ]
+      ],
+      "gold_evidence_excerpts": [
+        "Any dispute between the Parties regarding or related to this Agreement shall be litigated in the courts located in Houston, Texas, and WPD agrees not to challenge personal jurisdiction in that forum."
+      ],
+      "document_prefix": "[ohr-007/OHR-Bench/law]",
+      "source_file": "data/ohr_bench_samples/ohr-007_law_law_CnsPharmaceuticalsInc_20200326_8-K_EX-10.1_12079626_EX-10.1_Development Agreement_p4.json",
+      "source_sha256": "2076e622c7caded1e22afddd46f7c549d6e30fcc464560afe43a26191a78e8ba",
+      "gt_text_sha256": "bd4021c5c9801843c83b589ebd13ba3c1e9d241c116a021874ee02049592b59e",
+      "noise_text_sha256": "ade47d5bbe73be2c2875847fbbddde3d33ed18657725d3e2ca261fe6d445499d",
+      "source_page_idx": 4,
+      "page": 5,
+      "explicit_sample_scope_in_question": false,
+      "reused_case_origin": null
+    },
+    {
+      "case_id": "existing-ohr-008",
+      "sample_id": "ohr-008",
+      "domain": "law",
+      "question": "In the Strategic Alliance Agreement involving Cherry Hill and Freedom Mortgage, what does UPB mean for a Mortgage Loan at a date of determination?",
+      "answer_checks": [
+        [
+          "unpaid principal balance",
+          "未偿本金余额",
+          "未付本金余额",
+          "未偿还本金余额"
+        ]
+      ],
+      "required_evidence_checks": [
+        [
+          "unpaid principal balance"
+        ]
+      ],
+      "gold_evidence_excerpts": [
+        "UPB: As to any Mortgage Loan and any date of determination, the unpaid principal balance of such Mortgage Loan as of such date."
+      ],
+      "document_prefix": "[ohr-008/OHR-Bench/law]",
+      "source_file": "data/ohr_bench_samples/ohr-008_law_law_CHERRYHILLMORTGAGEINVESTMENTCORP_09_26_2013-EX-10.1-Strategic Alliance Agreement_p3.json",
+      "source_sha256": "1f76452731abe1cd4f138a0b8140bbab2bdd16ab94419b2ad1b72fc1bb4860f9",
+      "gt_text_sha256": "4266ae29f5cc0f7189a78ddced5d24732f18ae13b70422d70ddf1c20a4811a88",
+      "noise_text_sha256": "76f9037ab3b6a090462dec5bddf79413e53a4b7f6bd893b0fc8df53b0bd20f4b",
+      "source_page_idx": 3,
+      "page": 4,
+      "explicit_sample_scope_in_question": false,
+      "reused_case_origin": null
+    },
+    {
+      "case_id": "existing-ohr-009",
+      "sample_id": "ohr-009",
+      "domain": "manual",
+      "question": "According to the Lenovo keyboard shortcuts, which key must be held and for how long to turn Filter Keys on or off?",
+      "answer_checks": [
+        [
+          "Right Shift",
+          "右Shift",
+          "右侧Shift",
+          "右侧 Shift",
+          "右Shift键"
+        ],
+        [
+          "eight seconds",
+          "8 seconds",
+          "八秒",
+          "8秒"
+        ]
+      ],
+      "required_evidence_checks": [
+        [
+          "Right Shift"
+        ],
+        [
+          "eight seconds"
+        ],
+        [
+          "Filter Keys"
+        ]
+      ],
+      "gold_evidence_excerpts": [
+        "Right Shift for eight seconds: Turn on or turn off Filter Keys"
+      ],
+      "document_prefix": "[ohr-009/OHR-Bench/manual]",
+      "source_file": "data/ohr_bench_samples/ohr-009_manual_manual_t480_ug_en_p64.json",
+      "source_sha256": "fbe69d03877f46d401fea599274b2b71ee56aba5e613d49a02568e6b26bd87be",
+      "gt_text_sha256": "03dafc8c46a1eec79eca5fecf81ebf7fbe58c578376491a0264dbc1a18247fe0",
+      "noise_text_sha256": "8080eb1b7b48f8e8e5d43176827ec4136f84ac410e53975d9c2e9e5ca9ba0b29",
+      "source_page_idx": 64,
+      "page": 65,
+      "explicit_sample_scope_in_question": false,
+      "reused_case_origin": null
+    },
+    {
+      "case_id": "existing-ohr-010",
+      "sample_id": "ohr-010",
+      "domain": "manual",
+      "question": "What does the official account for the Student Associations Department at Tsinghua share information about, and how many associations are mentioned?",
+      "answer_checks": [
+        [
+          "200+",
+          "over 200",
+          "more than 200",
+          "200多个",
+          "200多",
+          "200余",
+          "200多家",
+          "超过200"
+        ],
+        [
+          "student associations",
+          "学生社团"
+        ]
+      ],
+      "required_evidence_checks": [
+        [
+          "200+"
+        ],
+        [
+          "student associations"
+        ]
+      ],
+      "gold_evidence_excerpts": [
+        "Official account for the Student Associations Department. Shares information on the 200+ student associations at Tsinghua, including their events and stories."
+      ],
+      "document_prefix": "[ohr-010/OHR-Bench/manual]",
+      "source_file": "data/ohr_bench_samples/ohr-010_manual_manual_guojixueshengshenghuozhinanyingwen9.1_p36.json",
+      "source_sha256": "7f0b0d8710b1a0f61f3655be29179d77894b16b17db570d8449bbc59868dc35c",
+      "gt_text_sha256": "112eed12990a352d1b07912834ad54bf995826d51dc097c5be989d37d516d806",
+      "noise_text_sha256": "278db232616db027d691f9463b45b3b20951021cbd30cc56899b05d44612a7f1",
+      "source_page_idx": 36,
+      "page": 37,
+      "explicit_sample_scope_in_question": false,
+      "reused_case_origin": null
+    },
+    {
+      "case_id": "existing-ohr-011",
+      "sample_id": "ohr-011",
+      "domain": "news",
+      "question": "According to the news report, how many unlicensed cannabis shops did the special task force shut down in New York City since early May?",
+      "answer_checks": [
+        [
+          "311"
+        ]
+      ],
+      "required_evidence_checks": [
+        [
+          "311"
+        ],
+        [
+          "unlicensed cannabis shops"
+        ]
+      ],
+      "gold_evidence_excerpts": [
+        "A special task force has shut down 311 unlicensed cannabis shops in the city since early May."
+      ],
+      "document_prefix": "[ohr-011/OHR-Bench/news]",
+      "source_file": "data/ohr_bench_samples/ohr-011_news_news_06_14_p0.json",
+      "source_sha256": "130c0a825ddaa0b420704a81d15be0c01ac545b63507c6dec2381f8564fa9c9b",
+      "gt_text_sha256": "a6988c413d58eb0ecedd930b82e6dfc1cb4395446dcf88980f80e25cc25e7120",
+      "noise_text_sha256": "d079698563b8dc58e421baca0cee14fd676418260f62082e662804068b00da1c",
+      "source_page_idx": 0,
+      "page": 1,
+      "explicit_sample_scope_in_question": false,
+      "reused_case_origin": null
+    },
+    {
+      "case_id": "existing-ohr-012",
+      "sample_id": "ohr-012",
+      "domain": "news",
+      "question": "In the report about Steve Sandberg and the GE Anaheim plant, when did the EPA suspend the plant's PCB-handling license?",
+      "answer_checks": [
+        [
+          "February 1992",
+          "1992年2月",
+          "1992 年 2 月"
+        ]
+      ],
+      "required_evidence_checks": [
+        [
+          "February 1992"
+        ],
+        [
+          "license was suspended"
+        ]
+      ],
+      "gold_evidence_excerpts": [
+        "In February 1992, the plant's PCB-handling license was suspended by the EPA because further acceptance of waste into the plant posed \"an unreasonable risk to human health and the environment.\""
+      ],
+      "document_prefix": "[ohr-012/OHR-Bench/news]",
+      "source_file": "data/ohr_bench_samples/ohr-012_news_news_DUDE_ce4c991a6c15eb953bb3e99be5d6c514_p4.json",
+      "source_sha256": "5638ff7a342c91acb9a55dc537b63ee86d90cb392c80bf1a34745acb1c43fe0e",
+      "gt_text_sha256": "e7c4e66d1e05b45fd6377cd2b65a0436f885f9bb3ea1f35102956684dab2abd8",
+      "noise_text_sha256": "9251d86391b7c6c42fd439bd21fe36c6394f6479d12f38dee0505a4aee944f91",
+      "source_page_idx": 4,
+      "page": 5,
+      "explicit_sample_scope_in_question": false,
+      "reused_case_origin": null
+    },
+    {
+      "case_id": "existing-ohr-013",
+      "sample_id": "ohr-013",
+      "domain": "textbook",
+      "question": "整车碰撞试验的专用灯光照明系统，其平均照度应不小于多少 lx？",
+      "answer_checks": [
+        [
+          "100000",
+          "100,000",
+          "100 000",
+          "十万",
+          "10万"
+        ],
+        [
+          "lx",
+          "勒克斯"
+        ]
+      ],
+      "required_evidence_checks": [
+        [
+          "100 000"
+        ],
+        [
+          "lx"
+        ]
+      ],
+      "gold_evidence_excerpts": [
+        "照明系统平均照度应不小于 100 000 lx"
+      ],
+      "document_prefix": "[ohr-013/OHR-Bench/textbook]",
+      "source_file": "data/ohr_bench_samples/ohr-013_textbook_textbook_omnidocbench_docstructbench_dianzishu_zhongwenzaixian-o.O-63708140.pdf_170_p0.json",
+      "source_sha256": "1640277ecfbbc4d74607691fac97d166f2e36a8596f0402221950adbd42e74c9",
+      "gt_text_sha256": "bf8f4452c4fac21e3fa7712e740fa20d8952b9e009dddbb1280f1c72ff9b3ccd",
+      "noise_text_sha256": "d508459566e726aa86c1f7faeeae093a1ba5eb5d396ab01f8506d171f19486a7",
+      "source_page_idx": 0,
+      "page": 1,
+      "explicit_sample_scope_in_question": false,
+      "reused_case_origin": null
+    },
+    {
+      "case_id": "existing-ohr-014",
+      "sample_id": "ohr-014",
+      "domain": "textbook",
+      "question": "Who is the Executive Editor of the International Space Station Researcher's Guide?",
+      "answer_checks": [
+        [
+          "Amelia Rai"
+        ]
+      ],
+      "required_evidence_checks": [
+        [
+          "Amelia Rai"
+        ]
+      ],
+      "gold_evidence_excerpts": [
+        "Executive Editor: Amelia Rai"
+      ],
+      "document_prefix": "[ohr-014/OHR-Bench/textbook]",
+      "source_file": "data/ohr_bench_samples/ohr-014_textbook_textbook_DUDE_0da5da2608ed89cdddd52bd078beced8_p1.json",
+      "source_sha256": "4a9eaf4cba9764b4aa1e7b99a3d7ab3aece5fa743048d6b9ddf417d7dbb424fc",
+      "gt_text_sha256": "ee095c336aec68369a8a99f15173d2116bfbdd8bd06cf7790e93a32ab4f7afd9",
+      "noise_text_sha256": "d8d1952e0bad4bb06cb816db7c4fae31d7297fc81eebd6f8a22669eab26f3dd1",
+      "source_page_idx": 1,
+      "page": 2,
+      "explicit_sample_scope_in_question": false,
+      "reused_case_origin": null
+    }
+  ]
+}

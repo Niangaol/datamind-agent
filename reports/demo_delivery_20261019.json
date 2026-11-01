@@ -1,0 +1,41 @@
+{
+  "checked_at": "2026-10-19T11:53:32.806401+08:00",
+  "scope": "Windows x86-64 / Intel Mac and Apple Silicon Mac via Docker Desktop",
+  "architectures": {
+    "arm64": {
+      "full_stack_fresh_volume": "pass",
+      "live_sql_rag_industrial": "pass",
+      "offline_embedding_ocr_formula": "pass",
+      "docker_load_archive": "pass",
+      "loaded_files_and_config_match_archive": "pass"
+    },
+    "amd64": {
+      "full_stack_fresh_volume": "pass",
+      "live_sql_rag_industrial": "pass",
+      "offline_embedding_ocr_formula": "pass",
+      "docker_load_archive": "pass",
+      "loaded_files_and_config_match_archive": "pass"
+    }
+  },
+  "mac_launcher": {
+    "archive_import": "pass",
+    "second_launch_reuses_import": "pass",
+    "stop_retains_data": "pass",
+    "restart_retains_uploaded_sample": "pass"
+  },
+  "windows_launcher": {
+    "script_and_compose_checks": "pass",
+    "shared_amd64_runtime_stack": "pass",
+    "physical_windows_host": "not_available; desktop launcher not executed on Windows"
+  },
+  "model_credentials": {
+    "seed_app_settings_rows": 0,
+    "image_model_key_environment_present": false,
+    "exact_existing_model_keys_in_exported_blobs": 0,
+    "runtime_temporary_profile_removed": true,
+    "packaged_model_config": "empty example only"
+  },
+  "backend_full_regression": "not_run",
+  "model_accuracy_benchmark": "not_run",
+  "current_local_demo_url": "http://127.0.0.1:8000/"
+}

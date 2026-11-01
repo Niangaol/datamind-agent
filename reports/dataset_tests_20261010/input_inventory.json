@@ -1,0 +1,322 @@
+{
+  "created_at": "2026-10-10T10:25:34.291858+00:00",
+  "git_commit": "ea8f030b8befddba68b9771789b9cd53087660ad",
+  "input_source_hashes": {
+    "db/chinook/Chinook_PostgreSql.sql": "e3fde5c1a5b51a2a91429a702c9ca6e69ba56e6c7f5e112724d70c3d03db695e",
+    "data/ohr_bench_samples/manifest.json": "853e2f5cf927cbcc77ef033666176d785a3c013474f50dbfa32ca28fb6bd5f18",
+    "data/ohr_bench_samples/ohr-001_academic_academic_DUDE_72a8558a002eb1c2875c38388854b4de_p17.json": "914a099ae5f183b78407e30c05a82377961c09fd843fff5144f348f3a623be0f",
+    "data/ohr_bench_samples/ohr-002_academic_academic_2405.14458v1_p2.json": "fde13dd254e8e320c893ebd07aa3173282ed13a2e93dc463a7461db1f264f810",
+    "data/ohr_bench_samples/ohr-003_administration_administration_DUDE_0875f9cd143bcf389bd1c48dce433857_p23.json": "4cf2382b17638480d7096a5e8434b08e9b595f066ce4ed4730477414038634d0",
+    "data/ohr_bench_samples/ohr-004_administration_administration_DUDE_61c8c8330f3895123e136140bda9991e_p8.json": "3568e3c1f18a544894864c8babeeb9a76e83ece7f38a910ae131e61c67a4e0cb",
+    "data/ohr_bench_samples/ohr-005_finance_finance_DUDE_fc03b3768346584a3fa425c656bfe748_p0.json": "0e7db9f20ac82bbd07ae29884fdd21a7ffc994eef9adf953fbfe54e311a8ff77",
+    "data/ohr_bench_samples/ohr-006_finance_finance_DUDE_747c6792875022c83dbce7927ceff57e_p3.json": "95e2ed7b696ccd67ac82e7f4cde612c77782822c5a6c2d53450f69e1a0ff9883",
+    "data/ohr_bench_samples/ohr-007_law_law_CnsPharmaceuticalsInc_20200326_8-K_EX-10.1_12079626_EX-10.1_Development Agreement_p4.json": "2076e622c7caded1e22afddd46f7c549d6e30fcc464560afe43a26191a78e8ba",
+    "data/ohr_bench_samples/ohr-008_law_law_CHERRYHILLMORTGAGEINVESTMENTCORP_09_26_2013-EX-10.1-Strategic Alliance Agreement_p3.json": "1f76452731abe1cd4f138a0b8140bbab2bdd16ab94419b2ad1b72fc1bb4860f9",
+    "data/ohr_bench_samples/ohr-009_manual_manual_t480_ug_en_p64.json": "fbe69d03877f46d401fea599274b2b71ee56aba5e613d49a02568e6b26bd87be",
+    "data/ohr_bench_samples/ohr-010_manual_manual_guojixueshengshenghuozhinanyingwen9.1_p36.json": "7f0b0d8710b1a0f61f3655be29179d77894b16b17db570d8449bbc59868dc35c",
+    "data/ohr_bench_samples/ohr-011_news_news_06_14_p0.json": "130c0a825ddaa0b420704a81d15be0c01ac545b63507c6dec2381f8564fa9c9b",
+    "data/ohr_bench_samples/ohr-012_news_news_DUDE_ce4c991a6c15eb953bb3e99be5d6c514_p4.json": "5638ff7a342c91acb9a55dc537b63ee86d90cb392c80bf1a34745acb1c43fe0e",
+    "data/ohr_bench_samples/ohr-013_textbook_textbook_omnidocbench_docstructbench_dianzishu_zhongwenzaixian-o.O-63708140.pdf_170_p0.json": "1640277ecfbbc4d74607691fac97d166f2e36a8596f0402221950adbd42e74c9",
+    "data/ohr_bench_samples/ohr-014_textbook_textbook_DUDE_0da5da2608ed89cdddd52bd078beced8_p1.json": "4a9eaf4cba9764b4aa1e7b99a3d7ab3aece5fa743048d6b9ddf417d7dbb424fc"
+  },
+  "ohr_samples": [
+    {
+      "sample_id": "ohr-001",
+      "domain": "academic",
+      "doc_name": "academic/DUDE_72a8558a002eb1c2875c38388854b4de",
+      "original_page_idx": 17,
+      "gt_chars": 1908,
+      "noise_chars": 2449,
+      "gt_equals_noise": false
+    },
+    {
+      "sample_id": "ohr-002",
+      "domain": "academic",
+      "doc_name": "academic/2405.14458v1",
+      "original_page_idx": 2,
+      "gt_chars": 4819,
+      "noise_chars": 6152,
+      "gt_equals_noise": false
+    },
+    {
+      "sample_id": "ohr-003",
+      "domain": "administration",
+      "doc_name": "administration/DUDE_0875f9cd143bcf389bd1c48dce433857",
+      "original_page_idx": 23,
+      "gt_chars": 683,
+      "noise_chars": 822,
+      "gt_equals_noise": false
+    },
+    {
+      "sample_id": "ohr-004",
+      "domain": "administration",
+      "doc_name": "administration/DUDE_61c8c8330f3895123e136140bda9991e",
+      "original_page_idx": 8,
+      "gt_chars": 1042,
+      "noise_chars": 1307,
+      "gt_equals_noise": false
+    },
+    {
+      "sample_id": "ohr-005",
+      "domain": "finance",
+      "doc_name": "finance/DUDE_fc03b3768346584a3fa425c656bfe748",
+      "original_page_idx": 0,
+      "gt_chars": 4421,
+      "noise_chars": 5853,
+      "gt_equals_noise": false
+    },
+    {
+      "sample_id": "ohr-006",
+      "domain": "finance",
+      "doc_name": "finance/DUDE_747c6792875022c83dbce7927ceff57e",
+      "original_page_idx": 3,
+      "gt_chars": 1510,
+      "noise_chars": 2122,
+      "gt_equals_noise": false
+    },
+    {
+      "sample_id": "ohr-007",
+      "domain": "law",
+      "doc_name": "law/CnsPharmaceuticalsInc_20200326_8-K_EX-10.1_12079626_EX-10.1_Development Agreement",
+      "original_page_idx": 4,
+      "gt_chars": 3606,
+      "noise_chars": 4557,
+      "gt_equals_noise": false
+    },
+    {
+      "sample_id": "ohr-008",
+      "domain": "law",
+      "doc_name": "law/CHERRYHILLMORTGAGEINVESTMENTCORP_09_26_2013-EX-10.1-Strategic Alliance Agreement",
+      "original_page_idx": 3,
+      "gt_chars": 3821,
+      "noise_chars": 4927,
+      "gt_equals_noise": false
+    },
+    {
+      "sample_id": "ohr-009",
+      "domain": "manual",
+      "doc_name": "manual/t480_ug_en",
+      "original_page_idx": 64,
+      "gt_chars": 2102,
+      "noise_chars": 2748,
+      "gt_equals_noise": false
+    },
+    {
+      "sample_id": "ohr-010",
+      "domain": "manual",
+      "doc_name": "manual/guojixueshengshenghuozhinanyingwen9.1",
+      "original_page_idx": 36,
+      "gt_chars": 766,
+      "noise_chars": 1004,
+      "gt_equals_noise": false
+    },
+    {
+      "sample_id": "ohr-011",
+      "domain": "news",
+      "doc_name": "news/06_14",
+      "original_page_idx": 0,
+      "gt_chars": 8316,
+      "noise_chars": 9672,
+      "gt_equals_noise": false
+    },
+    {
+      "sample_id": "ohr-012",
+      "domain": "news",
+      "doc_name": "news/DUDE_ce4c991a6c15eb953bb3e99be5d6c514",
+      "original_page_idx": 4,
+      "gt_chars": 6151,
+      "noise_chars": 8006,
+      "gt_equals_noise": false
+    },
+    {
+      "sample_id": "ohr-013",
+      "domain": "textbook",
+      "doc_name": "textbook/omnidocbench_docstructbench_dianzishu_zhongwenzaixian-o.O-63708140.pdf_170",
+      "original_page_idx": 0,
+      "gt_chars": 1153,
+      "noise_chars": 1510,
+      "gt_equals_noise": false
+    },
+    {
+      "sample_id": "ohr-014",
+      "domain": "textbook",
+      "doc_name": "textbook/DUDE_0da5da2608ed89cdddd52bd078beced8",
+      "original_page_idx": 1,
+      "gt_chars": 905,
+      "noise_chars": 1175,
+      "gt_equals_noise": false
+    }
+  ],
+  "ohr_domains": {
+    "academic": 2,
+    "administration": 2,
+    "finance": 2,
+    "law": 2,
+    "manual": 2,
+    "news": 2,
+    "textbook": 2
+  },
+  "ohr_indexed_assets": [
+    {
+      "document_id": "doc-5e8aa547c92c",
+      "title": "[ohr-001/OHR-Bench/academic] academic/DUDE_72a8558a002eb1c2875c38388854b4de p18",
+      "source_sha256": "914a099ae5f183b78407e30c05a82377961c09fd843fff5144f348f3a623be0f",
+      "document_version": 1,
+      "parser_version": "pdf-ocr-0.4",
+      "status": "indexed",
+      "chunks": 3
+    },
+    {
+      "document_id": "doc-68ffb35f0631",
+      "title": "[ohr-002/OHR-Bench/academic] academic/2405.14458v1 p3",
+      "source_sha256": "fde13dd254e8e320c893ebd07aa3173282ed13a2e93dc463a7461db1f264f810",
+      "document_version": 1,
+      "parser_version": "pdf-ocr-0.4",
+      "status": "indexed",
+      "chunks": 7
+    },
+    {
+      "document_id": "doc-aa6db023179e",
+      "title": "[ohr-003/OHR-Bench/administration] administration/DUDE_0875f9cd143bcf389bd1c48dce433857 p24",
+      "source_sha256": "4cf2382b17638480d7096a5e8434b08e9b595f066ce4ed4730477414038634d0",
+      "document_version": 1,
+      "parser_version": "pdf-ocr-0.4",
+      "status": "indexed",
+      "chunks": 1
+    },
+    {
+      "document_id": "doc-98f69ab4f64c",
+      "title": "[ohr-004/OHR-Bench/administration] administration/DUDE_61c8c8330f3895123e136140bda9991e p9",
+      "source_sha256": "3568e3c1f18a544894864c8babeeb9a76e83ece7f38a910ae131e61c67a4e0cb",
+      "document_version": 1,
+      "parser_version": "pdf-ocr-0.4",
+      "status": "indexed",
+      "chunks": 2
+    },
+    {
+      "document_id": "doc-606cf64708ac",
+      "title": "[ohr-005/OHR-Bench/finance] finance/DUDE_fc03b3768346584a3fa425c656bfe748 p1",
+      "source_sha256": "0e7db9f20ac82bbd07ae29884fdd21a7ffc994eef9adf953fbfe54e311a8ff77",
+      "document_version": 1,
+      "parser_version": "pdf-ocr-0.4",
+      "status": "indexed",
+      "chunks": 7
+    },
+    {
+      "document_id": "doc-113525cff4b4",
+      "title": "[ohr-006/OHR-Bench/finance] finance/DUDE_747c6792875022c83dbce7927ceff57e p4",
+      "source_sha256": "95e2ed7b696ccd67ac82e7f4cde612c77782822c5a6c2d53450f69e1a0ff9883",
+      "document_version": 1,
+      "parser_version": "pdf-ocr-0.4",
+      "status": "indexed",
+      "chunks": 2
+    },
+    {
+      "document_id": "doc-16c67957a006",
+      "title": "[ohr-007/OHR-Bench/law] law/CnsPharmaceuticalsInc_20200326_8-K_EX-10.1_12079626_EX-10.1_Development Agreement p5",
+      "source_sha256": "2076e622c7caded1e22afddd46f7c549d6e30fcc464560afe43a26191a78e8ba",
+      "document_version": 1,
+      "parser_version": "pdf-ocr-0.4",
+      "status": "indexed",
+      "chunks": 5
+    },
+    {
+      "document_id": "doc-c11c7baa1fce",
+      "title": "[ohr-008/OHR-Bench/law] law/CHERRYHILLMORTGAGEINVESTMENTCORP_09_26_2013-EX-10.1-Strategic Alliance Agreement p4",
+      "source_sha256": "1f76452731abe1cd4f138a0b8140bbab2bdd16ab94419b2ad1b72fc1bb4860f9",
+      "document_version": 1,
+      "parser_version": "pdf-ocr-0.4",
+      "status": "indexed",
+      "chunks": 6
+    },
+    {
+      "document_id": "doc-241ab5369b54",
+      "title": "[ohr-009/OHR-Bench/manual] manual/t480_ug_en p65",
+      "source_sha256": "fbe69d03877f46d401fea599274b2b71ee56aba5e613d49a02568e6b26bd87be",
+      "document_version": 1,
+      "parser_version": "pdf-ocr-0.4",
+      "status": "indexed",
+      "chunks": 3
+    },
+    {
+      "document_id": "doc-d0ce188dc04d",
+      "title": "[ohr-010/OHR-Bench/manual] manual/guojixueshengshenghuozhinanyingwen9.1 p37",
+      "source_sha256": "7f0b0d8710b1a0f61f3655be29179d77894b16b17db570d8449bbc59868dc35c",
+      "document_version": 1,
+      "parser_version": "pdf-ocr-0.4",
+      "status": "indexed",
+      "chunks": 1
+    },
+    {
+      "document_id": "doc-3dcf871abe07",
+      "title": "[ohr-011/OHR-Bench/news] news/06_14 p1",
+      "source_sha256": "130c0a825ddaa0b420704a81d15be0c01ac545b63507c6dec2381f8564fa9c9b",
+      "document_version": 1,
+      "parser_version": "pdf-ocr-0.4",
+      "status": "indexed",
+      "chunks": 12
+    },
+    {
+      "document_id": "doc-a18d8692c3b0",
+      "title": "[ohr-012/OHR-Bench/news] news/DUDE_ce4c991a6c15eb953bb3e99be5d6c514 p5",
+      "source_sha256": "5638ff7a342c91acb9a55dc537b63ee86d90cb392c80bf1a34745acb1c43fe0e",
+      "document_version": 1,
+      "parser_version": "pdf-ocr-0.4",
+      "status": "indexed",
+      "chunks": 9
+    },
+    {
+      "document_id": "doc-c919b194b0ca",
+      "title": "[ohr-013/OHR-Bench/textbook] textbook/omnidocbench_docstructbench_dianzishu_zhongwenzaixian-o.O-63708140.pdf_170 p1",
+      "source_sha256": "1640277ecfbbc4d74607691fac97d166f2e36a8596f0402221950adbd42e74c9",
+      "document_version": 1,
+      "parser_version": "pdf-ocr-0.4",
+      "status": "indexed",
+      "chunks": 2
+    },
+    {
+      "document_id": "doc-20698e587ac0",
+      "title": "[ohr-014/OHR-Bench/textbook] textbook/DUDE_0da5da2608ed89cdddd52bd078beced8 p2",
+      "source_sha256": "4a9eaf4cba9764b4aa1e7b99a3d7ab3aece5fa743048d6b9ddf417d7dbb424fc",
+      "document_version": 1,
+      "parser_version": "pdf-ocr-0.4",
+      "status": "indexed",
+      "chunks": 2
+    }
+  ],
+  "ohr_chunks_fingerprint": "0bf8f6fc9710fee5ac2c67200fed4af90050cb6d9891a527b0721efc18a07ace",
+  "chinook_counts": {
+    "album": 347,
+    "artist": 275,
+    "customer": 59,
+    "employee": 8,
+    "genre": 25,
+    "invoice": 412,
+    "invoice_line": 2240,
+    "media_type": 5,
+    "playlist": 18,
+    "playlist_track": 8715,
+    "track": 3503
+  },
+  "chinook_total_rows": 15607,
+  "chinook_invoice_total_sum": "2328.60",
+  "model": "deepseek-flash",
+  "protocol": "openai",
+  "source_data_access": "SELECT only; no reingestion or data reset",
+  "scope": "Existing OHR text-page subset and Chinook database; not full OHR official benchmark or real image OCR evaluation",
+  "api_started_for_test": true,
+  "upload_worker_started_for_test": false,
+  "chinook_table_fingerprints": {
+    "album": "623f2959964b0533b6cb0bcc0bdefd1ee74155e82c3bef5cfe8547900a024be8",
+    "artist": "351e7742fa68fe351837d3b60ea909d5ab022411769e1c9096aba7e862ac5def",
+    "customer": "c27f991a4e7490fcb8f26c1e14e09586429d5090585b49cee8054fac51998eb9",
+    "employee": "32fc2eaed865f4b07a4bc2f1a0fd215b522f6bb76788854f3332a16b7966a75b",
+    "genre": "bfa6473d79610d306e510adeeb70c47304e62112aba0d045af5ce069d3915787",
+    "invoice": "fe6c6bb6ce3ed4eb8f7237a2cc46a9d6d452075863a787468cf8162a8a67fdc9",
+    "invoice_line": "3b208abd8fdeeb500642c3a2f534028250bcea06364cbb43e1868bfc4131e62b",
+    "media_type": "af7e073eea86b027a40b93cff1bbb44aa26bd165ec508d47a178105ff3eecd4d",
+    "playlist": "1a92c47422b12e1239320b7fe004c1c0c927017a09dd7e07679167673e5e8da4",
+    "playlist_track": "40549f7f5d40586248915deeca31a3f3c6d9fe2aa3a7c0b03d6db8e2b9e5d2ed",
+    "track": "ae590880f3ea9d035f2bb6249e2bc5f54f54d8f9a1bb5f3025b7863e55de3a98"
+  }
+}

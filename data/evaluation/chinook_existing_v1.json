@@ -1,0 +1,136 @@
+{
+  "suite": "chinook_existing",
+  "suite_version": "chinook-existing-v1",
+  "source_id": "chinook",
+  "created_at": "2026-10-10T18:25:39.412714+08:00",
+  "freeze_policy": "Questions and gold SQL frozen before any model output; no retrospective label changes.",
+  "comparison": "Exact projected row and column count; numeric canonicalization only; ordered cases preserve row order; unordered cases compare full row multisets.",
+  "cases": [
+    {
+      "case_id": "nl2sql-011",
+      "question": "Chinook库里哪个国家客户最多？请给出国家名称和客户数。",
+      "category": "跨库-Chinook",
+      "gold_sql": "SELECT country, count(*) FROM customer GROUP BY country ORDER BY count(*) DESC LIMIT 1",
+      "ordered": true,
+      "expected_column_count": 2,
+      "provenance": "existing nl2sql_v1 frozen registry"
+    },
+    {
+      "case_id": "nl2sql-012",
+      "question": "Chinook里销量最高的歌手是谁？请给出歌手名称和销量。",
+      "category": "跨库-Chinook JOIN",
+      "gold_sql": "SELECT ar.name, sum(il.quantity) AS sold FROM invoice_line il JOIN track t ON il.track_id = t.track_id JOIN album al ON t.album_id = al.album_id JOIN artist ar ON al.artist_id = ar.artist_id GROUP BY ar.name ORDER BY sold DESC LIMIT 1",
+      "ordered": true,
+      "expected_column_count": 2,
+      "provenance": "existing nl2sql_v1 frozen registry"
+    },
+    {
+      "case_id": "chinook-existing-003",
+      "question": "Chinook 客户表中一共有多少位客户？只返回客户总数。",
+      "category": "单表计数",
+      "gold_sql": "SELECT count(*) FROM customer",
+      "ordered": false,
+      "expected_column_count": 1,
+      "provenance": "frozen before any new model call"
+    },
+    {
+      "case_id": "chinook-existing-004",
+      "question": "Chinook 国家为 Brazil 的客户有多少位？只返回客户数。",
+      "category": "单表过滤",
+      "gold_sql": "SELECT count(*) FROM customer WHERE country = 'Brazil'",
+      "ordered": false,
+      "expected_column_count": 1,
+      "provenance": "frozen before any new model call"
+    },
+    {
+      "case_id": "chinook-existing-005",
+      "question": "Chinook 在 2010 年开出了多少张账单？只返回账单数。",
+      "category": "时间过滤",
+      "gold_sql": "SELECT count(*) FROM invoice WHERE invoice_date >= '2010-01-01' AND invoice_date < '2011-01-01'",
+      "ordered": false,
+      "expected_column_count": 1,
+      "provenance": "frozen before any new model call"
+    },
+    {
+      "case_id": "chinook-existing-006",
+      "question": "Chinook 单价大于 1 的曲目有多少首？只返回曲目数。",
+      "category": "数值过滤",
+      "gold_sql": "SELECT count(*) FROM track WHERE unit_price > 1",
+      "ordered": false,
+      "expected_column_count": 1,
+      "provenance": "frozen before any new model call"
+    },
+    {
+      "case_id": "chinook-existing-007",
+      "question": "Chinook 流派名称为 Rock 的曲目有多少首？只返回曲目数。",
+      "category": "JOIN 2表",
+      "gold_sql": "SELECT count(*) FROM track t JOIN genre g ON t.genre_id = g.genre_id WHERE g.name = 'Rock'",
+      "ordered": false,
+      "expected_column_count": 1,
+      "provenance": "frozen before any new model call"
+    },
+    {
+      "case_id": "chinook-existing-008",
+      "question": "Chinook 艺术家 AC/DC 有哪些专辑？只返回专辑名称，按专辑名称升序排列。",
+      "category": "JOIN 2表+排序",
+      "gold_sql": "SELECT al.title FROM album al JOIN artist ar ON al.artist_id = ar.artist_id WHERE ar.name = 'AC/DC' ORDER BY al.title ASC",
+      "ordered": true,
+      "expected_column_count": 1,
+      "provenance": "frozen before any new model call"
+    },
+    {
+      "case_id": "chinook-existing-009",
+      "question": "Chinook 各音乐流派分别有多少首曲目？只返回流派名称、曲目数，按流派名称升序排列。",
+      "category": "JOIN+分组",
+      "gold_sql": "SELECT g.name, count(*) FROM track t JOIN genre g ON t.genre_id = g.genre_id GROUP BY g.name ORDER BY g.name ASC",
+      "ordered": true,
+      "expected_column_count": 2,
+      "provenance": "frozen before any new model call"
+    },
+    {
+      "case_id": "chinook-existing-010",
+      "question": "Chinook 各媒体类型分别有多少首曲目？只返回媒体类型名称、曲目数，按媒体类型名称升序排列。",
+      "category": "JOIN+分组",
+      "gold_sql": "SELECT m.name, count(*) FROM track t JOIN media_type m ON t.media_type_id = m.media_type_id GROUP BY m.name ORDER BY m.name ASC",
+      "ordered": true,
+      "expected_column_count": 2,
+      "provenance": "frozen before any new model call"
+    },
+    {
+      "case_id": "chinook-existing-011",
+      "question": "Chinook 时长最长的前 3 首曲目是什么？只返回曲目名称、时长毫秒数，时长降序，同长度按曲目 ID 升序。",
+      "category": "排序Top-k",
+      "gold_sql": "SELECT name, milliseconds FROM track ORDER BY milliseconds DESC, track_id ASC LIMIT 3",
+      "ordered": true,
+      "expected_column_count": 2,
+      "provenance": "frozen before any new model call"
+    },
+    {
+      "case_id": "chinook-existing-012",
+      "question": "Chinook 历史上账单国家为 USA 的账单总额合计是多少？只返回总金额。",
+      "category": "金额聚合+过滤",
+      "gold_sql": "SELECT sum(total) FROM invoice WHERE billing_country = 'USA'",
+      "ordered": false,
+      "expected_column_count": 1,
+      "provenance": "frozen before any new model call"
+    },
+    {
+      "case_id": "chinook-existing-013",
+      "question": "Chinook 每个播放列表分别收录了多少首曲目？包含空播放列表，只返回播放列表名称、曲目数，按播放列表 ID 升序。",
+      "category": "LEFT JOIN+分组",
+      "gold_sql": "SELECT p.name, count(pt.track_id) FROM playlist p LEFT JOIN playlist_track pt ON p.playlist_id = pt.playlist_id GROUP BY p.playlist_id, p.name ORDER BY p.playlist_id ASC",
+      "ordered": true,
+      "expected_column_count": 2,
+      "provenance": "frozen before any new model call"
+    },
+    {
+      "case_id": "chinook-existing-014",
+      "question": "Chinook 职位是 Sales Support Agent 的员工共有多少位？只返回员工数。",
+      "category": "单表过滤",
+      "gold_sql": "SELECT count(*) FROM employee WHERE title = 'Sales Support Agent'",
+      "ordered": false,
+      "expected_column_count": 1,
+      "provenance": "frozen before any new model call"
+    }
+  ]
+}

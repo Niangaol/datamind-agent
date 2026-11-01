@@ -1,0 +1,16 @@
+{
+  "verified_at": "2026-10-10T18:30:21.115689+08:00",
+  "report_path": "/Users/caicai/DataMind Agent/reports/dataset_tests_20261010/ohr_noise_retrieval.json",
+  "report_sha256": "bdaaa735fa3f194dad0d1abfe33c58dba4d94bae66d7e260a44d6026eed45e5e",
+  "independent_process_replay": "passed",
+  "source_and_code_provenance_exact": "passed",
+  "labels_exact": "passed",
+  "summary_exact": "passed",
+  "all_case_ranks_ids_evidence_and_terms_exact": "passed",
+  "all_case_scores_within_tolerance": "passed",
+  "score_relative_tolerance": 1e-12,
+  "score_absolute_tolerance": 1e-12,
+  "different_float_fields": 66,
+  "maximum_float_difference": 7.105427357601002e-15,
+  "float_note": "The production lexical_ranking sums over a query set. Python hash randomization changes summation order between processes; only tiny last-bit float differences occur in this replay. Production functions were not modified."
+}

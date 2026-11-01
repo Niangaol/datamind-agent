@@ -1,0 +1,383 @@
+{
+  "diagnostic_version": "ohrbench-q6-retrieval-v1",
+  "created_at": "2026-10-10T10:29:43.880897+00:00",
+  "initial_report": "reports/dataset_tests_20261010/ohrbench.json",
+  "case_id": "existing-ohr-006",
+  "question": "What is the Grant Income for 2004 in the operating statement of CO-OPERATIVE FEDERATION OF VICTORIA LTD?",
+  "suite_sha256": "e183e554faa7148ed0c5bcc4d2c8eec1b2f0b1617341846b4282d92c5bccd017",
+  "method": "Post-run read-only retriever diagnostic for failed first case; no model call, no label changes, no production/index modifications. All query hits are ranked by actual KnowledgeRetriever. Initial failed outcome remains in original report.",
+  "query_tokens": [
+    "what",
+    "is",
+    "the",
+    "grant",
+    "income",
+    "for",
+    "2004",
+    "in",
+    "the",
+    "operating",
+    "statement",
+    "of",
+    "co-operative",
+    "federation",
+    "of",
+    "victoria",
+    "ltd"
+  ],
+  "eligible_chunks": 62,
+  "modes": {
+    "lexical": {
+      "elapsed_ms": 13.8,
+      "retrieval": {
+        "snapshot_id": "kb-e84eeafeb1b5ffbc",
+        "retriever_version": "hybrid-rrf-v3",
+        "mode": "lexical",
+        "warnings": [],
+        "eligible_chunks": 62,
+        "collections": [
+          "ohrbench_kb"
+        ]
+      },
+      "top10": [
+        {
+          "rank": 1,
+          "chunk_id": "chk-a631b0533433",
+          "document_id": "doc-113525cff4b4",
+          "title": "[ohr-006/OHR-Bench/finance] finance/DUDE_747c6792875022c83dbce7927ceff57e p4",
+          "source_sha256": "95e2ed7b696ccd67ac82e7f4cde612c77782822c5a6c2d53450f69e1a0ff9883",
+          "retrieval_score": 0.016393,
+          "retrieval_scores": {
+            "lexical": 38.14142
+          },
+          "contains_gold_document": true,
+          "exact_text": "CO-OPERATIVE FEDERATION OF VICTORIA LTD\n\nOPERATING STATEMENT\nYEAR ENDED 30 JUNE 2004\n\\begin{tabular}{|c|c|c|c|}\n  \\multirow[t]{2}{*}{} & & 2004 & 2003 \\\\\n  & Notes & \\$ & \\$ \\\\\n  \\multicolumn{4}{|l|}{INCOME} \\\\\n  Grant Income & 2 & 11,621 & 21,498 \\\\\n  Seminar Fees & & - & 1,104 \\\\\n  Interest Received & & - & 100 \\\\\n  Membership Subscriptions & & 19,450 & 26,505 \\\\\n  Publication Sales & & 100 & 1,505 \\\\\n  Sundry Income & & 100 & 275 \\\\\n  Annual Dinner & & - & 60 \\\\\n  Workshops & & 885 & - \\\\\n  Monash University & & - & 700 \\\\\n  Refunds & & 344 & - \\\\\n  & & 32,500 & 51,747 \\\\\n  \\multicolumn{4}{|l|}{EXPENSES} \\\\\n  Annual Meeting & & 132 & 120 \\\\\n  Auditors Remuneration & 3 & 2,695 & 3,400 \\\\\n  Banking Charges & & 107 & 91 \\\\\n  Chairman's Expenses & & 1,401 & 1,394 \\\\\n  Consultant Fees & & 35"
+        },
+        {
+          "rank": 2,
+          "chunk_id": "chk-3361a001ce84",
+          "document_id": "doc-113525cff4b4",
+          "title": "[ohr-006/OHR-Bench/finance] finance/DUDE_747c6792875022c83dbce7927ceff57e p4",
+          "source_sha256": "95e2ed7b696ccd67ac82e7f4cde612c77782822c5a6c2d53450f69e1a0ff9883",
+          "retrieval_score": 0.016129,
+          "retrieval_scores": {
+            "lexical": 7.12926
+          },
+          "contains_gold_document": true,
+          "exact_text": "107 & 91 \\\\\n  Chairman's Expenses & & 1,401 & 1,394 \\\\\n  Consultant Fees & & 357 & - \\\\\n  Depreciation & & 82 & 82 \\\\\n  Grant Expenditure & & 19,110 & 28,240 \\\\\n  Honorariums & 8 & 5,112 & 7,400 \\\\\n  Insurance & & 1,689 & 3,311 \\\\\n  Meeting Expenses & & 286 & 680 \\\\\n  Postage, Printing \\& Stationery & & 3,227 & 4,192 \\\\\n  Registry Fees & & 90 & - \\\\\n  Seminar Expenses & & 638 & 2,281 \\\\\n  Software Expenses & & - & 320 \\\\\n  Sundry Expenses & & 206 & 727 \\\\\n  Survey Expenses & & 240 & - \\\\\n  Telephone, Fax \\& Internet & & 1,871 & 1,243 \\\\\n  Travel Reimbursements & & 2,144 & 118 \\\\\n  Website Expenses & & - & 250 \\\\\n  Workshops & & 640 & 660 \\\\\n  & & 40,027 & 54,509 \\\\\n  OPERATING DEFICIT & & $(7,527)$ & $(2,762)$ \\\\\n \n\\end{tabular}\n\nThe accompanying notes form part of the accounts."
+        },
+        {
+          "rank": 3,
+          "chunk_id": "chk-d33edf11ee41",
+          "document_id": "doc-5e8aa547c92c",
+          "title": "[ohr-001/OHR-Bench/academic] academic/DUDE_72a8558a002eb1c2875c38388854b4de p18",
+          "source_sha256": "914a099ae5f183b78407e30c05a82377961c09fd843fff5144f348f3a623be0f",
+          "retrieval_score": 0.015873,
+          "retrieval_scores": {
+            "lexical": 6.9648
+          },
+          "contains_gold_document": false,
+          "exact_text": "e variety of ornamentation. Second: by the great scarcity of stone implements, and the absence of arrow heads, spear points and other pointed implements of stone. Not a single arrow head, flake or chip has been found by the various parties who have been there in the interests of the University; and the combined time spent there, if represented by a single individual, would equal over eighty days work of seven hours each. The men of the Omori period were also cannibals, the evidences of which will be presented further on. Peculiar clay tablets or amulets, to be described elsewhere in this memoir are also unique. The Omori deposits are not only peculiar for what they possess, but for what they do not possess.\n\nThe following list presents the objects thus far found at Omori, and in another co"
+        },
+        {
+          "rank": 4,
+          "chunk_id": "chk-2df910d228fc",
+          "document_id": "doc-c11c7baa1fce",
+          "title": "[ohr-008/OHR-Bench/law] law/CHERRYHILLMORTGAGEINVESTMENTCORP_09_26_2013-EX-10.1-Strategic Alliance Agreement p4",
+          "source_sha256": "1f76452731abe1cd4f138a0b8140bbab2bdd16ab94419b2ad1b72fc1bb4860f9",
+          "retrieval_score": 0.015625,
+          "retrieval_scores": {
+            "lexical": 6.8829
+          },
+          "contains_gold_document": false,
+          "exact_text": "Tangible Net Worth: The net worth of Seller determined in accordance with GAAP, minus all intangibles determined in accordance with GAAP (including goodwill, capitalized financing costs and capitalized administration costs but excluding originated and purchased mortgage servicing rights or retained residual securities) and any and all advances to, investments in and receivables held from affiliates; provided, however, that the non-cash effect (gain or loss) of any mark-to-market adjustments made directly to stockholders' equity for fluctuation of the value of financial instruments as mandated under the Statement of Financial Accounting Standards No. 133 (or any successor statement) shall be excluded from the calculation of Tangible Net Worth.\n\nTransactions: The execution, delivery and perf"
+        },
+        {
+          "rank": 5,
+          "chunk_id": "chk-9af9644f21c3",
+          "document_id": "doc-241ab5369b54",
+          "title": "[ohr-009/OHR-Bench/manual] manual/t480_ug_en p65",
+          "source_sha256": "fbe69d03877f46d401fea599274b2b71ee56aba5e613d49a02568e6b26bd87be",
+          "retrieval_score": 0.015385,
+          "retrieval_scores": {
+            "lexical": 5.65282
+          },
+          "contains_gold_document": false,
+          "exact_text": "to suit their physical and cognitive needs.\n\nTo access Ease of Access Center, do the following:\n1. Go to Control Panel, and ensure that you view Control Panel using Category.\n2. Click Ease of Access $\\rightarrow$ Ease of Access Center.\n3. Choose the appropriate tool by following the instructions on the screen.\n\nEase of Access Center mainly includes the following tools:\n- Magnifier\n\nMagnifier is a useful utility that enlarges the entire screen or part of the screen so that you can see the items better.\n- Narrator\n\nNarrator is a screen reader that reads what is displayed on the screen aloud and describes events such as error messages.\n- On-Screen Keyboard"
+        },
+        {
+          "rank": 6,
+          "chunk_id": "chk-1b229291c08c",
+          "document_id": "doc-241ab5369b54",
+          "title": "[ohr-009/OHR-Bench/manual] manual/t480_ug_en p65",
+          "source_sha256": "fbe69d03877f46d401fea599274b2b71ee56aba5e613d49a02568e6b26bd87be",
+          "retrieval_score": 0.015152,
+          "retrieval_scores": {
+            "lexical": 4.82816
+          },
+          "contains_gold_document": false,
+          "exact_text": "rd, some of the following keyboard shortcuts might not be available.\n- Windows logo key + U: Open Ease of Access Center\n- Right Shift for eight seconds: Turn on or turn off Filter Keys\n- Shift five times: Turn on or turn off Sticky Keys\n- Num Lock for five seconds: Turn on or turn off Toggle Keys\n- Left Alt+Left Shift+Num Lock: Turn on or turn off Mouse Keys\n- Left Alt+Left Shift+PrtScn (or PrtSc): Turn on or turn off High Contrast\n\nFor more information, go to https://windows.microsoft.com/, and then search using any of the following keywords: keyboard shortcuts, key combinations, shortcut keys.\n\nEase of Access Center\n\nEase of Access Center on the Windows operating system enables you to configure your computers to suit their physical and cognitive needs.\n\nTo access Ease of Access Center, d"
+        },
+        {
+          "rank": 7,
+          "chunk_id": "chk-d34022a69706",
+          "document_id": "doc-a18d8692c3b0",
+          "title": "[ohr-012/OHR-Bench/news] news/DUDE_ce4c991a6c15eb953bb3e99be5d6c514 p5",
+          "source_sha256": "5638ff7a342c91acb9a55dc537b63ee86d90cb392c80bf1a34745acb1c43fe0e",
+          "retrieval_score": 0.014925,
+          "retrieval_scores": {
+            "lexical": 4.01767
+          },
+          "contains_gold_document": false,
+          "exact_text": "began to warn his co-workers of the danger.\n\nGeneral Electric was also spurred to action. An October 28, 1991, memo from GE attorney Bill Thornton outlines a plan for dealing with Sandberg, who, he wrote, \"seems to be escalating the situation day by day.\" General Electric established a public-relations team and called an all-employee meeting at which medical experts flown in from around the country presented GE's side of the story. One such expert was Marie Johnson, an industrial-hygiene nurse from GE's plant at Hudson Falls, New York—best known for its massive PCB discharges into the Hudson River. Johnson is described in the memo as someone who \"is very knowledgeable and gives a warm, caring impression.\"\n\n\"It is not expected that we could win the heart and mind of Sandberg,\" Thornton wro"
+        },
+        {
+          "rank": 8,
+          "chunk_id": "chk-0cf98c86dea4",
+          "document_id": "doc-3dcf871abe07",
+          "title": "[ohr-011/OHR-Bench/news] news/06_14 p1",
+          "source_sha256": "130c0a825ddaa0b420704a81d15be0c01ac545b63507c6dec2381f8564fa9c9b",
+          "retrieval_score": 0.014706,
+          "retrieval_scores": {
+            "lexical": 3.61521
+          },
+          "contains_gold_document": false,
+          "exact_text": "gage with the\npresident,'\" Gov. Gavin Newsom president,'\" Gov. Gavin Newsom\nof California, a longtime ally of Mr. Katzenberg, recounted in an interview. \"And he started doing that in a consistent way\", In the end, Mr.\nNewsom added, \"He really was inNewsom added, \"He really was in-\nstrumental in getting people off\nthe sidelines and getting them to dive headfirst in this campaign.\" Continued on Page Al5\n\nINTERNATIONAL A4-9\n\nA Key City for Halting Russia Faced with an assault from the northin Vovchansk. The front line is still there, but little else is.\n\n\nNATIONAL A10-19\nA Rare Plant Re-emerges A Vermont biologist studying turtles\ncame upon an herb that the state botanist identified as one not seen there in more than a century\n\n\n\nBUSINESS B1-6\nSplash Mountain Overhaul The ride was closed beca"
+        },
+        {
+          "rank": 9,
+          "chunk_id": "chk-9eab49d04173",
+          "document_id": "doc-3dcf871abe07",
+          "title": "[ohr-011/OHR-Bench/news] news/06_14 p1",
+          "source_sha256": "130c0a825ddaa0b420704a81d15be0c01ac545b63507c6dec2381f8564fa9c9b",
+          "retrieval_score": 0.014493,
+          "retrieval_scores": {
+            "lexical": 3.27333
+          },
+          "contains_gold_document": false,
+          "exact_text": "cost of doing\n\nFollowing going to feel this.\" tion of cannabis for recreationa use in 2021, rogue smoke shops multiplied like an invasive ecies. Convenience store ownContinued on Page A19\n\nThe mifepristone ruling gave a muted victory to rights groups.\nhave succeeded in galvanizing voters to defeat anti-abortion\nmeasures and plan to highligh abortion rights in the November elections.\nBy dodging a ruling on the subsance of the case, the justices\nvoided delivering a clear, subvoided delivering a clear, sub-\ntantive win to either political party or a decision they could use motivate their base.\n\nContinued on Page Al3\nTARBUCKS RULING In a blow to labor regulators, the justice arbed their authority. PAGE B.\n\nSecret Weapon\nOf Biden Camp\nIs Movie Mogul\nBy PETER BAKER WASHINGTON - When Presithat he"
+        },
+        {
+          "rank": 10,
+          "chunk_id": "chk-145dc4a73df3",
+          "document_id": "doc-a18d8692c3b0",
+          "title": "[ohr-012/OHR-Bench/news] news/DUDE_ce4c991a6c15eb953bb3e99be5d6c514 p5",
+          "source_sha256": "5638ff7a342c91acb9a55dc537b63ee86d90cb392c80bf1a34745acb1c43fe0e",
+          "retrieval_score": 0.014286,
+          "retrieval_scores": {
+            "lexical": 3.18842
+          },
+          "contains_gold_document": false,
+          "exact_text": "oil burns or ages. Put to work in highly toxic areas without protective clothing or a respirator, Sandberg says he was given no warnings about the chemicals.\n\nInstead, GE told him-and maintains to this day-that PCBs are essentially harmless. At GE's PCB training school in Cincinnati, Sandberg says, he and other new workers were given an article from the magazine Hippocrates suggesting that exposure to PCBs is less risky than exposure to the toxins naturally occurring in peanut butter, beer, or raw mushrooms. \"They showed us a video with Walter Cronkite saying PCBs were as toxic as table salt,\" Sandberg said.\n\nSandberg's job was to clean out hundreds of exploded, burned-up PCB transformers in preparation for shipment to incinerators or landfills. He was sent to the scenes of PCB transforme"
+        }
+      ],
+      "gold_document_chunk_ranks": [
+        {
+          "rank": 1,
+          "chunk_id": "chk-a631b0533433",
+          "document_id": "doc-113525cff4b4",
+          "title": "[ohr-006/OHR-Bench/finance] finance/DUDE_747c6792875022c83dbce7927ceff57e p4",
+          "source_sha256": "95e2ed7b696ccd67ac82e7f4cde612c77782822c5a6c2d53450f69e1a0ff9883",
+          "retrieval_score": 0.016393,
+          "retrieval_scores": {
+            "lexical": 38.14142
+          },
+          "contains_gold_document": true
+        },
+        {
+          "rank": 2,
+          "chunk_id": "chk-3361a001ce84",
+          "document_id": "doc-113525cff4b4",
+          "title": "[ohr-006/OHR-Bench/finance] finance/DUDE_747c6792875022c83dbce7927ceff57e p4",
+          "source_sha256": "95e2ed7b696ccd67ac82e7f4cde612c77782822c5a6c2d53450f69e1a0ff9883",
+          "retrieval_score": 0.016129,
+          "retrieval_scores": {
+            "lexical": 7.12926
+          },
+          "contains_gold_document": true
+        }
+      ]
+    },
+    "hybrid": {
+      "elapsed_ms": 340.9,
+      "retrieval": {
+        "snapshot_id": "kb-e84eeafeb1b5ffbc",
+        "retriever_version": "hybrid-rrf-v3",
+        "mode": "hybrid",
+        "warnings": [],
+        "eligible_chunks": 62,
+        "collections": [
+          "ohrbench_kb"
+        ]
+      },
+      "top10": [
+        {
+          "rank": 1,
+          "chunk_id": "chk-2df910d228fc",
+          "document_id": "doc-c11c7baa1fce",
+          "title": "[ohr-008/OHR-Bench/law] law/CHERRYHILLMORTGAGEINVESTMENTCORP_09_26_2013-EX-10.1-Strategic Alliance Agreement p4",
+          "source_sha256": "1f76452731abe1cd4f138a0b8140bbab2bdd16ab94419b2ad1b72fc1bb4860f9",
+          "retrieval_score": 0.032018,
+          "retrieval_scores": {
+            "lexical": 6.8829,
+            "dense": 0.65037
+          },
+          "contains_gold_document": false,
+          "exact_text": "Tangible Net Worth: The net worth of Seller determined in accordance with GAAP, minus all intangibles determined in accordance with GAAP (including goodwill, capitalized financing costs and capitalized administration costs but excluding originated and purchased mortgage servicing rights or retained residual securities) and any and all advances to, investments in and receivables held from affiliates; provided, however, that the non-cash effect (gain or loss) of any mark-to-market adjustments made directly to stockholders' equity for fluctuation of the value of financial instruments as mandated under the Statement of Financial Accounting Standards No. 133 (or any successor statement) shall be excluded from the calculation of Tangible Net Worth.\n\nTransactions: The execution, delivery and perf"
+        },
+        {
+          "rank": 2,
+          "chunk_id": "chk-0cf98c86dea4",
+          "document_id": "doc-3dcf871abe07",
+          "title": "[ohr-011/OHR-Bench/news] news/06_14 p1",
+          "source_sha256": "130c0a825ddaa0b420704a81d15be0c01ac545b63507c6dec2381f8564fa9c9b",
+          "retrieval_score": 0.029631,
+          "retrieval_scores": {
+            "lexical": 3.61521,
+            "dense": 0.62936
+          },
+          "contains_gold_document": false,
+          "exact_text": "gage with the\npresident,'\" Gov. Gavin Newsom president,'\" Gov. Gavin Newsom\nof California, a longtime ally of Mr. Katzenberg, recounted in an interview. \"And he started doing that in a consistent way\", In the end, Mr.\nNewsom added, \"He really was inNewsom added, \"He really was in-\nstrumental in getting people off\nthe sidelines and getting them to dive headfirst in this campaign.\" Continued on Page Al5\n\nINTERNATIONAL A4-9\n\nA Key City for Halting Russia Faced with an assault from the northin Vovchansk. The front line is still there, but little else is.\n\n\nNATIONAL A10-19\nA Rare Plant Re-emerges A Vermont biologist studying turtles\ncame upon an herb that the state botanist identified as one not seen there in more than a century\n\n\n\nBUSINESS B1-6\nSplash Mountain Overhaul The ride was closed beca"
+        },
+        {
+          "rank": 3,
+          "chunk_id": "chk-6d22b335250f",
+          "document_id": "doc-3dcf871abe07",
+          "title": "[ohr-011/OHR-Bench/news] news/06_14 p1",
+          "source_sha256": "130c0a825ddaa0b420704a81d15be0c01ac545b63507c6dec2381f8564fa9c9b",
+          "retrieval_score": 0.028382,
+          "retrieval_scores": {
+            "lexical": 3.02371,
+            "dense": 0.62699
+          },
+          "contains_gold_document": false,
+          "exact_text": "t of the hostages. Israel says it is willing to nego tiate a permanent cessation of but only after dismantling Hamas's military and governing capabilities. That clashes with Continued on Page A7\n\nJUSTICES MAINTAIN WIDE AVAILABILITY OF ABORTION PILL\n\n9-0 Decision on Procedural Grounds Drug May Face Other Challenges\n\nquestion had been narrowed to\nwhether the agency had acted legally in 2016 and 2021, when it\nbroadened distribution of the pill. eventually including telemedicine and mail options.\nThe ruling han\nThe ruling handed a muted vicEven as they praised the decision for averting severe restrictions on\nthe availability of the pill, they warned that the outcome could be short-lived. Anti-abortion groups vowed to\npress ahead, promising that the press ahead, promising that the\nfight was far"
+        },
+        {
+          "rank": 4,
+          "chunk_id": "chk-d34022a69706",
+          "document_id": "doc-a18d8692c3b0",
+          "title": "[ohr-012/OHR-Bench/news] news/DUDE_ce4c991a6c15eb953bb3e99be5d6c514 p5",
+          "source_sha256": "5638ff7a342c91acb9a55dc537b63ee86d90cb392c80bf1a34745acb1c43fe0e",
+          "retrieval_score": 0.027912,
+          "retrieval_scores": {
+            "lexical": 4.01767,
+            "dense": 0.61589
+          },
+          "contains_gold_document": false,
+          "exact_text": "began to warn his co-workers of the danger.\n\nGeneral Electric was also spurred to action. An October 28, 1991, memo from GE attorney Bill Thornton outlines a plan for dealing with Sandberg, who, he wrote, \"seems to be escalating the situation day by day.\" General Electric established a public-relations team and called an all-employee meeting at which medical experts flown in from around the country presented GE's side of the story. One such expert was Marie Johnson, an industrial-hygiene nurse from GE's plant at Hudson Falls, New York—best known for its massive PCB discharges into the Hudson River. Johnson is described in the memo as someone who \"is very knowledgeable and gives a warm, caring impression.\"\n\n\"It is not expected that we could win the heart and mind of Sandberg,\" Thornton wro"
+        },
+        {
+          "rank": 5,
+          "chunk_id": "chk-78edaa727512",
+          "document_id": "doc-3dcf871abe07",
+          "title": "[ohr-011/OHR-Bench/news] news/06_14 p1",
+          "source_sha256": "130c0a825ddaa0b420704a81d15be0c01ac545b63507c6dec2381f8564fa9c9b",
+          "retrieval_score": 0.026944,
+          "retrieval_scores": {
+            "lexical": 2.57817,
+            "dense": 0.62679
+          },
+          "contains_gold_document": false,
+          "exact_text": "iations\n\nThe Biden administration has\npledged to keep working with the pledged to keep working with the\nQatari and Egyptian mediators bridge the gaps. But after day region, a monthslong effort to end the war in Gaza seems as stuck as ever, as each side clings\ntubbornly to maximalist demands unacceptable to the other.\nAsked at the Group of Asked at the Group of 7 sum-\nmit meeting in Italy if he still\nthought a deal could be reached, President Biden said, \"I haven\nlost hope, but it's going to be tough At the crux of the disagree-\nment over the three-phase deal, perts, is Hamas's goal of essentially securing a permanent cease-fire from the outset and\nwithdrawal of all Israeli trops rom Gaza before handing over most of the hostages. Israel says it is willing to nego tiate a permanent cessation"
+        },
+        {
+          "rank": 6,
+          "chunk_id": "chk-27ebdc338f58",
+          "document_id": "doc-3dcf871abe07",
+          "title": "[ohr-011/OHR-Bench/news] news/06_14 p1",
+          "source_sha256": "130c0a825ddaa0b420704a81d15be0c01ac545b63507c6dec2381f8564fa9c9b",
+          "retrieval_score": 0.026671,
+          "retrieval_scores": {
+            "lexical": 2.68091,
+            "dense": 0.62072
+          },
+          "contains_gold_document": false,
+          "exact_text": "put on notice.\n could reopen whithin hours of incourt orders to shut them down permanently. But changes en-\nacted in this year's state budget acted in this year's state budget Sheriff's Office the power to declare the shops an imminent\nthreat to the public and close them\n\n\nA special task force has shut down 311 unlicensed cannabis shops in the city since early May.\nimmediately for up to a year. Sheriff Anthony Miranda, in an\ninterview at his office in Queens, serview at his office in Queens, come that the shops relied on to absorb the cost of violations. While some stores continue to\nnearby or shifting to delivery services - even reviving weed ing cannabis or shut down com pletely, he said.\n\"It's not just the cost of doing\n\nFollowing going to feel this.\" tion of cannabis for recreationa u"
+        },
+        {
+          "rank": 7,
+          "chunk_id": "chk-145dc4a73df3",
+          "document_id": "doc-a18d8692c3b0",
+          "title": "[ohr-012/OHR-Bench/news] news/DUDE_ce4c991a6c15eb953bb3e99be5d6c514 p5",
+          "source_sha256": "5638ff7a342c91acb9a55dc537b63ee86d90cb392c80bf1a34745acb1c43fe0e",
+          "retrieval_score": 0.02605,
+          "retrieval_scores": {
+            "lexical": 3.18842,
+            "dense": 0.5845
+          },
+          "contains_gold_document": false,
+          "exact_text": "oil burns or ages. Put to work in highly toxic areas without protective clothing or a respirator, Sandberg says he was given no warnings about the chemicals.\n\nInstead, GE told him-and maintains to this day-that PCBs are essentially harmless. At GE's PCB training school in Cincinnati, Sandberg says, he and other new workers were given an article from the magazine Hippocrates suggesting that exposure to PCBs is less risky than exposure to the toxins naturally occurring in peanut butter, beer, or raw mushrooms. \"They showed us a video with Walter Cronkite saying PCBs were as toxic as table salt,\" Sandberg said.\n\nSandberg's job was to clean out hundreds of exploded, burned-up PCB transformers in preparation for shipment to incinerators or landfills. He was sent to the scenes of PCB transforme"
+        },
+        {
+          "rank": 8,
+          "chunk_id": "chk-538fe923584b",
+          "document_id": "doc-a18d8692c3b0",
+          "title": "[ohr-012/OHR-Bench/news] news/DUDE_ce4c991a6c15eb953bb3e99be5d6c514 p5",
+          "source_sha256": "5638ff7a342c91acb9a55dc537b63ee86d90cb392c80bf1a34745acb1c43fe0e",
+          "retrieval_score": 0.025712,
+          "retrieval_scores": {
+            "lexical": 2.25851,
+            "dense": 0.62618
+          },
+          "contains_gold_document": false,
+          "exact_text": "e a telling remark by GE official F. R. Kaimer: \"We had 50 other men in very bad condition as far as the acne was concerned,\" he told the group. \"The first reaction that several of our executives had was to throw [the PCB] out-get it out of our plant. But that was easily said but not so easily done. We might just as well have thrown our business to the four winds and said,\n\nGE's \"Warm, Garing Impression\"\n\nIn 1989, when Steve Sandberg went to work for General Electric's processing plant in Anaheim, California, he had never heard of PCBs or the Toxic Substances Control Act, the federal law that banned their manufacture 13 years earlier. He had never heard of dioxins or dibenzofurans, super-toxins created when PCB oil burns or ages. Put to work in highly toxic areas without protective clothin"
+        },
+        {
+          "rank": 9,
+          "chunk_id": "chk-2ebfc36d99e7",
+          "document_id": "doc-a18d8692c3b0",
+          "title": "[ohr-012/OHR-Bench/news] news/DUDE_ce4c991a6c15eb953bb3e99be5d6c514 p5",
+          "source_sha256": "5638ff7a342c91acb9a55dc537b63ee86d90cb392c80bf1a34745acb1c43fe0e",
+          "retrieval_score": 0.025321,
+          "retrieval_scores": {
+            "lexical": 2.60352,
+            "dense": 0.60432
+          },
+          "contains_gold_document": false,
+          "exact_text": "is not expected that we could win the heart and mind of Sandberg,\" Thornton wrote. \"Rather, the meeting is intended to prevent him from infecting the others. Depending on how he reacts, Sandberg could be seen by his fellow employees as someone who is off the wall.\" Ironically, on the day of the all-employee meeting, Sandberg was moved out of the PCB area of the operation on orders from a GE physician, who concluded that he could not tolerate any further exposure to PCBs.\n\nYet his managers stuck by their story that PCBs were harmless. Mel Dinkel, a GE manager who insisted that the plant was in full compliance with all PCB regulations, dared Sandberg to go to the state and federal authorities. \"He gave me the phone numbers, addresses, everything,\" Sandberg says. \"He said, 'If you feel this"
+        },
+        {
+          "rank": 10,
+          "chunk_id": "chk-02de8c010191",
+          "document_id": "doc-3dcf871abe07",
+          "title": "[ohr-011/OHR-Bench/news] news/06_14 p1",
+          "source_sha256": "130c0a825ddaa0b420704a81d15be0c01ac545b63507c6dec2381f8564fa9c9b",
+          "retrieval_score": 0.025253,
+          "retrieval_scores": {
+            "lexical": 2.19497,
+            "dense": 0.62603
+          },
+          "contains_gold_document": false,
+          "exact_text": "e saw \"oppor tunities to improve, enhance and brand\n\n\nLaylah Rose, the head of Miss USA, between Noelia Voigt, left, and UmaSofia Srivastava,\nwho both quit after their wins.\n\nThose repairs were sorely\nneeded In recentyears Miss USA has weathered allegations of racism and sexual harassment, and has passed from owner to owner Trump. The 2022 suicide of\nUSA 2019 sent the organization reeling. In 2023, Ms. Rose's predesations of pageant rigging. the pageant, Ms. Rose got to work (She bought the rights to manage \\$1.5 million, according to a preli Continued on Page All\n\nMaximalist Demands Make Gaza Peace Elusive\nBy ISABEL KERSHNER JERUSALEM - Prime Min-\nister Benjamin Netanyahu of ister Benjamin Netanyahu of\nIrrael called Hamas's response to the latest peace proposal for\nGaza \"negative.\" Hamas"
+        }
+      ],
+      "gold_document_chunk_ranks": [
+        {
+          "rank": 15,
+          "chunk_id": "chk-a631b0533433",
+          "document_id": "doc-113525cff4b4",
+          "title": "[ohr-006/OHR-Bench/finance] finance/DUDE_747c6792875022c83dbce7927ceff57e p4",
+          "source_sha256": "95e2ed7b696ccd67ac82e7f4cde612c77782822c5a6c2d53450f69e1a0ff9883",
+          "retrieval_score": 0.016393,
+          "retrieval_scores": {
+            "lexical": 38.14142
+          },
+          "contains_gold_document": true
+        },
+        {
+          "rank": 16,
+          "chunk_id": "chk-3361a001ce84",
+          "document_id": "doc-113525cff4b4",
+          "title": "[ohr-006/OHR-Bench/finance] finance/DUDE_747c6792875022c83dbce7927ceff57e p4",
+          "source_sha256": "95e2ed7b696ccd67ac82e7f4cde612c77782822c5a6c2d53450f69e1a0ff9883",
+          "retrieval_score": 0.016129,
+          "retrieval_scores": {
+            "lexical": 7.12926
+          },
+          "contains_gold_document": true
+        }
+      ]
+    }
+  }
+}

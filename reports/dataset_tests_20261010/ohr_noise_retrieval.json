@@ -1,0 +1,4571 @@
+{
+  "test": "ohrbench-existing-v1-paired-text-lexical-retrieval",
+  "generated_at": "2026-10-10T18:29:06.286666+08:00",
+  "runtime": {
+    "python": "3.14.5",
+    "executable": "/Users/caicai/DataMind Agent/.venv/bin/python"
+  },
+  "labels": {
+    "path": "/Users/caicai/DataMind Agent/data/evaluation/ohrbench_existing_v1.json",
+    "sha256": "e183e554faa7148ed0c5bcc4d2c8eec1b2f0b1617341846b4282d92c5bccd017",
+    "suite_version": "ohrbench-existing-v1",
+    "frozen_at": "2026-10-10T10:26:25.540398+00:00"
+  },
+  "source_provenance": {
+    "manifest_path": "/Users/caicai/DataMind Agent/data/ohr_bench_samples/manifest.json",
+    "manifest_sha256": "853e2f5cf927cbcc77ef033666176d785a3c013474f50dbfa32ca28fb6bd5f18",
+    "source_set_sha256": "8437b76a0497ef002c6fc09937e77a578c19c5dc41a98bbe95b9b44f0731e13d",
+    "sample_count": 14,
+    "samples": [
+      {
+        "sample_id": "ohr-001",
+        "source_file": "data/ohr_bench_samples/ohr-001_academic_academic_DUDE_72a8558a002eb1c2875c38388854b4de_p17.json",
+        "source_sha256": "914a099ae5f183b78407e30c05a82377961c09fd843fff5144f348f3a623be0f",
+        "domain": "academic",
+        "source": "OHR-Bench_v2",
+        "license": "CC-BY-4.0",
+        "page_idx": 17,
+        "gt_text": {
+          "text_sha256": "f47174fe12309379489291b143af2f19b5d82527edbe0fe013d6b06381a8de0a",
+          "chars": 1908,
+          "normalized_chars": 1591
+        },
+        "noise_text": {
+          "text_sha256": "9296051065e136a265b082e26303683af05c15549d10cc71c2a345c52d4e3b43",
+          "chars": 2449,
+          "normalized_chars": 1881
+        },
+        "raw_text_changed": true,
+        "normalized_text_changed": true
+      },
+      {
+        "sample_id": "ohr-002",
+        "source_file": "data/ohr_bench_samples/ohr-002_academic_academic_2405.14458v1_p2.json",
+        "source_sha256": "fde13dd254e8e320c893ebd07aa3173282ed13a2e93dc463a7461db1f264f810",
+        "domain": "academic",
+        "source": "OHR-Bench_v2",
+        "license": "CC-BY-4.0",
+        "page_idx": 2,
+        "gt_text": {
+          "text_sha256": "366f30bfe4bcd1bb5ca9e9aa82467fabedd7ce4f0ce7ec1643dcd5c74aca7e4a",
+          "chars": 4819,
+          "normalized_chars": 4144
+        },
+        "noise_text": {
+          "text_sha256": "2904c1cfb5843d20af1e78a2a16f126015c9df953ba262acf2f998e026c8c72d",
+          "chars": 6152,
+          "normalized_chars": 4894
+        },
+        "raw_text_changed": true,
+        "normalized_text_changed": true
+      },
+      {
+        "sample_id": "ohr-003",
+        "source_file": "data/ohr_bench_samples/ohr-003_administration_administration_DUDE_0875f9cd143bcf389bd1c48dce433857_p23.json",
+        "source_sha256": "4cf2382b17638480d7096a5e8434b08e9b595f066ce4ed4730477414038634d0",
+        "domain": "administration",
+        "source": "OHR-Bench_v2",
+        "license": "CC-BY-4.0",
+        "page_idx": 23,
+        "gt_text": {
+          "text_sha256": "ee2634ac3776d6dc15fa20852cc5cb156b9163b8dc04328a5406bfd81645dd4c",
+          "chars": 683,
+          "normalized_chars": 576
+        },
+        "noise_text": {
+          "text_sha256": "305747ba0fe5e4fdaf1866167a7a65cdfcf53b186019c9aac5974078e67b53ff",
+          "chars": 822,
+          "normalized_chars": 668
+        },
+        "raw_text_changed": true,
+        "normalized_text_changed": true
+      },
+      {
+        "sample_id": "ohr-004",
+        "source_file": "data/ohr_bench_samples/ohr-004_administration_administration_DUDE_61c8c8330f3895123e136140bda9991e_p8.json",
+        "source_sha256": "3568e3c1f18a544894864c8babeeb9a76e83ece7f38a910ae131e61c67a4e0cb",
+        "domain": "administration",
+        "source": "OHR-Bench_v2",
+        "license": "CC-BY-4.0",
+        "page_idx": 8,
+        "gt_text": {
+          "text_sha256": "83c6005d8b11637a92591695a5eebe1eaa72b7524824a48a94b3a45bdcbe952c",
+          "chars": 1042,
+          "normalized_chars": 878
+        },
+        "noise_text": {
+          "text_sha256": "bd9e6d0d6514c50358e2fbc9ba11aafe92fa7dfa0e01a624adb7fa7477b27661",
+          "chars": 1307,
+          "normalized_chars": 1002
+        },
+        "raw_text_changed": true,
+        "normalized_text_changed": true
+      },
+      {
+        "sample_id": "ohr-005",
+        "source_file": "data/ohr_bench_samples/ohr-005_finance_finance_DUDE_fc03b3768346584a3fa425c656bfe748_p0.json",
+        "source_sha256": "0e7db9f20ac82bbd07ae29884fdd21a7ffc994eef9adf953fbfe54e311a8ff77",
+        "domain": "finance",
+        "source": "OHR-Bench_v2",
+        "license": "CC-BY-4.0",
+        "page_idx": 0,
+        "gt_text": {
+          "text_sha256": "62bb3eaed06bd12b00f0bc707349997db54e5c10ab3560224d571fe4b25d316c",
+          "chars": 4421,
+          "normalized_chars": 3595
+        },
+        "noise_text": {
+          "text_sha256": "36a500a7da4915fa43d6c987277306a19e8c7194dbee3ef811fae210a2bee63e",
+          "chars": 5853,
+          "normalized_chars": 4982
+        },
+        "raw_text_changed": true,
+        "normalized_text_changed": true
+      },
+      {
+        "sample_id": "ohr-006",
+        "source_file": "data/ohr_bench_samples/ohr-006_finance_finance_DUDE_747c6792875022c83dbce7927ceff57e_p3.json",
+        "source_sha256": "95e2ed7b696ccd67ac82e7f4cde612c77782822c5a6c2d53450f69e1a0ff9883",
+        "domain": "finance",
+        "source": "OHR-Bench_v2",
+        "license": "CC-BY-4.0",
+        "page_idx": 3,
+        "gt_text": {
+          "text_sha256": "08318a51fd15a2285615e2f70f8f7c0af3ed53101bf9e6190ca79b82e4f31e04",
+          "chars": 1510,
+          "normalized_chars": 1132
+        },
+        "noise_text": {
+          "text_sha256": "42374e7be76982619645d7c5c79a7321f0ec0c940894f819d8c5201b748c82f7",
+          "chars": 2122,
+          "normalized_chars": 1744
+        },
+        "raw_text_changed": true,
+        "normalized_text_changed": true
+      },
+      {
+        "sample_id": "ohr-007",
+        "source_file": "data/ohr_bench_samples/ohr-007_law_law_CnsPharmaceuticalsInc_20200326_8-K_EX-10.1_12079626_EX-10.1_Development Agreement_p4.json",
+        "source_sha256": "2076e622c7caded1e22afddd46f7c549d6e30fcc464560afe43a26191a78e8ba",
+        "domain": "law",
+        "source": "OHR-Bench_v2",
+        "license": "CC-BY-4.0",
+        "page_idx": 4,
+        "gt_text": {
+          "text_sha256": "bd4021c5c9801843c83b589ebd13ba3c1e9d241c116a021874ee02049592b59e",
+          "chars": 3606,
+          "normalized_chars": 3040
+        },
+        "noise_text": {
+          "text_sha256": "ade47d5bbe73be2c2875847fbbddde3d33ed18657725d3e2ca261fe6d445499d",
+          "chars": 4557,
+          "normalized_chars": 3563
+        },
+        "raw_text_changed": true,
+        "normalized_text_changed": true
+      },
+      {
+        "sample_id": "ohr-008",
+        "source_file": "data/ohr_bench_samples/ohr-008_law_law_CHERRYHILLMORTGAGEINVESTMENTCORP_09_26_2013-EX-10.1-Strategic Alliance Agreement_p3.json",
+        "source_sha256": "1f76452731abe1cd4f138a0b8140bbab2bdd16ab94419b2ad1b72fc1bb4860f9",
+        "domain": "law",
+        "source": "OHR-Bench_v2",
+        "license": "CC-BY-4.0",
+        "page_idx": 3,
+        "gt_text": {
+          "text_sha256": "4266ae29f5cc0f7189a78ddced5d24732f18ae13b70422d70ddf1c20a4811a88",
+          "chars": 3821,
+          "normalized_chars": 3218
+        },
+        "noise_text": {
+          "text_sha256": "76f9037ab3b6a090462dec5bddf79413e53a4b7f6bd893b0fc8df53b0bd20f4b",
+          "chars": 4927,
+          "normalized_chars": 3819
+        },
+        "raw_text_changed": true,
+        "normalized_text_changed": true
+      },
+      {
+        "sample_id": "ohr-009",
+        "source_file": "data/ohr_bench_samples/ohr-009_manual_manual_t480_ug_en_p64.json",
+        "source_sha256": "fbe69d03877f46d401fea599274b2b71ee56aba5e613d49a02568e6b26bd87be",
+        "domain": "manual",
+        "source": "OHR-Bench_v2",
+        "license": "CC-BY-4.0",
+        "page_idx": 64,
+        "gt_text": {
+          "text_sha256": "03dafc8c46a1eec79eca5fecf81ebf7fbe58c578376491a0264dbc1a18247fe0",
+          "chars": 2102,
+          "normalized_chars": 1759
+        },
+        "noise_text": {
+          "text_sha256": "8080eb1b7b48f8e8e5d43176827ec4136f84ac410e53975d9c2e9e5ca9ba0b29",
+          "chars": 2748,
+          "normalized_chars": 2136
+        },
+        "raw_text_changed": true,
+        "normalized_text_changed": true
+      },
+      {
+        "sample_id": "ohr-010",
+        "source_file": "data/ohr_bench_samples/ohr-010_manual_manual_guojixueshengshenghuozhinanyingwen9.1_p36.json",
+        "source_sha256": "7f0b0d8710b1a0f61f3655be29179d77894b16b17db570d8449bbc59868dc35c",
+        "domain": "manual",
+        "source": "OHR-Bench_v2",
+        "license": "CC-BY-4.0",
+        "page_idx": 36,
+        "gt_text": {
+          "text_sha256": "112eed12990a352d1b07912834ad54bf995826d51dc097c5be989d37d516d806",
+          "chars": 766,
+          "normalized_chars": 651
+        },
+        "noise_text": {
+          "text_sha256": "278db232616db027d691f9463b45b3b20951021cbd30cc56899b05d44612a7f1",
+          "chars": 1004,
+          "normalized_chars": 810
+        },
+        "raw_text_changed": true,
+        "normalized_text_changed": true
+      },
+      {
+        "sample_id": "ohr-011",
+        "source_file": "data/ohr_bench_samples/ohr-011_news_news_06_14_p0.json",
+        "source_sha256": "130c0a825ddaa0b420704a81d15be0c01ac545b63507c6dec2381f8564fa9c9b",
+        "domain": "news",
+        "source": "OHR-Bench_v2",
+        "license": "CC-BY-4.0",
+        "page_idx": 0,
+        "gt_text": {
+          "text_sha256": "a6988c413d58eb0ecedd930b82e6dfc1cb4395446dcf88980f80e25cc25e7120",
+          "chars": 8316,
+          "normalized_chars": 6882
+        },
+        "noise_text": {
+          "text_sha256": "d079698563b8dc58e421baca0cee14fd676418260f62082e662804068b00da1c",
+          "chars": 9672,
+          "normalized_chars": 7574
+        },
+        "raw_text_changed": true,
+        "normalized_text_changed": true
+      },
+      {
+        "sample_id": "ohr-012",
+        "source_file": "data/ohr_bench_samples/ohr-012_news_news_DUDE_ce4c991a6c15eb953bb3e99be5d6c514_p4.json",
+        "source_sha256": "5638ff7a342c91acb9a55dc537b63ee86d90cb392c80bf1a34745acb1c43fe0e",
+        "domain": "news",
+        "source": "OHR-Bench_v2",
+        "license": "CC-BY-4.0",
+        "page_idx": 4,
+        "gt_text": {
+          "text_sha256": "e7c4e66d1e05b45fd6377cd2b65a0436f885f9bb3ea1f35102956684dab2abd8",
+          "chars": 6151,
+          "normalized_chars": 5123
+        },
+        "noise_text": {
+          "text_sha256": "9251d86391b7c6c42fd439bd21fe36c6394f6479d12f38dee0505a4aee944f91",
+          "chars": 8006,
+          "normalized_chars": 6120
+        },
+        "raw_text_changed": true,
+        "normalized_text_changed": true
+      },
+      {
+        "sample_id": "ohr-013",
+        "source_file": "data/ohr_bench_samples/ohr-013_textbook_textbook_omnidocbench_docstructbench_dianzishu_zhongwenzaixian-o.O-63708140.pdf_170_p0.json",
+        "source_sha256": "1640277ecfbbc4d74607691fac97d166f2e36a8596f0402221950adbd42e74c9",
+        "domain": "textbook",
+        "source": "OHR-Bench_v2",
+        "license": "CC-BY-4.0",
+        "page_idx": 0,
+        "gt_text": {
+          "text_sha256": "bf8f4452c4fac21e3fa7712e740fa20d8952b9e009dddbb1280f1c72ff9b3ccd",
+          "chars": 1153,
+          "normalized_chars": 974
+        },
+        "noise_text": {
+          "text_sha256": "d508459566e726aa86c1f7faeeae093a1ba5eb5d396ab01f8506d171f19486a7",
+          "chars": 1510,
+          "normalized_chars": 1312
+        },
+        "raw_text_changed": true,
+        "normalized_text_changed": true
+      },
+      {
+        "sample_id": "ohr-014",
+        "source_file": "data/ohr_bench_samples/ohr-014_textbook_textbook_DUDE_0da5da2608ed89cdddd52bd078beced8_p1.json",
+        "source_sha256": "4a9eaf4cba9764b4aa1e7b99a3d7ab3aece5fa743048d6b9ddf417d7dbb424fc",
+        "domain": "textbook",
+        "source": "OHR-Bench_v2",
+        "license": "CC-BY-4.0",
+        "page_idx": 1,
+        "gt_text": {
+          "text_sha256": "ee095c336aec68369a8a99f15173d2116bfbdd8bd06cf7790e93a32ab4f7afd9",
+          "chars": 905,
+          "normalized_chars": 773
+        },
+        "noise_text": {
+          "text_sha256": "d8d1952e0bad4bb06cb816db7c4fae31d7297fc81eebd6f8a22669eab26f3dd1",
+          "chars": 1175,
+          "normalized_chars": 931
+        },
+        "raw_text_changed": true,
+        "normalized_text_changed": true
+      }
+    ]
+  },
+  "code_provenance": {
+    "files": [
+      {
+        "path": "/Users/caicai/DataMind Agent/ingestion/ingest.py",
+        "sha256": "78fa087f9b3f0f218707ecfe6989ea83630c09bba85cc53f9505109f073d097c"
+      },
+      {
+        "path": "/Users/caicai/DataMind Agent/datamind/knowledge.py",
+        "sha256": "5d570f1cbb73b2ad4effe918356c7dee00e65d83dca5db26e13128863a13d3a1"
+      }
+    ],
+    "functions": [
+      {
+        "qualified_name": "ingestion.ingest.ohr_block",
+        "source_sha256": "88449f9ce8bc583a667a0f4e499d8d2f4ae4c75aba72d349d6d488bfd3dcf454"
+      },
+      {
+        "qualified_name": "ingestion.ingest.ensure_block_ids",
+        "source_sha256": "7d572dea99d81a07768c68e5dba5016f91885b02a428913615dd041d3ca5beef"
+      },
+      {
+        "qualified_name": "ingestion.ingest.build_chunks",
+        "source_sha256": "1265dc2c74c5aed82425895c27637114aeab49dcf16536c9add5f1ccb7dfc1ba"
+      },
+      {
+        "qualified_name": "ingestion.ingest.md5",
+        "source_sha256": "f97fd7e6d41db2fb8dda1ee3752c541dcb54833be98c69d594eea220c7b42ca9"
+      },
+      {
+        "qualified_name": "datamind.knowledge.lexical_ranking",
+        "source_sha256": "d0aaf9a8d3227727d8995c4ec9081b2bd12f0265d72f378f42b4ad94fd7615fa"
+      },
+      {
+        "qualified_name": "datamind.knowledge.tokens",
+        "source_sha256": "9938930e4f35afa7edc44185bf7ee6415e6b78193123257c64c0227c4114d3f3"
+      },
+      {
+        "qualified_name": "datamind.knowledge.normalize",
+        "source_sha256": "6caeb5a0cc2a259d3c16f0358dd641cfe52c8a48017a75e3fc82175c79ec1369"
+      }
+    ],
+    "chunk_settings": {
+      "CHUNK_TARGET": 500,
+      "CHUNK_MAX": 800,
+      "CHUNK_OVERLAP": 80
+    },
+    "evaluation_script_sha256": "14694a1c017de541c85dff081ca7e1b542536e1e73091b6befb7c17172eaf319"
+  },
+  "method": {
+    "retrieval": "Current production lexical_ranking over all independently rebuilt text chunks in each condition",
+    "pipeline": "ohr_block -> ensure_block_ids -> build_chunks -> lexical_ranking",
+    "scope": "All 14 samples for every query; no select_documents, document_refs, file filter, or gold-based query expansion",
+    "query_rule": "Remove only case-insensitive ohr-XXX occurrences from original frozen questions; retain all other characters",
+    "title_rule": "All row titles are empty. Section paths are the unmodified output of build_chunks (empty for the OHR paragraph adapter).",
+    "noise_rule": "Use a fresh in-memory record with gt_text replaced by existing noise_text; no file changes",
+    "normalization": "Production knowledge.normalize: Unicode NFKC, remove whitespace, lowercase. Keep punctuation/markup.",
+    "top_k": 5,
+    "document_recall_at_5_chunks": "At least one chunk of the expected document appears among the five highest scoring chunks",
+    "document_recall_at_5_unique_documents": "Deduplicate full chunk ranking by first document occurrence; expected document among first five documents",
+    "expected_document_rank": "Rank after first-occurrence document deduplication; null if no positive lexical hit",
+    "evidence_rule": "Every frozen GT excerpt must remain a continuous substring after the same production normalization in both conditions; no markup repair",
+    "chunk_difference_rule": "Compare text by sample_id plus chunk index; extra tail chunks counted separately. This is not an edit distance or semantic alignment.",
+    "real_model_calls": 0,
+    "api_calls": 0,
+    "database_connections": 0,
+    "database_or_index_writes": 0
+  },
+  "limitations": [
+    "Existing 14 extracted pages with manually selected questions/excerpts, not the complete OHR-Bench or official QA benchmark.",
+    "This is an offline lexical component test, not end-to-end generation, hybrid/dense retrieval, or answer accuracy.",
+    "Provided gt_text and noise_text are evaluated directly. No image rendering or real OCR inference is run.",
+    "Strict unchanged-excerpt retention can fail because of formatting even if a reader could reconstruct meaning; it is not a semantic correctness test.",
+    "rag-011/ohr-005 originally names the sample. Removing its ID leaves a generic topic question; report that case separately from the 13 content questions."
+  ],
+  "text_and_chunk_differences": {
+    "raw_text_changed_samples": 14,
+    "normalized_text_changed_samples": 14,
+    "chars": {
+      "gt_text": 41203,
+      "noise_text": 52304
+    },
+    "normalized_chars": {
+      "gt_text": 34336,
+      "noise_text": 41436
+    },
+    "chunks": {
+      "gt_text": 62,
+      "noise_text": 79
+    },
+    "per_sample_chunk_differences": [
+      {
+        "sample_id": "ohr-001",
+        "gt_chunks": 3,
+        "noise_chunks": 4,
+        "aligned_by_index_pairs": 3,
+        "same_index_raw_text_changed": 3,
+        "same_index_normalized_text_changed": 3,
+        "unpaired_gt_chunks": 0,
+        "unpaired_noise_chunks": 1
+      },
+      {
+        "sample_id": "ohr-002",
+        "gt_chunks": 7,
+        "noise_chunks": 9,
+        "aligned_by_index_pairs": 7,
+        "same_index_raw_text_changed": 7,
+        "same_index_normalized_text_changed": 7,
+        "unpaired_gt_chunks": 0,
+        "unpaired_noise_chunks": 2
+      },
+      {
+        "sample_id": "ohr-003",
+        "gt_chunks": 1,
+        "noise_chunks": 2,
+        "aligned_by_index_pairs": 1,
+        "same_index_raw_text_changed": 1,
+        "same_index_normalized_text_changed": 1,
+        "unpaired_gt_chunks": 0,
+        "unpaired_noise_chunks": 1
+      },
+      {
+        "sample_id": "ohr-004",
+        "gt_chunks": 2,
+        "noise_chunks": 2,
+        "aligned_by_index_pairs": 2,
+        "same_index_raw_text_changed": 2,
+        "same_index_normalized_text_changed": 2,
+        "unpaired_gt_chunks": 0,
+        "unpaired_noise_chunks": 0
+      },
+      {
+        "sample_id": "ohr-005",
+        "gt_chunks": 7,
+        "noise_chunks": 9,
+        "aligned_by_index_pairs": 7,
+        "same_index_raw_text_changed": 7,
+        "same_index_normalized_text_changed": 7,
+        "unpaired_gt_chunks": 0,
+        "unpaired_noise_chunks": 2
+      },
+      {
+        "sample_id": "ohr-006",
+        "gt_chunks": 2,
+        "noise_chunks": 3,
+        "aligned_by_index_pairs": 2,
+        "same_index_raw_text_changed": 2,
+        "same_index_normalized_text_changed": 2,
+        "unpaired_gt_chunks": 0,
+        "unpaired_noise_chunks": 1
+      },
+      {
+        "sample_id": "ohr-007",
+        "gt_chunks": 5,
+        "noise_chunks": 7,
+        "aligned_by_index_pairs": 5,
+        "same_index_raw_text_changed": 5,
+        "same_index_normalized_text_changed": 5,
+        "unpaired_gt_chunks": 0,
+        "unpaired_noise_chunks": 2
+      },
+      {
+        "sample_id": "ohr-008",
+        "gt_chunks": 6,
+        "noise_chunks": 7,
+        "aligned_by_index_pairs": 6,
+        "same_index_raw_text_changed": 6,
+        "same_index_normalized_text_changed": 6,
+        "unpaired_gt_chunks": 0,
+        "unpaired_noise_chunks": 1
+      },
+      {
+        "sample_id": "ohr-009",
+        "gt_chunks": 3,
+        "noise_chunks": 4,
+        "aligned_by_index_pairs": 3,
+        "same_index_raw_text_changed": 3,
+        "same_index_normalized_text_changed": 3,
+        "unpaired_gt_chunks": 0,
+        "unpaired_noise_chunks": 1
+      },
+      {
+        "sample_id": "ohr-010",
+        "gt_chunks": 1,
+        "noise_chunks": 2,
+        "aligned_by_index_pairs": 1,
+        "same_index_raw_text_changed": 1,
+        "same_index_normalized_text_changed": 1,
+        "unpaired_gt_chunks": 0,
+        "unpaired_noise_chunks": 1
+      },
+      {
+        "sample_id": "ohr-011",
+        "gt_chunks": 12,
+        "noise_chunks": 14,
+        "aligned_by_index_pairs": 12,
+        "same_index_raw_text_changed": 12,
+        "same_index_normalized_text_changed": 12,
+        "unpaired_gt_chunks": 0,
+        "unpaired_noise_chunks": 2
+      },
+      {
+        "sample_id": "ohr-012",
+        "gt_chunks": 9,
+        "noise_chunks": 12,
+        "aligned_by_index_pairs": 9,
+        "same_index_raw_text_changed": 9,
+        "same_index_normalized_text_changed": 9,
+        "unpaired_gt_chunks": 0,
+        "unpaired_noise_chunks": 3
+      },
+      {
+        "sample_id": "ohr-013",
+        "gt_chunks": 2,
+        "noise_chunks": 2,
+        "aligned_by_index_pairs": 2,
+        "same_index_raw_text_changed": 2,
+        "same_index_normalized_text_changed": 2,
+        "unpaired_gt_chunks": 0,
+        "unpaired_noise_chunks": 0
+      },
+      {
+        "sample_id": "ohr-014",
+        "gt_chunks": 2,
+        "noise_chunks": 2,
+        "aligned_by_index_pairs": 2,
+        "same_index_raw_text_changed": 2,
+        "same_index_normalized_text_changed": 2,
+        "unpaired_gt_chunks": 0,
+        "unpaired_noise_chunks": 0
+      }
+    ],
+    "same_index_raw_text_changed_chunks": 62,
+    "same_index_normalized_text_changed_chunks": 62,
+    "unpaired_gt_chunks": 0,
+    "unpaired_noise_chunks": 17
+  },
+  "summary": {
+    "all_14": {
+      "gt_text": {
+        "cases": 14,
+        "document_recall_at_5_unique_documents": {
+          "hits": 13,
+          "total": 14,
+          "rate": 0.9285714285714286
+        },
+        "document_recall_at_5_chunks": {
+          "hits": 13,
+          "total": 14,
+          "rate": 0.9285714285714286
+        },
+        "document_mrr": 0.9345238095238095,
+        "first_relevant_chunk_mrr": 0.9299999999999999,
+        "all_gold_excerpts_continuous_in_document": {
+          "hits": 14,
+          "total": 14,
+          "rate": 1.0
+        },
+        "gold_excerpt_continuous_in_document": {
+          "hits": 15,
+          "total": 15,
+          "rate": 1.0
+        },
+        "all_gold_excerpts_continuous_in_any_chunks": {
+          "hits": 14,
+          "total": 14,
+          "rate": 1.0
+        },
+        "all_gold_excerpts_continuous_in_top5_chunks": {
+          "hits": 13,
+          "total": 14,
+          "rate": 0.9285714285714286
+        },
+        "all_required_evidence_terms_in_document": {
+          "hits": 14,
+          "total": 14,
+          "rate": 1.0
+        },
+        "all_required_evidence_terms_in_top5_chunks": {
+          "hits": 13,
+          "total": 14,
+          "rate": 0.9285714285714286
+        }
+      },
+      "noise_text": {
+        "cases": 14,
+        "document_recall_at_5_unique_documents": {
+          "hits": 13,
+          "total": 14,
+          "rate": 0.9285714285714286
+        },
+        "document_recall_at_5_chunks": {
+          "hits": 13,
+          "total": 14,
+          "rate": 0.9285714285714286
+        },
+        "document_mrr": 0.9345238095238095,
+        "first_relevant_chunk_mrr": 0.9297619047619048,
+        "all_gold_excerpts_continuous_in_document": {
+          "hits": 2,
+          "total": 14,
+          "rate": 0.14285714285714285
+        },
+        "gold_excerpt_continuous_in_document": {
+          "hits": 2,
+          "total": 15,
+          "rate": 0.13333333333333333
+        },
+        "all_gold_excerpts_continuous_in_any_chunks": {
+          "hits": 2,
+          "total": 14,
+          "rate": 0.14285714285714285
+        },
+        "all_gold_excerpts_continuous_in_top5_chunks": {
+          "hits": 2,
+          "total": 14,
+          "rate": 0.14285714285714285
+        },
+        "all_required_evidence_terms_in_document": {
+          "hits": 12,
+          "total": 14,
+          "rate": 0.8571428571428571
+        },
+        "all_required_evidence_terms_in_top5_chunks": {
+          "hits": 11,
+          "total": 14,
+          "rate": 0.7857142857142857
+        }
+      }
+    },
+    "content_13": {
+      "gt_text": {
+        "cases": 13,
+        "document_recall_at_5_unique_documents": {
+          "hits": 13,
+          "total": 13,
+          "rate": 1.0
+        },
+        "document_recall_at_5_chunks": {
+          "hits": 13,
+          "total": 13,
+          "rate": 1.0
+        },
+        "document_mrr": 1.0,
+        "first_relevant_chunk_mrr": 1.0,
+        "all_gold_excerpts_continuous_in_document": {
+          "hits": 13,
+          "total": 13,
+          "rate": 1.0
+        },
+        "gold_excerpt_continuous_in_document": {
+          "hits": 14,
+          "total": 14,
+          "rate": 1.0
+        },
+        "all_gold_excerpts_continuous_in_any_chunks": {
+          "hits": 13,
+          "total": 13,
+          "rate": 1.0
+        },
+        "all_gold_excerpts_continuous_in_top5_chunks": {
+          "hits": 13,
+          "total": 13,
+          "rate": 1.0
+        },
+        "all_required_evidence_terms_in_document": {
+          "hits": 13,
+          "total": 13,
+          "rate": 1.0
+        },
+        "all_required_evidence_terms_in_top5_chunks": {
+          "hits": 13,
+          "total": 13,
+          "rate": 1.0
+        }
+      },
+      "noise_text": {
+        "cases": 13,
+        "document_recall_at_5_unique_documents": {
+          "hits": 13,
+          "total": 13,
+          "rate": 1.0
+        },
+        "document_recall_at_5_chunks": {
+          "hits": 13,
+          "total": 13,
+          "rate": 1.0
+        },
+        "document_mrr": 1.0,
+        "first_relevant_chunk_mrr": 1.0,
+        "all_gold_excerpts_continuous_in_document": {
+          "hits": 2,
+          "total": 13,
+          "rate": 0.15384615384615385
+        },
+        "gold_excerpt_continuous_in_document": {
+          "hits": 2,
+          "total": 14,
+          "rate": 0.14285714285714285
+        },
+        "all_gold_excerpts_continuous_in_any_chunks": {
+          "hits": 2,
+          "total": 13,
+          "rate": 0.15384615384615385
+        },
+        "all_gold_excerpts_continuous_in_top5_chunks": {
+          "hits": 2,
+          "total": 13,
+          "rate": 0.15384615384615385
+        },
+        "all_required_evidence_terms_in_document": {
+          "hits": 11,
+          "total": 13,
+          "rate": 0.8461538461538461
+        },
+        "all_required_evidence_terms_in_top5_chunks": {
+          "hits": 11,
+          "total": 13,
+          "rate": 0.8461538461538461
+        }
+      }
+    },
+    "originally_explicit_scope_1_without_filter": {
+      "gt_text": {
+        "cases": 1,
+        "document_recall_at_5_unique_documents": {
+          "hits": 0,
+          "total": 1,
+          "rate": 0.0
+        },
+        "document_recall_at_5_chunks": {
+          "hits": 0,
+          "total": 1,
+          "rate": 0.0
+        },
+        "document_mrr": 0.08333333333333333,
+        "first_relevant_chunk_mrr": 0.02,
+        "all_gold_excerpts_continuous_in_document": {
+          "hits": 1,
+          "total": 1,
+          "rate": 1.0
+        },
+        "gold_excerpt_continuous_in_document": {
+          "hits": 1,
+          "total": 1,
+          "rate": 1.0
+        },
+        "all_gold_excerpts_continuous_in_any_chunks": {
+          "hits": 1,
+          "total": 1,
+          "rate": 1.0
+        },
+        "all_gold_excerpts_continuous_in_top5_chunks": {
+          "hits": 0,
+          "total": 1,
+          "rate": 0.0
+        },
+        "all_required_evidence_terms_in_document": {
+          "hits": 1,
+          "total": 1,
+          "rate": 1.0
+        },
+        "all_required_evidence_terms_in_top5_chunks": {
+          "hits": 0,
+          "total": 1,
+          "rate": 0.0
+        }
+      },
+      "noise_text": {
+        "cases": 1,
+        "document_recall_at_5_unique_documents": {
+          "hits": 0,
+          "total": 1,
+          "rate": 0.0
+        },
+        "document_recall_at_5_chunks": {
+          "hits": 0,
+          "total": 1,
+          "rate": 0.0
+        },
+        "document_mrr": 0.08333333333333333,
+        "first_relevant_chunk_mrr": 0.016666666666666666,
+        "all_gold_excerpts_continuous_in_document": {
+          "hits": 0,
+          "total": 1,
+          "rate": 0.0
+        },
+        "gold_excerpt_continuous_in_document": {
+          "hits": 0,
+          "total": 1,
+          "rate": 0.0
+        },
+        "all_gold_excerpts_continuous_in_any_chunks": {
+          "hits": 0,
+          "total": 1,
+          "rate": 0.0
+        },
+        "all_gold_excerpts_continuous_in_top5_chunks": {
+          "hits": 0,
+          "total": 1,
+          "rate": 0.0
+        },
+        "all_required_evidence_terms_in_document": {
+          "hits": 1,
+          "total": 1,
+          "rate": 1.0
+        },
+        "all_required_evidence_terms_in_top5_chunks": {
+          "hits": 0,
+          "total": 1,
+          "rate": 0.0
+        }
+      }
+    }
+  },
+  "paired_changes": {
+    "top5_chunk_document_recall": {
+      "gt=True,noise=True": 13,
+      "gt=False,noise=False": 1
+    },
+    "document_rank_worse_in_noise": [],
+    "first_chunk_rank_worse_in_noise": [
+      "rag-011"
+    ]
+  },
+  "cases": [
+    {
+      "case_id": "existing-ohr-001",
+      "sample_id": "ohr-001",
+      "domain": "academic",
+      "original_question": "Which stone implements were not found at Omori by the parties working for the University?",
+      "retrieval_question": "Which stone implements were not found at Omori by the parties working for the University?",
+      "query_sample_id_removed": false,
+      "original_explicit_sample_scope": false,
+      "gold_evidence_excerpts": [
+        "Not a single arrow head, flake or chip has been found by the various parties who have been there in the interests of the University;"
+      ],
+      "gt_text": {
+        "eligible_chunks": 62,
+        "ranked_chunks": 55,
+        "expected_document_rank": 1,
+        "expected_document_first_chunk_rank": 1,
+        "expected_document_in_top5_documents": true,
+        "expected_document_in_top5_chunks": true,
+        "expected_document_best_chunk_score": 30.727479791702173,
+        "ranked_document_ids": [
+          "ohr-001",
+          "ohr-011",
+          "ohr-012",
+          "ohr-007",
+          "ohr-004",
+          "ohr-002",
+          "ohr-010",
+          "ohr-006",
+          "ohr-008",
+          "ohr-009",
+          "ohr-005",
+          "ohr-003",
+          "ohr-014"
+        ],
+        "top5_chunks": [
+          {
+            "rank": 1,
+            "chunk_id": "chk-45b6fe09725b",
+            "score": 30.727479791702173,
+            "document_id": "ohr-001",
+            "source_chunk_index": 1,
+            "page_start": 18,
+            "page_end": 18,
+            "content_hash": "80daf00ede572e5ddc257fa51cadb6061a2777a3ff8837c08d2c79e9becd7b0a"
+          },
+          {
+            "rank": 2,
+            "chunk_id": "chk-6fc229ece223",
+            "score": 17.213887544585962,
+            "document_id": "ohr-001",
+            "source_chunk_index": 2,
+            "page_start": 18,
+            "page_end": 18,
+            "content_hash": "d739615f5c5cb41778bfb2317c9b83179d8a741bb65ac9ece9bba4ff84a9a9bb"
+          },
+          {
+            "rank": 3,
+            "chunk_id": "chk-c98f5b63c44a",
+            "score": 13.646328034562423,
+            "document_id": "ohr-001",
+            "source_chunk_index": 0,
+            "page_start": 18,
+            "page_end": 18,
+            "content_hash": "ef0bb07b0319c43923fa47ffc573cf04b4265d7d1540c7a6793119b5fa5011f4"
+          },
+          {
+            "rank": 4,
+            "chunk_id": "chk-c56abbdb9970",
+            "score": 10.119862006817705,
+            "document_id": "ohr-011",
+            "source_chunk_index": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "content_hash": "e0421c1092758b392689e4469f35d74f3772e71bbe99431d0d914312057f6b73"
+          },
+          {
+            "rank": 5,
+            "chunk_id": "chk-fd93f598fd49",
+            "score": 7.179783895920412,
+            "document_id": "ohr-012",
+            "source_chunk_index": 5,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "4ff4060d5e10d96b1cef223fe1f621835543fa51a2e3ed6efbf9116fe876af8d"
+          }
+        ],
+        "gold_evidence": [
+          {
+            "excerpt": "Not a single arrow head, flake or chip has been found by the various parties who have been there in the interests of the University;",
+            "raw_continuous_in_document": true,
+            "normalized_continuous_in_document": true,
+            "normalized_continuous_in_chunk_ids": [
+              "chk-45b6fe09725b"
+            ],
+            "normalized_continuous_in_top5_chunk_ids": [
+              "chk-45b6fe09725b"
+            ]
+          }
+        ],
+        "all_gold_excerpts_continuous_in_document": true,
+        "all_gold_excerpts_continuous_in_any_chunks": true,
+        "all_gold_excerpts_continuous_in_top5_chunks": true,
+        "required_evidence_terms_in_document": [
+          {
+            "alternatives": [
+              "arrow head"
+            ],
+            "matched_alternatives": [
+              "arrow head"
+            ]
+          },
+          {
+            "alternatives": [
+              "flake"
+            ],
+            "matched_alternatives": [
+              "flake"
+            ]
+          },
+          {
+            "alternatives": [
+              "chip"
+            ],
+            "matched_alternatives": [
+              "chip"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_document": true,
+        "required_evidence_terms_in_top5_chunks": [
+          {
+            "alternatives": [
+              "arrow head"
+            ],
+            "matched_alternatives": [
+              "arrow head"
+            ]
+          },
+          {
+            "alternatives": [
+              "flake"
+            ],
+            "matched_alternatives": [
+              "flake"
+            ]
+          },
+          {
+            "alternatives": [
+              "chip"
+            ],
+            "matched_alternatives": [
+              "chip"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_top5_chunks": true
+      },
+      "noise_text": {
+        "eligible_chunks": 79,
+        "ranked_chunks": 68,
+        "expected_document_rank": 1,
+        "expected_document_first_chunk_rank": 1,
+        "expected_document_in_top5_documents": true,
+        "expected_document_in_top5_chunks": true,
+        "expected_document_best_chunk_score": 24.985923909836135,
+        "ranked_document_ids": [
+          "ohr-001",
+          "ohr-011",
+          "ohr-012",
+          "ohr-007",
+          "ohr-004",
+          "ohr-008",
+          "ohr-002",
+          "ohr-010",
+          "ohr-006",
+          "ohr-009",
+          "ohr-003",
+          "ohr-005",
+          "ohr-014"
+        ],
+        "top5_chunks": [
+          {
+            "rank": 1,
+            "chunk_id": "chk-45b6fe09725b",
+            "score": 24.985923909836135,
+            "document_id": "ohr-001",
+            "source_chunk_index": 1,
+            "page_start": 18,
+            "page_end": 18,
+            "content_hash": "db793e0219147fc9c9a5d4a9934b4d9b66e54f43294946e6fbc8f2d672190568"
+          },
+          {
+            "rank": 2,
+            "chunk_id": "chk-6fc229ece223",
+            "score": 19.79125576230002,
+            "document_id": "ohr-001",
+            "source_chunk_index": 2,
+            "page_start": 18,
+            "page_end": 18,
+            "content_hash": "d073ad3ffca8e0e213ac50d8e63ae5d7f767761140c2567cb5a89dd1bb741ee9"
+          },
+          {
+            "rank": 3,
+            "chunk_id": "chk-f3b9234f573f",
+            "score": 13.456322050005243,
+            "document_id": "ohr-011",
+            "source_chunk_index": 3,
+            "page_start": 1,
+            "page_end": 1,
+            "content_hash": "d7461db4e7388e9a6b6affe695d11fcce058308ca174637ecf2395484acef487"
+          },
+          {
+            "rank": 4,
+            "chunk_id": "chk-c98f5b63c44a",
+            "score": 9.939632801432683,
+            "document_id": "ohr-001",
+            "source_chunk_index": 0,
+            "page_start": 18,
+            "page_end": 18,
+            "content_hash": "d2f93b654a93a11ccd8f57e44e21ff73c112e1f770fdcefcb7038aa772bfb137"
+          },
+          {
+            "rank": 5,
+            "chunk_id": "chk-fd93f598fd49",
+            "score": 7.572300003413613,
+            "document_id": "ohr-012",
+            "source_chunk_index": 5,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "ae1c36ad1221b7820d32276253d4920f7988724d06042035538c02adda278055"
+          }
+        ],
+        "gold_evidence": [
+          {
+            "excerpt": "Not a single arrow head, flake or chip has been found by the various parties who have been there in the interests of the University;",
+            "raw_continuous_in_document": false,
+            "normalized_continuous_in_document": false,
+            "normalized_continuous_in_chunk_ids": [],
+            "normalized_continuous_in_top5_chunk_ids": []
+          }
+        ],
+        "all_gold_excerpts_continuous_in_document": false,
+        "all_gold_excerpts_continuous_in_any_chunks": false,
+        "all_gold_excerpts_continuous_in_top5_chunks": false,
+        "required_evidence_terms_in_document": [
+          {
+            "alternatives": [
+              "arrow head"
+            ],
+            "matched_alternatives": [
+              "arrow head"
+            ]
+          },
+          {
+            "alternatives": [
+              "flake"
+            ],
+            "matched_alternatives": [
+              "flake"
+            ]
+          },
+          {
+            "alternatives": [
+              "chip"
+            ],
+            "matched_alternatives": [
+              "chip"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_document": true,
+        "required_evidence_terms_in_top5_chunks": [
+          {
+            "alternatives": [
+              "arrow head"
+            ],
+            "matched_alternatives": [
+              "arrow head"
+            ]
+          },
+          {
+            "alternatives": [
+              "flake"
+            ],
+            "matched_alternatives": [
+              "flake"
+            ]
+          },
+          {
+            "alternatives": [
+              "chip"
+            ],
+            "matched_alternatives": [
+              "chip"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_top5_chunks": true
+      }
+    },
+    {
+      "case_id": "existing-ohr-002",
+      "sample_id": "ohr-002",
+      "domain": "academic",
+      "original_question": "For the dual label assignments strategy in YOLO, which head is discarded during inference and which head makes predictions?",
+      "retrieval_question": "For the dual label assignments strategy in YOLO, which head is discarded during inference and which head makes predictions?",
+      "query_sample_id_removed": false,
+      "original_explicit_sample_scope": false,
+      "gold_evidence_excerpts": [
+        "During inference, we discard the one-to-many head and utilize the one-to-one head to make predictions."
+      ],
+      "gt_text": {
+        "eligible_chunks": 62,
+        "ranked_chunks": 55,
+        "expected_document_rank": 1,
+        "expected_document_first_chunk_rank": 1,
+        "expected_document_in_top5_documents": true,
+        "expected_document_in_top5_chunks": true,
+        "expected_document_best_chunk_score": 28.59647927905755,
+        "ranked_document_ids": [
+          "ohr-002",
+          "ohr-001",
+          "ohr-012",
+          "ohr-011",
+          "ohr-007",
+          "ohr-008",
+          "ohr-005",
+          "ohr-003",
+          "ohr-009",
+          "ohr-014",
+          "ohr-004",
+          "ohr-010",
+          "ohr-006"
+        ],
+        "top5_chunks": [
+          {
+            "rank": 1,
+            "chunk_id": "chk-8198b3ad6d9a",
+            "score": 28.59647927905755,
+            "document_id": "ohr-002",
+            "source_chunk_index": 4,
+            "page_start": 3,
+            "page_end": 3,
+            "content_hash": "307dc67d98aa1dd9358fa80f6cf4467ba3736448750f4f2b0f9d5e8d7d732cc2"
+          },
+          {
+            "rank": 2,
+            "chunk_id": "chk-762db9d755e3",
+            "score": 21.175023600266215,
+            "document_id": "ohr-002",
+            "source_chunk_index": 5,
+            "page_start": 3,
+            "page_end": 3,
+            "content_hash": "a19fab4deb001a80c40f82223eef2326d6848bf0dadd099cc3a15b753398d0ba"
+          },
+          {
+            "rank": 3,
+            "chunk_id": "chk-b17e5ea094f3",
+            "score": 19.83617413827996,
+            "document_id": "ohr-002",
+            "source_chunk_index": 6,
+            "page_start": 3,
+            "page_end": 3,
+            "content_hash": "ebca2d1f03072fd6b398fb6e8cee4032bdb8c8c542ca539099659e03de6fca21"
+          },
+          {
+            "rank": 4,
+            "chunk_id": "chk-7e0f97ecd5e1",
+            "score": 15.407068996430386,
+            "document_id": "ohr-002",
+            "source_chunk_index": 3,
+            "page_start": 3,
+            "page_end": 3,
+            "content_hash": "9b254351402c96963aaa104219987e1282d65fccc2d818bf7fa6cc176b866a15"
+          },
+          {
+            "rank": 5,
+            "chunk_id": "chk-edd9aa0efd77",
+            "score": 10.51491798009979,
+            "document_id": "ohr-002",
+            "source_chunk_index": 0,
+            "page_start": 3,
+            "page_end": 3,
+            "content_hash": "d397d88a5f087f68b25ae2d6aced7e571956654b23bd5f92fbbc96220585ca10"
+          }
+        ],
+        "gold_evidence": [
+          {
+            "excerpt": "During inference, we discard the one-to-many head and utilize the one-to-one head to make predictions.",
+            "raw_continuous_in_document": true,
+            "normalized_continuous_in_document": true,
+            "normalized_continuous_in_chunk_ids": [
+              "chk-b17e5ea094f3"
+            ],
+            "normalized_continuous_in_top5_chunk_ids": [
+              "chk-b17e5ea094f3"
+            ]
+          }
+        ],
+        "all_gold_excerpts_continuous_in_document": true,
+        "all_gold_excerpts_continuous_in_any_chunks": true,
+        "all_gold_excerpts_continuous_in_top5_chunks": true,
+        "required_evidence_terms_in_document": [
+          {
+            "alternatives": [
+              "one-to-many"
+            ],
+            "matched_alternatives": [
+              "one-to-many"
+            ]
+          },
+          {
+            "alternatives": [
+              "one-to-one"
+            ],
+            "matched_alternatives": [
+              "one-to-one"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_document": true,
+        "required_evidence_terms_in_top5_chunks": [
+          {
+            "alternatives": [
+              "one-to-many"
+            ],
+            "matched_alternatives": [
+              "one-to-many"
+            ]
+          },
+          {
+            "alternatives": [
+              "one-to-one"
+            ],
+            "matched_alternatives": [
+              "one-to-one"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_top5_chunks": true
+      },
+      "noise_text": {
+        "eligible_chunks": 79,
+        "ranked_chunks": 67,
+        "expected_document_rank": 1,
+        "expected_document_first_chunk_rank": 1,
+        "expected_document_in_top5_documents": true,
+        "expected_document_in_top5_chunks": true,
+        "expected_document_best_chunk_score": 30.238040539930882,
+        "ranked_document_ids": [
+          "ohr-002",
+          "ohr-012",
+          "ohr-001",
+          "ohr-008",
+          "ohr-011",
+          "ohr-007",
+          "ohr-005",
+          "ohr-003",
+          "ohr-009",
+          "ohr-014",
+          "ohr-004",
+          "ohr-010",
+          "ohr-006"
+        ],
+        "top5_chunks": [
+          {
+            "rank": 1,
+            "chunk_id": "chk-5d40a367ed3c",
+            "score": 30.238040539930882,
+            "document_id": "ohr-002",
+            "source_chunk_index": 7,
+            "page_start": 3,
+            "page_end": 3,
+            "content_hash": "6b1d5eabbdeb12f289aee1f5e01ec44e68ed98c5fcd51c5f570aa6f6c215b2f1"
+          },
+          {
+            "rank": 2,
+            "chunk_id": "chk-b17e5ea094f3",
+            "score": 24.199197256998765,
+            "document_id": "ohr-002",
+            "source_chunk_index": 6,
+            "page_start": 3,
+            "page_end": 3,
+            "content_hash": "2714b4516ef0a5a27ce383b3dced8cd057887e95727ac7b7e91dc1da00f04567"
+          },
+          {
+            "rank": 3,
+            "chunk_id": "chk-9d4d33aa3246",
+            "score": 17.226731572998656,
+            "document_id": "ohr-002",
+            "source_chunk_index": 8,
+            "page_start": 3,
+            "page_end": 3,
+            "content_hash": "97932fd7ca42cc69952b3cfc6cd902c70fe0fa5b95b7851e61ab72173363f850"
+          },
+          {
+            "rank": 4,
+            "chunk_id": "chk-8198b3ad6d9a",
+            "score": 16.610103507266334,
+            "document_id": "ohr-002",
+            "source_chunk_index": 4,
+            "page_start": 3,
+            "page_end": 3,
+            "content_hash": "2832b1f9f58a5ad912d7f2244b7b6cf829addf84d47154efaf4ee9792bbbb0a6"
+          },
+          {
+            "rank": 5,
+            "chunk_id": "chk-762db9d755e3",
+            "score": 12.106078551115122,
+            "document_id": "ohr-002",
+            "source_chunk_index": 5,
+            "page_start": 3,
+            "page_end": 3,
+            "content_hash": "7c4997e7a33ab417cafce7d41616a93b4555c6d31eec2225c466fa6adad32d7b"
+          }
+        ],
+        "gold_evidence": [
+          {
+            "excerpt": "During inference, we discard the one-to-many head and utilize the one-to-one head to make predictions.",
+            "raw_continuous_in_document": false,
+            "normalized_continuous_in_document": false,
+            "normalized_continuous_in_chunk_ids": [],
+            "normalized_continuous_in_top5_chunk_ids": []
+          }
+        ],
+        "all_gold_excerpts_continuous_in_document": false,
+        "all_gold_excerpts_continuous_in_any_chunks": false,
+        "all_gold_excerpts_continuous_in_top5_chunks": false,
+        "required_evidence_terms_in_document": [
+          {
+            "alternatives": [
+              "one-to-many"
+            ],
+            "matched_alternatives": [
+              "one-to-many"
+            ]
+          },
+          {
+            "alternatives": [
+              "one-to-one"
+            ],
+            "matched_alternatives": [
+              "one-to-one"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_document": true,
+        "required_evidence_terms_in_top5_chunks": [
+          {
+            "alternatives": [
+              "one-to-many"
+            ],
+            "matched_alternatives": [
+              "one-to-many"
+            ]
+          },
+          {
+            "alternatives": [
+              "one-to-one"
+            ],
+            "matched_alternatives": [
+              "one-to-one"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_top5_chunks": true
+      }
+    },
+    {
+      "case_id": "existing-ohr-003",
+      "sample_id": "ohr-003",
+      "domain": "administration",
+      "original_question": "Whom does the insurance endorsement INCLUDE TREASURERS OR TAX COLLECTORS AS EMPLOYEES add to the definition of employee?",
+      "retrieval_question": "Whom does the insurance endorsement INCLUDE TREASURERS OR TAX COLLECTORS AS EMPLOYEES add to the definition of employee?",
+      "query_sample_id_removed": false,
+      "original_explicit_sample_scope": false,
+      "gold_evidence_excerpts": [
+        "The definition of \"employee\" is amended to include your treasurers or tax collectors shown in the Schedule."
+      ],
+      "gt_text": {
+        "eligible_chunks": 62,
+        "ranked_chunks": 57,
+        "expected_document_rank": 1,
+        "expected_document_first_chunk_rank": 1,
+        "expected_document_in_top5_documents": true,
+        "expected_document_in_top5_chunks": true,
+        "expected_document_best_chunk_score": 48.262118227813254,
+        "ranked_document_ids": [
+          "ohr-003",
+          "ohr-008",
+          "ohr-007",
+          "ohr-005",
+          "ohr-012",
+          "ohr-006",
+          "ohr-009",
+          "ohr-001",
+          "ohr-011",
+          "ohr-002",
+          "ohr-004",
+          "ohr-010",
+          "ohr-014"
+        ],
+        "top5_chunks": [
+          {
+            "rank": 1,
+            "chunk_id": "chk-c26c84089329",
+            "score": 48.262118227813254,
+            "document_id": "ohr-003",
+            "source_chunk_index": 0,
+            "page_start": 24,
+            "page_end": 24,
+            "content_hash": "ee2634ac3776d6dc15fa20852cc5cb156b9163b8dc04328a5406bfd81645dd4c"
+          },
+          {
+            "rank": 2,
+            "chunk_id": "chk-bb80ec1bcd58",
+            "score": 8.253547247794597,
+            "document_id": "ohr-008",
+            "source_chunk_index": 2,
+            "page_start": 4,
+            "page_end": 4,
+            "content_hash": "d0595ec90ae62e6c5dc33daea17ca110bc645c8a4f4d179ae9102381b7ba27fa"
+          },
+          {
+            "rank": 3,
+            "chunk_id": "chk-920ca7703254",
+            "score": 6.939406237131659,
+            "document_id": "ohr-008",
+            "source_chunk_index": 1,
+            "page_start": 4,
+            "page_end": 4,
+            "content_hash": "a8f41ecb5f00c7b58029cf26edbe706a01ca8ddbf85450e5844e37156ef2ae88"
+          },
+          {
+            "rank": 4,
+            "chunk_id": "chk-55e2286c8109",
+            "score": 6.564098765453771,
+            "document_id": "ohr-007",
+            "source_chunk_index": 0,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "7d97f38a6faaaa8b40da5ebbc9c8d259de4999aca6be12b1faedca2a61dfaa6a"
+          },
+          {
+            "rank": 5,
+            "chunk_id": "chk-c0639635b09c",
+            "score": 5.589958847867031,
+            "document_id": "ohr-005",
+            "source_chunk_index": 0,
+            "page_start": 1,
+            "page_end": 1,
+            "content_hash": "422802bc74fe6448b69a36c3a1dcdb7cf1b7f81b342bf0d6a0b1e967886a93ee"
+          }
+        ],
+        "gold_evidence": [
+          {
+            "excerpt": "The definition of \"employee\" is amended to include your treasurers or tax collectors shown in the Schedule.",
+            "raw_continuous_in_document": true,
+            "normalized_continuous_in_document": true,
+            "normalized_continuous_in_chunk_ids": [
+              "chk-c26c84089329"
+            ],
+            "normalized_continuous_in_top5_chunk_ids": [
+              "chk-c26c84089329"
+            ]
+          }
+        ],
+        "all_gold_excerpts_continuous_in_document": true,
+        "all_gold_excerpts_continuous_in_any_chunks": true,
+        "all_gold_excerpts_continuous_in_top5_chunks": true,
+        "required_evidence_terms_in_document": [
+          {
+            "alternatives": [
+              "treasurers"
+            ],
+            "matched_alternatives": [
+              "treasurers"
+            ]
+          },
+          {
+            "alternatives": [
+              "tax collectors"
+            ],
+            "matched_alternatives": [
+              "tax collectors"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_document": true,
+        "required_evidence_terms_in_top5_chunks": [
+          {
+            "alternatives": [
+              "treasurers"
+            ],
+            "matched_alternatives": [
+              "treasurers"
+            ]
+          },
+          {
+            "alternatives": [
+              "tax collectors"
+            ],
+            "matched_alternatives": [
+              "tax collectors"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_top5_chunks": true
+      },
+      "noise_text": {
+        "eligible_chunks": 79,
+        "ranked_chunks": 69,
+        "expected_document_rank": 1,
+        "expected_document_first_chunk_rank": 1,
+        "expected_document_in_top5_documents": true,
+        "expected_document_in_top5_chunks": true,
+        "expected_document_best_chunk_score": 46.856070195634686,
+        "ranked_document_ids": [
+          "ohr-003",
+          "ohr-008",
+          "ohr-007",
+          "ohr-012",
+          "ohr-005",
+          "ohr-006",
+          "ohr-001",
+          "ohr-011",
+          "ohr-009",
+          "ohr-002",
+          "ohr-004",
+          "ohr-010",
+          "ohr-014"
+        ],
+        "top5_chunks": [
+          {
+            "rank": 1,
+            "chunk_id": "chk-c26c84089329",
+            "score": 46.856070195634686,
+            "document_id": "ohr-003",
+            "source_chunk_index": 0,
+            "page_start": 24,
+            "page_end": 24,
+            "content_hash": "e466fdb900783cd56e329171b66d2fa8f36c0a694da20219e6da134b70bd2f4e"
+          },
+          {
+            "rank": 2,
+            "chunk_id": "chk-57e1eb533c45",
+            "score": 16.993934059284832,
+            "document_id": "ohr-003",
+            "source_chunk_index": 1,
+            "page_start": 24,
+            "page_end": 24,
+            "content_hash": "ff709f046b359b7acc4c51af121b9e80577328cb14910fb84879a39f36d3169b"
+          },
+          {
+            "rank": 3,
+            "chunk_id": "chk-bb80ec1bcd58",
+            "score": 8.466857949568723,
+            "document_id": "ohr-008",
+            "source_chunk_index": 2,
+            "page_start": 4,
+            "page_end": 4,
+            "content_hash": "14ac6973cf249bef2684dd7fb211ba029e8b2f55d47c4c5f99d5079b2b36432b"
+          },
+          {
+            "rank": 4,
+            "chunk_id": "chk-d48d224708a0",
+            "score": 8.301410321149508,
+            "document_id": "ohr-008",
+            "source_chunk_index": 3,
+            "page_start": 4,
+            "page_end": 4,
+            "content_hash": "e4a00e78d4f681ac6f5ecad0d00ddfa55bfed89e3f0b04f2391474bc182a693a"
+          },
+          {
+            "rank": 5,
+            "chunk_id": "chk-55e2286c8109",
+            "score": 7.053841051481107,
+            "document_id": "ohr-007",
+            "source_chunk_index": 0,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "592fd87f9cbe0e8e7659fbe66a2b2798ae8d422117667d0cc12b2b6ae7b7938e"
+          }
+        ],
+        "gold_evidence": [
+          {
+            "excerpt": "The definition of \"employee\" is amended to include your treasurers or tax collectors shown in the Schedule.",
+            "raw_continuous_in_document": false,
+            "normalized_continuous_in_document": false,
+            "normalized_continuous_in_chunk_ids": [],
+            "normalized_continuous_in_top5_chunk_ids": []
+          }
+        ],
+        "all_gold_excerpts_continuous_in_document": false,
+        "all_gold_excerpts_continuous_in_any_chunks": false,
+        "all_gold_excerpts_continuous_in_top5_chunks": false,
+        "required_evidence_terms_in_document": [
+          {
+            "alternatives": [
+              "treasurers"
+            ],
+            "matched_alternatives": [
+              "treasurers"
+            ]
+          },
+          {
+            "alternatives": [
+              "tax collectors"
+            ],
+            "matched_alternatives": [
+              "tax collectors"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_document": true,
+        "required_evidence_terms_in_top5_chunks": [
+          {
+            "alternatives": [
+              "treasurers"
+            ],
+            "matched_alternatives": [
+              "treasurers"
+            ]
+          },
+          {
+            "alternatives": [
+              "tax collectors"
+            ],
+            "matched_alternatives": [
+              "tax collectors"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_top5_chunks": true
+      }
+    },
+    {
+      "case_id": "existing-ohr-004",
+      "sample_id": "ohr-004",
+      "domain": "administration",
+      "original_question": "Who submitted the complaint against Aaron Reardon on February 22, 2012?",
+      "retrieval_question": "Who submitted the complaint against Aaron Reardon on February 22, 2012?",
+      "query_sample_id_removed": false,
+      "original_explicit_sample_scope": false,
+      "gold_evidence_excerpts": [
+        "Complaint against Aaron Reardon submitted by Anne K. Block, on February 22, 2012."
+      ],
+      "gt_text": {
+        "eligible_chunks": 62,
+        "ranked_chunks": 55,
+        "expected_document_rank": 1,
+        "expected_document_first_chunk_rank": 1,
+        "expected_document_in_top5_documents": true,
+        "expected_document_in_top5_chunks": true,
+        "expected_document_best_chunk_score": 34.8476023444103,
+        "ranked_document_ids": [
+          "ohr-004",
+          "ohr-012",
+          "ohr-009",
+          "ohr-011",
+          "ohr-001",
+          "ohr-007",
+          "ohr-005",
+          "ohr-010",
+          "ohr-014",
+          "ohr-002",
+          "ohr-008",
+          "ohr-003",
+          "ohr-006"
+        ],
+        "top5_chunks": [
+          {
+            "rank": 1,
+            "chunk_id": "chk-97f56e20178e",
+            "score": 34.8476023444103,
+            "document_id": "ohr-004",
+            "source_chunk_index": 0,
+            "page_start": 9,
+            "page_end": 9,
+            "content_hash": "d56ee0a6f94372cca75683138ac3c992c3634880c163952f5dd7e994e7c7e919"
+          },
+          {
+            "rank": 2,
+            "chunk_id": "chk-d332b81399e9",
+            "score": 5.339708140219187,
+            "document_id": "ohr-012",
+            "source_chunk_index": 6,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "e9916510c2a48e9b0feffd4352847fb00636031a5a6b0286e1d53c64882e8310"
+          },
+          {
+            "rank": 3,
+            "chunk_id": "chk-3d5c783a96f8",
+            "score": 3.9178697573053887,
+            "document_id": "ohr-012",
+            "source_chunk_index": 4,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "b3e76277b3e9fe3f5033728e5cb86a76bb55a5d10edc8e5e304568c2603d7756"
+          },
+          {
+            "rank": 4,
+            "chunk_id": "chk-e35786e0085e",
+            "score": 3.9010697282410054,
+            "document_id": "ohr-012",
+            "source_chunk_index": 8,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "cc645d85bd5a59bea829de1e882aa9a153842c332e1078013847983409b8aaed"
+          },
+          {
+            "rank": 5,
+            "chunk_id": "chk-eaf283229201",
+            "score": 3.7372250057418253,
+            "document_id": "ohr-009",
+            "source_chunk_index": 0,
+            "page_start": 65,
+            "page_end": 65,
+            "content_hash": "827019f93875daeacaf22bffe0225f16c42f5c4bc8a889135864532b88146c2e"
+          }
+        ],
+        "gold_evidence": [
+          {
+            "excerpt": "Complaint against Aaron Reardon submitted by Anne K. Block, on February 22, 2012.",
+            "raw_continuous_in_document": true,
+            "normalized_continuous_in_document": true,
+            "normalized_continuous_in_chunk_ids": [
+              "chk-97f56e20178e"
+            ],
+            "normalized_continuous_in_top5_chunk_ids": [
+              "chk-97f56e20178e"
+            ]
+          }
+        ],
+        "all_gold_excerpts_continuous_in_document": true,
+        "all_gold_excerpts_continuous_in_any_chunks": true,
+        "all_gold_excerpts_continuous_in_top5_chunks": true,
+        "required_evidence_terms_in_document": [
+          {
+            "alternatives": [
+              "Anne K. Block"
+            ],
+            "matched_alternatives": [
+              "Anne K. Block"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_document": true,
+        "required_evidence_terms_in_top5_chunks": [
+          {
+            "alternatives": [
+              "Anne K. Block"
+            ],
+            "matched_alternatives": [
+              "Anne K. Block"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_top5_chunks": true
+      },
+      "noise_text": {
+        "eligible_chunks": 79,
+        "ranked_chunks": 64,
+        "expected_document_rank": 1,
+        "expected_document_first_chunk_rank": 1,
+        "expected_document_in_top5_documents": true,
+        "expected_document_in_top5_chunks": true,
+        "expected_document_best_chunk_score": 33.196418726700756,
+        "ranked_document_ids": [
+          "ohr-004",
+          "ohr-012",
+          "ohr-007",
+          "ohr-005",
+          "ohr-009",
+          "ohr-001",
+          "ohr-011",
+          "ohr-010",
+          "ohr-014",
+          "ohr-002",
+          "ohr-008",
+          "ohr-003",
+          "ohr-006"
+        ],
+        "top5_chunks": [
+          {
+            "rank": 1,
+            "chunk_id": "chk-97f56e20178e",
+            "score": 33.196418726700756,
+            "document_id": "ohr-004",
+            "source_chunk_index": 0,
+            "page_start": 9,
+            "page_end": 9,
+            "content_hash": "377ac3b36b9c2234412abb9b61cbdf1c85c2484bfb1e3b54917d31a7a69c745d"
+          },
+          {
+            "rank": 2,
+            "chunk_id": "chk-677fcc142ac5",
+            "score": 6.927105684544489,
+            "document_id": "ohr-012",
+            "source_chunk_index": 10,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "5304efdf1cd7f36db6c9cb62a23e968838860df0e75ac77ad47711e9890d7ce4"
+          },
+          {
+            "rank": 3,
+            "chunk_id": "chk-e35786e0085e",
+            "score": 5.7538678442569475,
+            "document_id": "ohr-012",
+            "source_chunk_index": 8,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "638ba7441c6be83556d5c8927bd03d6b3d8713163ab63018822125f2f97c3df4"
+          },
+          {
+            "rank": 4,
+            "chunk_id": "chk-fd93f598fd49",
+            "score": 4.973985850753309,
+            "document_id": "ohr-012",
+            "source_chunk_index": 5,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "ae1c36ad1221b7820d32276253d4920f7988724d06042035538c02adda278055"
+          },
+          {
+            "rank": 5,
+            "chunk_id": "chk-bcbea6f5dc7b",
+            "score": 3.7793413368919184,
+            "document_id": "ohr-012",
+            "source_chunk_index": 7,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "673ad20bfa1f1318c0b75e8501d208c3580408e1599271b1407cc56aa5d64f0f"
+          }
+        ],
+        "gold_evidence": [
+          {
+            "excerpt": "Complaint against Aaron Reardon submitted by Anne K. Block, on February 22, 2012.",
+            "raw_continuous_in_document": false,
+            "normalized_continuous_in_document": false,
+            "normalized_continuous_in_chunk_ids": [],
+            "normalized_continuous_in_top5_chunk_ids": []
+          }
+        ],
+        "all_gold_excerpts_continuous_in_document": false,
+        "all_gold_excerpts_continuous_in_any_chunks": false,
+        "all_gold_excerpts_continuous_in_top5_chunks": false,
+        "required_evidence_terms_in_document": [
+          {
+            "alternatives": [
+              "Anne K. Block"
+            ],
+            "matched_alternatives": [
+              "Anne K. Block"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_document": true,
+        "required_evidence_terms_in_top5_chunks": [
+          {
+            "alternatives": [
+              "Anne K. Block"
+            ],
+            "matched_alternatives": [
+              "Anne K. Block"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_top5_chunks": true
+      }
+    },
+    {
+      "case_id": "rag-011",
+      "sample_id": "ohr-005",
+      "domain": "finance",
+      "original_question": "According to OHR-Bench finance sample ohr-005, what topic and years does the document discuss?",
+      "retrieval_question": "According to OHR-Bench finance sample , what topic and years does the document discuss?",
+      "query_sample_id_removed": true,
+      "original_explicit_sample_scope": true,
+      "gold_evidence_excerpts": [
+        "Sales/Use Tax Analysis for the 2017-2021 Capital Program (Cash Basis)"
+      ],
+      "gt_text": {
+        "eligible_chunks": 62,
+        "ranked_chunks": 54,
+        "expected_document_rank": 12,
+        "expected_document_first_chunk_rank": 50,
+        "expected_document_in_top5_documents": false,
+        "expected_document_in_top5_chunks": false,
+        "expected_document_best_chunk_score": 0.5517572820855285,
+        "ranked_document_ids": [
+          "ohr-002",
+          "ohr-001",
+          "ohr-011",
+          "ohr-009",
+          "ohr-012",
+          "ohr-008",
+          "ohr-007",
+          "ohr-010",
+          "ohr-003",
+          "ohr-004",
+          "ohr-014",
+          "ohr-005",
+          "ohr-006"
+        ],
+        "top5_chunks": [
+          {
+            "rank": 1,
+            "chunk_id": "chk-7e0f97ecd5e1",
+            "score": 6.523423775454447,
+            "document_id": "ohr-002",
+            "source_chunk_index": 3,
+            "page_start": 3,
+            "page_end": 3,
+            "content_hash": "9b254351402c96963aaa104219987e1282d65fccc2d818bf7fa6cc176b866a15"
+          },
+          {
+            "rank": 2,
+            "chunk_id": "chk-45b6fe09725b",
+            "score": 5.278222337712041,
+            "document_id": "ohr-001",
+            "source_chunk_index": 1,
+            "page_start": 18,
+            "page_end": 18,
+            "content_hash": "80daf00ede572e5ddc257fa51cadb6061a2777a3ff8837c08d2c79e9becd7b0a"
+          },
+          {
+            "rank": 3,
+            "chunk_id": "chk-ff68ff3e2aaa",
+            "score": 4.891482343242879,
+            "document_id": "ohr-011",
+            "source_chunk_index": 1,
+            "page_start": 1,
+            "page_end": 1,
+            "content_hash": "e26ce29c2279df7f7f09e053cde31b36070692a364efa60787d1abd8bb41b7b2"
+          },
+          {
+            "rank": 4,
+            "chunk_id": "chk-85ac9609f2c7",
+            "score": 4.5697511767062045,
+            "document_id": "ohr-009",
+            "source_chunk_index": 2,
+            "page_start": 65,
+            "page_end": 65,
+            "content_hash": "bb7c4bf440c2bb876695c61d8926cddca74334c075be5810e21ed5719f6d109f"
+          },
+          {
+            "rank": 5,
+            "chunk_id": "chk-edd9aa0efd77",
+            "score": 4.242067155712323,
+            "document_id": "ohr-002",
+            "source_chunk_index": 0,
+            "page_start": 3,
+            "page_end": 3,
+            "content_hash": "d397d88a5f087f68b25ae2d6aced7e571956654b23bd5f92fbbc96220585ca10"
+          }
+        ],
+        "gold_evidence": [
+          {
+            "excerpt": "Sales/Use Tax Analysis for the 2017-2021 Capital Program (Cash Basis)",
+            "raw_continuous_in_document": true,
+            "normalized_continuous_in_document": true,
+            "normalized_continuous_in_chunk_ids": [
+              "chk-c0639635b09c"
+            ],
+            "normalized_continuous_in_top5_chunk_ids": []
+          }
+        ],
+        "all_gold_excerpts_continuous_in_document": true,
+        "all_gold_excerpts_continuous_in_any_chunks": true,
+        "all_gold_excerpts_continuous_in_top5_chunks": false,
+        "required_evidence_terms_in_document": [
+          {
+            "alternatives": [
+              "Sales/Use Tax"
+            ],
+            "matched_alternatives": [
+              "Sales/Use Tax"
+            ]
+          },
+          {
+            "alternatives": [
+              "Capital Program"
+            ],
+            "matched_alternatives": [
+              "Capital Program"
+            ]
+          },
+          {
+            "alternatives": [
+              "2017"
+            ],
+            "matched_alternatives": [
+              "2017"
+            ]
+          },
+          {
+            "alternatives": [
+              "2021"
+            ],
+            "matched_alternatives": [
+              "2021"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_document": true,
+        "required_evidence_terms_in_top5_chunks": [
+          {
+            "alternatives": [
+              "Sales/Use Tax"
+            ],
+            "matched_alternatives": []
+          },
+          {
+            "alternatives": [
+              "Capital Program"
+            ],
+            "matched_alternatives": []
+          },
+          {
+            "alternatives": [
+              "2017"
+            ],
+            "matched_alternatives": []
+          },
+          {
+            "alternatives": [
+              "2021"
+            ],
+            "matched_alternatives": []
+          }
+        ],
+        "all_required_evidence_terms_in_top5_chunks": false
+      },
+      "noise_text": {
+        "eligible_chunks": 79,
+        "ranked_chunks": 67,
+        "expected_document_rank": 12,
+        "expected_document_first_chunk_rank": 60,
+        "expected_document_in_top5_documents": false,
+        "expected_document_in_top5_chunks": false,
+        "expected_document_best_chunk_score": 0.7066342659830971,
+        "ranked_document_ids": [
+          "ohr-002",
+          "ohr-001",
+          "ohr-011",
+          "ohr-012",
+          "ohr-009",
+          "ohr-008",
+          "ohr-007",
+          "ohr-010",
+          "ohr-004",
+          "ohr-003",
+          "ohr-014",
+          "ohr-005",
+          "ohr-006"
+        ],
+        "top5_chunks": [
+          {
+            "rank": 1,
+            "chunk_id": "chk-8198b3ad6d9a",
+            "score": 7.054881544255867,
+            "document_id": "ohr-002",
+            "source_chunk_index": 4,
+            "page_start": 3,
+            "page_end": 3,
+            "content_hash": "2832b1f9f58a5ad912d7f2244b7b6cf829addf84d47154efaf4ee9792bbbb0a6"
+          },
+          {
+            "rank": 2,
+            "chunk_id": "chk-6fc229ece223",
+            "score": 5.77376130384216,
+            "document_id": "ohr-001",
+            "source_chunk_index": 2,
+            "page_start": 18,
+            "page_end": 18,
+            "content_hash": "d073ad3ffca8e0e213ac50d8e63ae5d7f767761140c2567cb5a89dd1bb741ee9"
+          },
+          {
+            "rank": 3,
+            "chunk_id": "chk-c56abbdb9970",
+            "score": 4.87290295291075,
+            "document_id": "ohr-011",
+            "source_chunk_index": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "content_hash": "7a9fac2d5b97dc7e5adea910fbc96f988901da098fa3ebf43e8aea5a974849e6"
+          },
+          {
+            "rank": 4,
+            "chunk_id": "chk-edd9aa0efd77",
+            "score": 4.749422049231938,
+            "document_id": "ohr-002",
+            "source_chunk_index": 0,
+            "page_start": 3,
+            "page_end": 3,
+            "content_hash": "8d08fc3f4835e602c712b3c295344abf032d66c6dbfaba6cd0ec825fc3f04189"
+          },
+          {
+            "rank": 5,
+            "chunk_id": "chk-187706a01a31",
+            "score": 4.7056882047093,
+            "document_id": "ohr-012",
+            "source_chunk_index": 2,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "8e64cf74e626361740b04e80774b8a90dd7e5c6151b5d6127f662d759fd35be7"
+          }
+        ],
+        "gold_evidence": [
+          {
+            "excerpt": "Sales/Use Tax Analysis for the 2017-2021 Capital Program (Cash Basis)",
+            "raw_continuous_in_document": false,
+            "normalized_continuous_in_document": false,
+            "normalized_continuous_in_chunk_ids": [],
+            "normalized_continuous_in_top5_chunk_ids": []
+          }
+        ],
+        "all_gold_excerpts_continuous_in_document": false,
+        "all_gold_excerpts_continuous_in_any_chunks": false,
+        "all_gold_excerpts_continuous_in_top5_chunks": false,
+        "required_evidence_terms_in_document": [
+          {
+            "alternatives": [
+              "Sales/Use Tax"
+            ],
+            "matched_alternatives": [
+              "Sales/Use Tax"
+            ]
+          },
+          {
+            "alternatives": [
+              "Capital Program"
+            ],
+            "matched_alternatives": [
+              "Capital Program"
+            ]
+          },
+          {
+            "alternatives": [
+              "2017"
+            ],
+            "matched_alternatives": [
+              "2017"
+            ]
+          },
+          {
+            "alternatives": [
+              "2021"
+            ],
+            "matched_alternatives": [
+              "2021"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_document": true,
+        "required_evidence_terms_in_top5_chunks": [
+          {
+            "alternatives": [
+              "Sales/Use Tax"
+            ],
+            "matched_alternatives": []
+          },
+          {
+            "alternatives": [
+              "Capital Program"
+            ],
+            "matched_alternatives": []
+          },
+          {
+            "alternatives": [
+              "2017"
+            ],
+            "matched_alternatives": []
+          },
+          {
+            "alternatives": [
+              "2021"
+            ],
+            "matched_alternatives": []
+          }
+        ],
+        "all_required_evidence_terms_in_top5_chunks": false
+      }
+    },
+    {
+      "case_id": "existing-ohr-006",
+      "sample_id": "ohr-006",
+      "domain": "finance",
+      "original_question": "What is the Grant Income for 2004 in the operating statement of CO-OPERATIVE FEDERATION OF VICTORIA LTD?",
+      "retrieval_question": "What is the Grant Income for 2004 in the operating statement of CO-OPERATIVE FEDERATION OF VICTORIA LTD?",
+      "query_sample_id_removed": false,
+      "original_explicit_sample_scope": false,
+      "gold_evidence_excerpts": [
+        "2004 & 2003",
+        "Grant Income & 2 & 11,621 & 21,498"
+      ],
+      "gt_text": {
+        "eligible_chunks": 62,
+        "ranked_chunks": 56,
+        "expected_document_rank": 1,
+        "expected_document_first_chunk_rank": 1,
+        "expected_document_in_top5_documents": true,
+        "expected_document_in_top5_chunks": true,
+        "expected_document_best_chunk_score": 38.16161453786783,
+        "ranked_document_ids": [
+          "ohr-006",
+          "ohr-008",
+          "ohr-001",
+          "ohr-009",
+          "ohr-012",
+          "ohr-011",
+          "ohr-002",
+          "ohr-005",
+          "ohr-003",
+          "ohr-014",
+          "ohr-007",
+          "ohr-004",
+          "ohr-010"
+        ],
+        "top5_chunks": [
+          {
+            "rank": 1,
+            "chunk_id": "chk-78072560d81e",
+            "score": 38.16161453786783,
+            "document_id": "ohr-006",
+            "source_chunk_index": 0,
+            "page_start": 4,
+            "page_end": 4,
+            "content_hash": "d8ad962a2ea840e879bc58fb0281382fd3c216f0abe4f1875f5731d278b5c5b0"
+          },
+          {
+            "rank": 2,
+            "chunk_id": "chk-9a503220b537",
+            "score": 7.1351620716987725,
+            "document_id": "ohr-006",
+            "source_chunk_index": 1,
+            "page_start": 4,
+            "page_end": 4,
+            "content_hash": "06fee38e817e9102d4dc9a22dd9d96e3f8f93eaf1a282e11561856fbd3bea689"
+          },
+          {
+            "rank": 3,
+            "chunk_id": "chk-0ab801545f3c",
+            "score": 6.932709535980122,
+            "document_id": "ohr-008",
+            "source_chunk_index": 0,
+            "page_start": 4,
+            "page_end": 4,
+            "content_hash": "79882d274b071cbc024d484b59c993cf17f0adfd5ffcda8ee3e423cbab2f2b4a"
+          },
+          {
+            "rank": 4,
+            "chunk_id": "chk-45b6fe09725b",
+            "score": 6.9327021709664205,
+            "document_id": "ohr-001",
+            "source_chunk_index": 1,
+            "page_start": 18,
+            "page_end": 18,
+            "content_hash": "80daf00ede572e5ddc257fa51cadb6061a2777a3ff8837c08d2c79e9becd7b0a"
+          },
+          {
+            "rank": 5,
+            "chunk_id": "chk-85ac9609f2c7",
+            "score": 5.675090726395261,
+            "document_id": "ohr-009",
+            "source_chunk_index": 2,
+            "page_start": 65,
+            "page_end": 65,
+            "content_hash": "bb7c4bf440c2bb876695c61d8926cddca74334c075be5810e21ed5719f6d109f"
+          }
+        ],
+        "gold_evidence": [
+          {
+            "excerpt": "2004 & 2003",
+            "raw_continuous_in_document": true,
+            "normalized_continuous_in_document": true,
+            "normalized_continuous_in_chunk_ids": [
+              "chk-78072560d81e"
+            ],
+            "normalized_continuous_in_top5_chunk_ids": [
+              "chk-78072560d81e"
+            ]
+          },
+          {
+            "excerpt": "Grant Income & 2 & 11,621 & 21,498",
+            "raw_continuous_in_document": true,
+            "normalized_continuous_in_document": true,
+            "normalized_continuous_in_chunk_ids": [
+              "chk-78072560d81e"
+            ],
+            "normalized_continuous_in_top5_chunk_ids": [
+              "chk-78072560d81e"
+            ]
+          }
+        ],
+        "all_gold_excerpts_continuous_in_document": true,
+        "all_gold_excerpts_continuous_in_any_chunks": true,
+        "all_gold_excerpts_continuous_in_top5_chunks": true,
+        "required_evidence_terms_in_document": [
+          {
+            "alternatives": [
+              "2004"
+            ],
+            "matched_alternatives": [
+              "2004"
+            ]
+          },
+          {
+            "alternatives": [
+              "Grant Income"
+            ],
+            "matched_alternatives": [
+              "Grant Income"
+            ]
+          },
+          {
+            "alternatives": [
+              "11,621"
+            ],
+            "matched_alternatives": [
+              "11,621"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_document": true,
+        "required_evidence_terms_in_top5_chunks": [
+          {
+            "alternatives": [
+              "2004"
+            ],
+            "matched_alternatives": [
+              "2004"
+            ]
+          },
+          {
+            "alternatives": [
+              "Grant Income"
+            ],
+            "matched_alternatives": [
+              "Grant Income"
+            ]
+          },
+          {
+            "alternatives": [
+              "11,621"
+            ],
+            "matched_alternatives": [
+              "11,621"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_top5_chunks": true
+      },
+      "noise_text": {
+        "eligible_chunks": 79,
+        "ranked_chunks": 68,
+        "expected_document_rank": 1,
+        "expected_document_first_chunk_rank": 1,
+        "expected_document_in_top5_documents": true,
+        "expected_document_in_top5_chunks": true,
+        "expected_document_best_chunk_score": 39.43060795511043,
+        "ranked_document_ids": [
+          "ohr-006",
+          "ohr-001",
+          "ohr-008",
+          "ohr-009",
+          "ohr-012",
+          "ohr-011",
+          "ohr-005",
+          "ohr-002",
+          "ohr-003",
+          "ohr-004",
+          "ohr-014",
+          "ohr-007",
+          "ohr-010"
+        ],
+        "top5_chunks": [
+          {
+            "rank": 1,
+            "chunk_id": "chk-78072560d81e",
+            "score": 39.43060795511043,
+            "document_id": "ohr-006",
+            "source_chunk_index": 0,
+            "page_start": 4,
+            "page_end": 4,
+            "content_hash": "e276d4f67e42460cf72d884ceb44d026992159c993d95499e9d3135e073f3eec"
+          },
+          {
+            "rank": 2,
+            "chunk_id": "chk-6fc229ece223",
+            "score": 8.979539977769246,
+            "document_id": "ohr-001",
+            "source_chunk_index": 2,
+            "page_start": 18,
+            "page_end": 18,
+            "content_hash": "d073ad3ffca8e0e213ac50d8e63ae5d7f767761140c2567cb5a89dd1bb741ee9"
+          },
+          {
+            "rank": 3,
+            "chunk_id": "chk-920ca7703254",
+            "score": 7.601113776246657,
+            "document_id": "ohr-008",
+            "source_chunk_index": 1,
+            "page_start": 4,
+            "page_end": 4,
+            "content_hash": "560d5c04b965abd2396ffb298867184434134fa3bba8abae3fc184d88d38138e"
+          },
+          {
+            "rank": 4,
+            "chunk_id": "chk-bc828962716d",
+            "score": 6.8409668986572925,
+            "document_id": "ohr-009",
+            "source_chunk_index": 3,
+            "page_start": 65,
+            "page_end": 65,
+            "content_hash": "b266e2ba81c3626d588c9e4bb6aa7be2b8f06887462c46b65d91587af476e9af"
+          },
+          {
+            "rank": 5,
+            "chunk_id": "chk-85ac9609f2c7",
+            "score": 5.124444720522122,
+            "document_id": "ohr-009",
+            "source_chunk_index": 2,
+            "page_start": 65,
+            "page_end": 65,
+            "content_hash": "9dd5fb880a5af1ca58c2e1f1af30c54bdf877d3927a85a04990ccb43179c0bdc"
+          }
+        ],
+        "gold_evidence": [
+          {
+            "excerpt": "2004 & 2003",
+            "raw_continuous_in_document": false,
+            "normalized_continuous_in_document": false,
+            "normalized_continuous_in_chunk_ids": [],
+            "normalized_continuous_in_top5_chunk_ids": []
+          },
+          {
+            "excerpt": "Grant Income & 2 & 11,621 & 21,498",
+            "raw_continuous_in_document": false,
+            "normalized_continuous_in_document": false,
+            "normalized_continuous_in_chunk_ids": [],
+            "normalized_continuous_in_top5_chunk_ids": []
+          }
+        ],
+        "all_gold_excerpts_continuous_in_document": false,
+        "all_gold_excerpts_continuous_in_any_chunks": false,
+        "all_gold_excerpts_continuous_in_top5_chunks": false,
+        "required_evidence_terms_in_document": [
+          {
+            "alternatives": [
+              "2004"
+            ],
+            "matched_alternatives": [
+              "2004"
+            ]
+          },
+          {
+            "alternatives": [
+              "Grant Income"
+            ],
+            "matched_alternatives": [
+              "Grant Income"
+            ]
+          },
+          {
+            "alternatives": [
+              "11,621"
+            ],
+            "matched_alternatives": [
+              "11,621"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_document": true,
+        "required_evidence_terms_in_top5_chunks": [
+          {
+            "alternatives": [
+              "2004"
+            ],
+            "matched_alternatives": [
+              "2004"
+            ]
+          },
+          {
+            "alternatives": [
+              "Grant Income"
+            ],
+            "matched_alternatives": [
+              "Grant Income"
+            ]
+          },
+          {
+            "alternatives": [
+              "11,621"
+            ],
+            "matched_alternatives": [
+              "11,621"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_top5_chunks": true
+      }
+    },
+    {
+      "case_id": "existing-ohr-007",
+      "sample_id": "ohr-007",
+      "domain": "law",
+      "original_question": "Under Article 9.8 of the WPD and CNS Development Agreement, in which city and state must disputes be litigated?",
+      "retrieval_question": "Under Article 9.8 of the WPD and CNS Development Agreement, in which city and state must disputes be litigated?",
+      "query_sample_id_removed": false,
+      "original_explicit_sample_scope": false,
+      "gold_evidence_excerpts": [
+        "Any dispute between the Parties regarding or related to this Agreement shall be litigated in the courts located in Houston, Texas, and WPD agrees not to challenge personal jurisdiction in that forum."
+      ],
+      "gt_text": {
+        "eligible_chunks": 62,
+        "ranked_chunks": 57,
+        "expected_document_rank": 1,
+        "expected_document_first_chunk_rank": 1,
+        "expected_document_in_top5_documents": true,
+        "expected_document_in_top5_chunks": true,
+        "expected_document_best_chunk_score": 25.582615891878557,
+        "ranked_document_ids": [
+          "ohr-007",
+          "ohr-008",
+          "ohr-011",
+          "ohr-003",
+          "ohr-002",
+          "ohr-001",
+          "ohr-012",
+          "ohr-004",
+          "ohr-005",
+          "ohr-009",
+          "ohr-014",
+          "ohr-010",
+          "ohr-006"
+        ],
+        "top5_chunks": [
+          {
+            "rank": 1,
+            "chunk_id": "chk-590e88600263",
+            "score": 25.582615891878557,
+            "document_id": "ohr-007",
+            "source_chunk_index": 4,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "d6ea6d8caf9c0b64e1286f965f8b4b936409bcef5cb7a8ab6e71c5a5d821088b"
+          },
+          {
+            "rank": 2,
+            "chunk_id": "chk-62bd7c35eea5",
+            "score": 17.6140766341191,
+            "document_id": "ohr-007",
+            "source_chunk_index": 2,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "1f8cb87628b1877e5f2d2a3e57641319d1971116086c8c37aec604b11f7aa901"
+          },
+          {
+            "rank": 3,
+            "chunk_id": "chk-55e2286c8109",
+            "score": 16.373936498848565,
+            "document_id": "ohr-007",
+            "source_chunk_index": 0,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "7d97f38a6faaaa8b40da5ebbc9c8d259de4999aca6be12b1faedca2a61dfaa6a"
+          },
+          {
+            "rank": 4,
+            "chunk_id": "chk-e154cf1db6ea",
+            "score": 12.306523507052413,
+            "document_id": "ohr-007",
+            "source_chunk_index": 3,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "46ea2577a92420d288e8ab041f7e1a1c2ce05aadae2fc3a4a8358cee76618c9d"
+          },
+          {
+            "rank": 5,
+            "chunk_id": "chk-920ca7703254",
+            "score": 8.274869515436531,
+            "document_id": "ohr-008",
+            "source_chunk_index": 1,
+            "page_start": 4,
+            "page_end": 4,
+            "content_hash": "a8f41ecb5f00c7b58029cf26edbe706a01ca8ddbf85450e5844e37156ef2ae88"
+          }
+        ],
+        "gold_evidence": [
+          {
+            "excerpt": "Any dispute between the Parties regarding or related to this Agreement shall be litigated in the courts located in Houston, Texas, and WPD agrees not to challenge personal jurisdiction in that forum.",
+            "raw_continuous_in_document": true,
+            "normalized_continuous_in_document": true,
+            "normalized_continuous_in_chunk_ids": [
+              "chk-590e88600263"
+            ],
+            "normalized_continuous_in_top5_chunk_ids": [
+              "chk-590e88600263"
+            ]
+          }
+        ],
+        "all_gold_excerpts_continuous_in_document": true,
+        "all_gold_excerpts_continuous_in_any_chunks": true,
+        "all_gold_excerpts_continuous_in_top5_chunks": true,
+        "required_evidence_terms_in_document": [
+          {
+            "alternatives": [
+              "Houston"
+            ],
+            "matched_alternatives": [
+              "Houston"
+            ]
+          },
+          {
+            "alternatives": [
+              "Texas"
+            ],
+            "matched_alternatives": [
+              "Texas"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_document": true,
+        "required_evidence_terms_in_top5_chunks": [
+          {
+            "alternatives": [
+              "Houston"
+            ],
+            "matched_alternatives": [
+              "Houston"
+            ]
+          },
+          {
+            "alternatives": [
+              "Texas"
+            ],
+            "matched_alternatives": [
+              "Texas"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_top5_chunks": true
+      },
+      "noise_text": {
+        "eligible_chunks": 79,
+        "ranked_chunks": 71,
+        "expected_document_rank": 1,
+        "expected_document_first_chunk_rank": 1,
+        "expected_document_in_top5_documents": true,
+        "expected_document_in_top5_chunks": true,
+        "expected_document_best_chunk_score": 25.55933041112204,
+        "ranked_document_ids": [
+          "ohr-007",
+          "ohr-008",
+          "ohr-011",
+          "ohr-001",
+          "ohr-002",
+          "ohr-003",
+          "ohr-012",
+          "ohr-004",
+          "ohr-005",
+          "ohr-009",
+          "ohr-014",
+          "ohr-010",
+          "ohr-006"
+        ],
+        "top5_chunks": [
+          {
+            "rank": 1,
+            "chunk_id": "chk-ffceb1ca753f",
+            "score": 25.55933041112204,
+            "document_id": "ohr-007",
+            "source_chunk_index": 5,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "e49f4f33dffe6c46cc71e26c7b2ffd15488dfa3730f95522ed1cfdb8fbc42887"
+          },
+          {
+            "rank": 2,
+            "chunk_id": "chk-e154cf1db6ea",
+            "score": 16.7528727189649,
+            "document_id": "ohr-007",
+            "source_chunk_index": 3,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "b2c3b7d801b5491748c1f81ebde76417201d91685ffad4bcfb8962401574c3d1"
+          },
+          {
+            "rank": 3,
+            "chunk_id": "chk-108e179bd248",
+            "score": 13.722276132161833,
+            "document_id": "ohr-007",
+            "source_chunk_index": 6,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "7f1d3457b2f38686d2e6f0207cc48b6f20a51be1009bb8aaf3da23a25b32660f"
+          },
+          {
+            "rank": 4,
+            "chunk_id": "chk-e671f18e717c",
+            "score": 12.762094002725025,
+            "document_id": "ohr-007",
+            "source_chunk_index": 1,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "aa0dd6b1c23e6febe337568a9625d5309783a60db1608858d81d87506bbfc10c"
+          },
+          {
+            "rank": 5,
+            "chunk_id": "chk-62bd7c35eea5",
+            "score": 12.466683571293299,
+            "document_id": "ohr-007",
+            "source_chunk_index": 2,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "09215f7e05f8e61cf644ef75425f831bee351107bdd882d99d43f4dc5d01decf"
+          }
+        ],
+        "gold_evidence": [
+          {
+            "excerpt": "Any dispute between the Parties regarding or related to this Agreement shall be litigated in the courts located in Houston, Texas, and WPD agrees not to challenge personal jurisdiction in that forum.",
+            "raw_continuous_in_document": false,
+            "normalized_continuous_in_document": false,
+            "normalized_continuous_in_chunk_ids": [],
+            "normalized_continuous_in_top5_chunk_ids": []
+          }
+        ],
+        "all_gold_excerpts_continuous_in_document": false,
+        "all_gold_excerpts_continuous_in_any_chunks": false,
+        "all_gold_excerpts_continuous_in_top5_chunks": false,
+        "required_evidence_terms_in_document": [
+          {
+            "alternatives": [
+              "Houston"
+            ],
+            "matched_alternatives": [
+              "Houston"
+            ]
+          },
+          {
+            "alternatives": [
+              "Texas"
+            ],
+            "matched_alternatives": [
+              "Texas"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_document": true,
+        "required_evidence_terms_in_top5_chunks": [
+          {
+            "alternatives": [
+              "Houston"
+            ],
+            "matched_alternatives": [
+              "Houston"
+            ]
+          },
+          {
+            "alternatives": [
+              "Texas"
+            ],
+            "matched_alternatives": [
+              "Texas"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_top5_chunks": true
+      }
+    },
+    {
+      "case_id": "existing-ohr-008",
+      "sample_id": "ohr-008",
+      "domain": "law",
+      "original_question": "In the Strategic Alliance Agreement involving Cherry Hill and Freedom Mortgage, what does UPB mean for a Mortgage Loan at a date of determination?",
+      "retrieval_question": "In the Strategic Alliance Agreement involving Cherry Hill and Freedom Mortgage, what does UPB mean for a Mortgage Loan at a date of determination?",
+      "query_sample_id_removed": false,
+      "original_explicit_sample_scope": false,
+      "gold_evidence_excerpts": [
+        "UPB: As to any Mortgage Loan and any date of determination, the unpaid principal balance of such Mortgage Loan as of such date."
+      ],
+      "gt_text": {
+        "eligible_chunks": 62,
+        "ranked_chunks": 57,
+        "expected_document_rank": 1,
+        "expected_document_first_chunk_rank": 1,
+        "expected_document_in_top5_documents": true,
+        "expected_document_in_top5_chunks": true,
+        "expected_document_best_chunk_score": 27.842444407070875,
+        "ranked_document_ids": [
+          "ohr-008",
+          "ohr-001",
+          "ohr-007",
+          "ohr-012",
+          "ohr-011",
+          "ohr-010",
+          "ohr-009",
+          "ohr-002",
+          "ohr-004",
+          "ohr-005",
+          "ohr-014",
+          "ohr-003",
+          "ohr-006"
+        ],
+        "top5_chunks": [
+          {
+            "rank": 1,
+            "chunk_id": "chk-920ca7703254",
+            "score": 27.842444407070875,
+            "document_id": "ohr-008",
+            "source_chunk_index": 1,
+            "page_start": 4,
+            "page_end": 4,
+            "content_hash": "a8f41ecb5f00c7b58029cf26edbe706a01ca8ddbf85450e5844e37156ef2ae88"
+          },
+          {
+            "rank": 2,
+            "chunk_id": "chk-d48d224708a0",
+            "score": 27.26469707211092,
+            "document_id": "ohr-008",
+            "source_chunk_index": 3,
+            "page_start": 4,
+            "page_end": 4,
+            "content_hash": "e9366458cc26612a95428dedf01f388a9da20c9625c925d63f6c42c09862ff91"
+          },
+          {
+            "rank": 3,
+            "chunk_id": "chk-387e0902db3f",
+            "score": 24.816280616208175,
+            "document_id": "ohr-008",
+            "source_chunk_index": 4,
+            "page_start": 4,
+            "page_end": 4,
+            "content_hash": "c2ece9cb946df687728b8f07ff827b82a8a303180afb1a8170f6d4de03363b40"
+          },
+          {
+            "rank": 4,
+            "chunk_id": "chk-3e8427bd7fe3",
+            "score": 14.23129193549456,
+            "document_id": "ohr-008",
+            "source_chunk_index": 5,
+            "page_start": 4,
+            "page_end": 4,
+            "content_hash": "1f2f103936a10d8927ae4858780158175bf34801f2c8cd946f5847f49b61f19e"
+          },
+          {
+            "rank": 5,
+            "chunk_id": "chk-bb80ec1bcd58",
+            "score": 12.682129136973202,
+            "document_id": "ohr-008",
+            "source_chunk_index": 2,
+            "page_start": 4,
+            "page_end": 4,
+            "content_hash": "d0595ec90ae62e6c5dc33daea17ca110bc645c8a4f4d179ae9102381b7ba27fa"
+          }
+        ],
+        "gold_evidence": [
+          {
+            "excerpt": "UPB: As to any Mortgage Loan and any date of determination, the unpaid principal balance of such Mortgage Loan as of such date.",
+            "raw_continuous_in_document": true,
+            "normalized_continuous_in_document": true,
+            "normalized_continuous_in_chunk_ids": [
+              "chk-920ca7703254"
+            ],
+            "normalized_continuous_in_top5_chunk_ids": [
+              "chk-920ca7703254"
+            ]
+          }
+        ],
+        "all_gold_excerpts_continuous_in_document": true,
+        "all_gold_excerpts_continuous_in_any_chunks": true,
+        "all_gold_excerpts_continuous_in_top5_chunks": true,
+        "required_evidence_terms_in_document": [
+          {
+            "alternatives": [
+              "unpaid principal balance"
+            ],
+            "matched_alternatives": [
+              "unpaid principal balance"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_document": true,
+        "required_evidence_terms_in_top5_chunks": [
+          {
+            "alternatives": [
+              "unpaid principal balance"
+            ],
+            "matched_alternatives": [
+              "unpaid principal balance"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_top5_chunks": true
+      },
+      "noise_text": {
+        "eligible_chunks": 79,
+        "ranked_chunks": 71,
+        "expected_document_rank": 1,
+        "expected_document_first_chunk_rank": 1,
+        "expected_document_in_top5_documents": true,
+        "expected_document_in_top5_chunks": true,
+        "expected_document_best_chunk_score": 29.334739368099143,
+        "ranked_document_ids": [
+          "ohr-008",
+          "ohr-001",
+          "ohr-007",
+          "ohr-011",
+          "ohr-012",
+          "ohr-009",
+          "ohr-010",
+          "ohr-002",
+          "ohr-004",
+          "ohr-005",
+          "ohr-014",
+          "ohr-003",
+          "ohr-006"
+        ],
+        "top5_chunks": [
+          {
+            "rank": 1,
+            "chunk_id": "chk-387e0902db3f",
+            "score": 29.334739368099143,
+            "document_id": "ohr-008",
+            "source_chunk_index": 4,
+            "page_start": 4,
+            "page_end": 4,
+            "content_hash": "ea25a6766d4252db28a1cbd6d38d22a42d1334339a3264b1dfcb7d31da6d1338"
+          },
+          {
+            "rank": 2,
+            "chunk_id": "chk-920ca7703254",
+            "score": 26.306441799295968,
+            "document_id": "ohr-008",
+            "source_chunk_index": 1,
+            "page_start": 4,
+            "page_end": 4,
+            "content_hash": "560d5c04b965abd2396ffb298867184434134fa3bba8abae3fc184d88d38138e"
+          },
+          {
+            "rank": 3,
+            "chunk_id": "chk-6e80e1b5846d",
+            "score": 25.447796049281582,
+            "document_id": "ohr-008",
+            "source_chunk_index": 6,
+            "page_start": 4,
+            "page_end": 4,
+            "content_hash": "1c5bfaf61dc9068803771bf546f5889d505445aeb7bb2709dba54f138fcd8d92"
+          },
+          {
+            "rank": 4,
+            "chunk_id": "chk-3e8427bd7fe3",
+            "score": 24.239762025856212,
+            "document_id": "ohr-008",
+            "source_chunk_index": 5,
+            "page_start": 4,
+            "page_end": 4,
+            "content_hash": "8aac59ee5b84c8527f28abb6a6bf1e8d4479260d7fc86c40726c85d73dae0c05"
+          },
+          {
+            "rank": 5,
+            "chunk_id": "chk-6fc229ece223",
+            "score": 10.928991741922058,
+            "document_id": "ohr-001",
+            "source_chunk_index": 2,
+            "page_start": 18,
+            "page_end": 18,
+            "content_hash": "d073ad3ffca8e0e213ac50d8e63ae5d7f767761140c2567cb5a89dd1bb741ee9"
+          }
+        ],
+        "gold_evidence": [
+          {
+            "excerpt": "UPB: As to any Mortgage Loan and any date of determination, the unpaid principal balance of such Mortgage Loan as of such date.",
+            "raw_continuous_in_document": false,
+            "normalized_continuous_in_document": false,
+            "normalized_continuous_in_chunk_ids": [],
+            "normalized_continuous_in_top5_chunk_ids": []
+          }
+        ],
+        "all_gold_excerpts_continuous_in_document": false,
+        "all_gold_excerpts_continuous_in_any_chunks": false,
+        "all_gold_excerpts_continuous_in_top5_chunks": false,
+        "required_evidence_terms_in_document": [
+          {
+            "alternatives": [
+              "unpaid principal balance"
+            ],
+            "matched_alternatives": [
+              "unpaid principal balance"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_document": true,
+        "required_evidence_terms_in_top5_chunks": [
+          {
+            "alternatives": [
+              "unpaid principal balance"
+            ],
+            "matched_alternatives": [
+              "unpaid principal balance"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_top5_chunks": true
+      }
+    },
+    {
+      "case_id": "existing-ohr-009",
+      "sample_id": "ohr-009",
+      "domain": "manual",
+      "original_question": "According to the Lenovo keyboard shortcuts, which key must be held and for how long to turn Filter Keys on or off?",
+      "retrieval_question": "According to the Lenovo keyboard shortcuts, which key must be held and for how long to turn Filter Keys on or off?",
+      "query_sample_id_removed": false,
+      "original_explicit_sample_scope": false,
+      "gold_evidence_excerpts": [
+        "Right Shift for eight seconds: Turn on or turn off Filter Keys"
+      ],
+      "gt_text": {
+        "eligible_chunks": 62,
+        "ranked_chunks": 55,
+        "expected_document_rank": 1,
+        "expected_document_first_chunk_rank": 1,
+        "expected_document_in_top5_documents": true,
+        "expected_document_in_top5_chunks": true,
+        "expected_document_best_chunk_score": 41.74130544358412,
+        "ranked_document_ids": [
+          "ohr-009",
+          "ohr-012",
+          "ohr-011",
+          "ohr-008",
+          "ohr-010",
+          "ohr-001",
+          "ohr-007",
+          "ohr-002",
+          "ohr-014",
+          "ohr-003",
+          "ohr-004",
+          "ohr-005",
+          "ohr-006"
+        ],
+        "top5_chunks": [
+          {
+            "rank": 1,
+            "chunk_id": "chk-f6c37d17b1c8",
+            "score": 41.74130544358412,
+            "document_id": "ohr-009",
+            "source_chunk_index": 1,
+            "page_start": 65,
+            "page_end": 65,
+            "content_hash": "60520e65c6e262c76f7e060c16db6dbe04d61a205638eaf164e7d0ec23e09383"
+          },
+          {
+            "rank": 2,
+            "chunk_id": "chk-eaf283229201",
+            "score": 19.11395263398832,
+            "document_id": "ohr-009",
+            "source_chunk_index": 0,
+            "page_start": 65,
+            "page_end": 65,
+            "content_hash": "827019f93875daeacaf22bffe0225f16c42f5c4bc8a889135864532b88146c2e"
+          },
+          {
+            "rank": 3,
+            "chunk_id": "chk-d332b81399e9",
+            "score": 9.907233516544045,
+            "document_id": "ohr-012",
+            "source_chunk_index": 6,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "e9916510c2a48e9b0feffd4352847fb00636031a5a6b0286e1d53c64882e8310"
+          },
+          {
+            "rank": 4,
+            "chunk_id": "chk-043b46e8d1d0",
+            "score": 8.2431821676285,
+            "document_id": "ohr-011",
+            "source_chunk_index": 10,
+            "page_start": 1,
+            "page_end": 1,
+            "content_hash": "84cfb4da41ffb534aa71f4df5d3e1338b206fc88a41a5bd04beea5209d428620"
+          },
+          {
+            "rank": 5,
+            "chunk_id": "chk-0ab801545f3c",
+            "score": 8.139271283170629,
+            "document_id": "ohr-008",
+            "source_chunk_index": 0,
+            "page_start": 4,
+            "page_end": 4,
+            "content_hash": "79882d274b071cbc024d484b59c993cf17f0adfd5ffcda8ee3e423cbab2f2b4a"
+          }
+        ],
+        "gold_evidence": [
+          {
+            "excerpt": "Right Shift for eight seconds: Turn on or turn off Filter Keys",
+            "raw_continuous_in_document": true,
+            "normalized_continuous_in_document": true,
+            "normalized_continuous_in_chunk_ids": [
+              "chk-f6c37d17b1c8"
+            ],
+            "normalized_continuous_in_top5_chunk_ids": [
+              "chk-f6c37d17b1c8"
+            ]
+          }
+        ],
+        "all_gold_excerpts_continuous_in_document": true,
+        "all_gold_excerpts_continuous_in_any_chunks": true,
+        "all_gold_excerpts_continuous_in_top5_chunks": true,
+        "required_evidence_terms_in_document": [
+          {
+            "alternatives": [
+              "Right Shift"
+            ],
+            "matched_alternatives": [
+              "Right Shift"
+            ]
+          },
+          {
+            "alternatives": [
+              "eight seconds"
+            ],
+            "matched_alternatives": [
+              "eight seconds"
+            ]
+          },
+          {
+            "alternatives": [
+              "Filter Keys"
+            ],
+            "matched_alternatives": [
+              "Filter Keys"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_document": true,
+        "required_evidence_terms_in_top5_chunks": [
+          {
+            "alternatives": [
+              "Right Shift"
+            ],
+            "matched_alternatives": [
+              "Right Shift"
+            ]
+          },
+          {
+            "alternatives": [
+              "eight seconds"
+            ],
+            "matched_alternatives": [
+              "eight seconds"
+            ]
+          },
+          {
+            "alternatives": [
+              "Filter Keys"
+            ],
+            "matched_alternatives": [
+              "Filter Keys"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_top5_chunks": true
+      },
+      "noise_text": {
+        "eligible_chunks": 79,
+        "ranked_chunks": 67,
+        "expected_document_rank": 1,
+        "expected_document_first_chunk_rank": 1,
+        "expected_document_in_top5_documents": true,
+        "expected_document_in_top5_chunks": true,
+        "expected_document_best_chunk_score": 40.1158039543803,
+        "ranked_document_ids": [
+          "ohr-009",
+          "ohr-012",
+          "ohr-011",
+          "ohr-010",
+          "ohr-001",
+          "ohr-008",
+          "ohr-007",
+          "ohr-002",
+          "ohr-014",
+          "ohr-004",
+          "ohr-003",
+          "ohr-005",
+          "ohr-006"
+        ],
+        "top5_chunks": [
+          {
+            "rank": 1,
+            "chunk_id": "chk-f6c37d17b1c8",
+            "score": 40.1158039543803,
+            "document_id": "ohr-009",
+            "source_chunk_index": 1,
+            "page_start": 65,
+            "page_end": 65,
+            "content_hash": "fc8c5ca89c58156d96e77282fe894482446ffffe3ae6fce24d9bdeab99944fda"
+          },
+          {
+            "rank": 2,
+            "chunk_id": "chk-85ac9609f2c7",
+            "score": 25.03840845967528,
+            "document_id": "ohr-009",
+            "source_chunk_index": 2,
+            "page_start": 65,
+            "page_end": 65,
+            "content_hash": "9dd5fb880a5af1ca58c2e1f1af30c54bdf877d3927a85a04990ccb43179c0bdc"
+          },
+          {
+            "rank": 3,
+            "chunk_id": "chk-eaf283229201",
+            "score": 15.481926636889305,
+            "document_id": "ohr-009",
+            "source_chunk_index": 0,
+            "page_start": 65,
+            "page_end": 65,
+            "content_hash": "f63f4a1eb9d7f7cc84fb1721654004551f01318f234345875cf58119f2403a77"
+          },
+          {
+            "rank": 4,
+            "chunk_id": "chk-e35786e0085e",
+            "score": 10.18575524508141,
+            "document_id": "ohr-012",
+            "source_chunk_index": 8,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "638ba7441c6be83556d5c8927bd03d6b3d8713163ab63018822125f2f97c3df4"
+          },
+          {
+            "rank": 5,
+            "chunk_id": "chk-5b07c8c85f79",
+            "score": 9.101159104821448,
+            "document_id": "ohr-011",
+            "source_chunk_index": 12,
+            "page_start": 1,
+            "page_end": 1,
+            "content_hash": "8378dc58dbda1fac7fbdba2012a6e47e2740f5a9a97405dc9a55ec43009a536f"
+          }
+        ],
+        "gold_evidence": [
+          {
+            "excerpt": "Right Shift for eight seconds: Turn on or turn off Filter Keys",
+            "raw_continuous_in_document": false,
+            "normalized_continuous_in_document": false,
+            "normalized_continuous_in_chunk_ids": [],
+            "normalized_continuous_in_top5_chunk_ids": []
+          }
+        ],
+        "all_gold_excerpts_continuous_in_document": false,
+        "all_gold_excerpts_continuous_in_any_chunks": false,
+        "all_gold_excerpts_continuous_in_top5_chunks": false,
+        "required_evidence_terms_in_document": [
+          {
+            "alternatives": [
+              "Right Shift"
+            ],
+            "matched_alternatives": [
+              "Right Shift"
+            ]
+          },
+          {
+            "alternatives": [
+              "eight seconds"
+            ],
+            "matched_alternatives": [
+              "eight seconds"
+            ]
+          },
+          {
+            "alternatives": [
+              "Filter Keys"
+            ],
+            "matched_alternatives": []
+          }
+        ],
+        "all_required_evidence_terms_in_document": false,
+        "required_evidence_terms_in_top5_chunks": [
+          {
+            "alternatives": [
+              "Right Shift"
+            ],
+            "matched_alternatives": [
+              "Right Shift"
+            ]
+          },
+          {
+            "alternatives": [
+              "eight seconds"
+            ],
+            "matched_alternatives": [
+              "eight seconds"
+            ]
+          },
+          {
+            "alternatives": [
+              "Filter Keys"
+            ],
+            "matched_alternatives": []
+          }
+        ],
+        "all_required_evidence_terms_in_top5_chunks": false
+      }
+    },
+    {
+      "case_id": "existing-ohr-010",
+      "sample_id": "ohr-010",
+      "domain": "manual",
+      "original_question": "What does the official account for the Student Associations Department at Tsinghua share information about, and how many associations are mentioned?",
+      "retrieval_question": "What does the official account for the Student Associations Department at Tsinghua share information about, and how many associations are mentioned?",
+      "query_sample_id_removed": false,
+      "original_explicit_sample_scope": false,
+      "gold_evidence_excerpts": [
+        "Official account for the Student Associations Department. Shares information on the 200+ student associations at Tsinghua, including their events and stories."
+      ],
+      "gt_text": {
+        "eligible_chunks": 62,
+        "ranked_chunks": 54,
+        "expected_document_rank": 1,
+        "expected_document_first_chunk_rank": 1,
+        "expected_document_in_top5_documents": true,
+        "expected_document_in_top5_chunks": true,
+        "expected_document_best_chunk_score": 43.0431609474761,
+        "ranked_document_ids": [
+          "ohr-010",
+          "ohr-001",
+          "ohr-009",
+          "ohr-012",
+          "ohr-011",
+          "ohr-008",
+          "ohr-002",
+          "ohr-003",
+          "ohr-007",
+          "ohr-005",
+          "ohr-004",
+          "ohr-014",
+          "ohr-006"
+        ],
+        "top5_chunks": [
+          {
+            "rank": 1,
+            "chunk_id": "chk-259c335dba1f",
+            "score": 43.0431609474761,
+            "document_id": "ohr-010",
+            "source_chunk_index": 0,
+            "page_start": 37,
+            "page_end": 37,
+            "content_hash": "112eed12990a352d1b07912834ad54bf995826d51dc097c5be989d37d516d806"
+          },
+          {
+            "rank": 2,
+            "chunk_id": "chk-45b6fe09725b",
+            "score": 10.170881070358128,
+            "document_id": "ohr-001",
+            "source_chunk_index": 1,
+            "page_start": 18,
+            "page_end": 18,
+            "content_hash": "80daf00ede572e5ddc257fa51cadb6061a2777a3ff8837c08d2c79e9becd7b0a"
+          },
+          {
+            "rank": 3,
+            "chunk_id": "chk-eaf283229201",
+            "score": 9.345587303619684,
+            "document_id": "ohr-009",
+            "source_chunk_index": 0,
+            "page_start": 65,
+            "page_end": 65,
+            "content_hash": "827019f93875daeacaf22bffe0225f16c42f5c4bc8a889135864532b88146c2e"
+          },
+          {
+            "rank": 4,
+            "chunk_id": "chk-187706a01a31",
+            "score": 7.318710715079572,
+            "document_id": "ohr-012",
+            "source_chunk_index": 2,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "15c04a202b2dd80c86f8e07cfa39ab0ffa1d941e7ae1e1b8fb0260975327e17f"
+          },
+          {
+            "rank": 5,
+            "chunk_id": "chk-c98f5b63c44a",
+            "score": 6.687208251461705,
+            "document_id": "ohr-001",
+            "source_chunk_index": 0,
+            "page_start": 18,
+            "page_end": 18,
+            "content_hash": "ef0bb07b0319c43923fa47ffc573cf04b4265d7d1540c7a6793119b5fa5011f4"
+          }
+        ],
+        "gold_evidence": [
+          {
+            "excerpt": "Official account for the Student Associations Department. Shares information on the 200+ student associations at Tsinghua, including their events and stories.",
+            "raw_continuous_in_document": true,
+            "normalized_continuous_in_document": true,
+            "normalized_continuous_in_chunk_ids": [
+              "chk-259c335dba1f"
+            ],
+            "normalized_continuous_in_top5_chunk_ids": [
+              "chk-259c335dba1f"
+            ]
+          }
+        ],
+        "all_gold_excerpts_continuous_in_document": true,
+        "all_gold_excerpts_continuous_in_any_chunks": true,
+        "all_gold_excerpts_continuous_in_top5_chunks": true,
+        "required_evidence_terms_in_document": [
+          {
+            "alternatives": [
+              "200+"
+            ],
+            "matched_alternatives": [
+              "200+"
+            ]
+          },
+          {
+            "alternatives": [
+              "student associations"
+            ],
+            "matched_alternatives": [
+              "student associations"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_document": true,
+        "required_evidence_terms_in_top5_chunks": [
+          {
+            "alternatives": [
+              "200+"
+            ],
+            "matched_alternatives": [
+              "200+"
+            ]
+          },
+          {
+            "alternatives": [
+              "student associations"
+            ],
+            "matched_alternatives": [
+              "student associations"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_top5_chunks": true
+      },
+      "noise_text": {
+        "eligible_chunks": 79,
+        "ranked_chunks": 67,
+        "expected_document_rank": 1,
+        "expected_document_first_chunk_rank": 1,
+        "expected_document_in_top5_documents": true,
+        "expected_document_in_top5_chunks": true,
+        "expected_document_best_chunk_score": 42.6382361477819,
+        "ranked_document_ids": [
+          "ohr-010",
+          "ohr-001",
+          "ohr-009",
+          "ohr-012",
+          "ohr-011",
+          "ohr-008",
+          "ohr-002",
+          "ohr-003",
+          "ohr-007",
+          "ohr-005",
+          "ohr-004",
+          "ohr-014",
+          "ohr-006"
+        ],
+        "top5_chunks": [
+          {
+            "rank": 1,
+            "chunk_id": "chk-259c335dba1f",
+            "score": 42.6382361477819,
+            "document_id": "ohr-010",
+            "source_chunk_index": 0,
+            "page_start": 37,
+            "page_end": 37,
+            "content_hash": "47344e5903429477c14b07dfc8125021d309fffa4675bb790064ffafa5c3b6cf"
+          },
+          {
+            "rank": 2,
+            "chunk_id": "chk-cdce493022b8",
+            "score": 20.35006562308922,
+            "document_id": "ohr-010",
+            "source_chunk_index": 1,
+            "page_start": 37,
+            "page_end": 37,
+            "content_hash": "dd841744fc5b2905b5f28292bf7749b7371197a219c329c37447d62cc0c17ae0"
+          },
+          {
+            "rank": 3,
+            "chunk_id": "chk-6fc229ece223",
+            "score": 11.309672163786404,
+            "document_id": "ohr-001",
+            "source_chunk_index": 2,
+            "page_start": 18,
+            "page_end": 18,
+            "content_hash": "d073ad3ffca8e0e213ac50d8e63ae5d7f767761140c2567cb5a89dd1bb741ee9"
+          },
+          {
+            "rank": 4,
+            "chunk_id": "chk-eaf283229201",
+            "score": 10.269801885544847,
+            "document_id": "ohr-009",
+            "source_chunk_index": 0,
+            "page_start": 65,
+            "page_end": 65,
+            "content_hash": "f63f4a1eb9d7f7cc84fb1721654004551f01318f234345875cf58119f2403a77"
+          },
+          {
+            "rank": 5,
+            "chunk_id": "chk-bcbea6f5dc7b",
+            "score": 7.423830307528696,
+            "document_id": "ohr-012",
+            "source_chunk_index": 7,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "673ad20bfa1f1318c0b75e8501d208c3580408e1599271b1407cc56aa5d64f0f"
+          }
+        ],
+        "gold_evidence": [
+          {
+            "excerpt": "Official account for the Student Associations Department. Shares information on the 200+ student associations at Tsinghua, including their events and stories.",
+            "raw_continuous_in_document": false,
+            "normalized_continuous_in_document": false,
+            "normalized_continuous_in_chunk_ids": [],
+            "normalized_continuous_in_top5_chunk_ids": []
+          }
+        ],
+        "all_gold_excerpts_continuous_in_document": false,
+        "all_gold_excerpts_continuous_in_any_chunks": false,
+        "all_gold_excerpts_continuous_in_top5_chunks": false,
+        "required_evidence_terms_in_document": [
+          {
+            "alternatives": [
+              "200+"
+            ],
+            "matched_alternatives": [
+              "200+"
+            ]
+          },
+          {
+            "alternatives": [
+              "student associations"
+            ],
+            "matched_alternatives": [
+              "student associations"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_document": true,
+        "required_evidence_terms_in_top5_chunks": [
+          {
+            "alternatives": [
+              "200+"
+            ],
+            "matched_alternatives": [
+              "200+"
+            ]
+          },
+          {
+            "alternatives": [
+              "student associations"
+            ],
+            "matched_alternatives": [
+              "student associations"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_top5_chunks": true
+      }
+    },
+    {
+      "case_id": "existing-ohr-011",
+      "sample_id": "ohr-011",
+      "domain": "news",
+      "original_question": "According to the news report, how many unlicensed cannabis shops did the special task force shut down in New York City since early May?",
+      "retrieval_question": "According to the news report, how many unlicensed cannabis shops did the special task force shut down in New York City since early May?",
+      "query_sample_id_removed": false,
+      "original_explicit_sample_scope": false,
+      "gold_evidence_excerpts": [
+        "A special task force has shut down 311 unlicensed cannabis shops in the city since early May."
+      ],
+      "gt_text": {
+        "eligible_chunks": 62,
+        "ranked_chunks": 54,
+        "expected_document_rank": 1,
+        "expected_document_first_chunk_rank": 1,
+        "expected_document_in_top5_documents": true,
+        "expected_document_in_top5_chunks": true,
+        "expected_document_best_chunk_score": 40.57682743827055,
+        "ranked_document_ids": [
+          "ohr-011",
+          "ohr-012",
+          "ohr-002",
+          "ohr-001",
+          "ohr-008",
+          "ohr-005",
+          "ohr-007",
+          "ohr-010",
+          "ohr-003",
+          "ohr-009",
+          "ohr-014",
+          "ohr-004",
+          "ohr-006"
+        ],
+        "top5_chunks": [
+          {
+            "rank": 1,
+            "chunk_id": "chk-6fc2a1c9ae43",
+            "score": 40.57682743827055,
+            "document_id": "ohr-011",
+            "source_chunk_index": 7,
+            "page_start": 1,
+            "page_end": 1,
+            "content_hash": "5782bc40a55d6230d7c9dcd3e25ca64d897d917eeebd77c32f66d5b0bb502d74"
+          },
+          {
+            "rank": 2,
+            "chunk_id": "chk-61dba3eaad51",
+            "score": 35.698645913596955,
+            "document_id": "ohr-011",
+            "source_chunk_index": 6,
+            "page_start": 1,
+            "page_end": 1,
+            "content_hash": "6f0a4ca539149c4d7a81c1b73f8ebf1aca4f026d9b9250f6900d4b10b251bc29"
+          },
+          {
+            "rank": 3,
+            "chunk_id": "chk-a28e1d477329",
+            "score": 23.557945244031657,
+            "document_id": "ohr-011",
+            "source_chunk_index": 5,
+            "page_start": 1,
+            "page_end": 1,
+            "content_hash": "9ec2781e1c9cc2f1cefbe3e253c39349214f979004959a4493fd1f7c8890a2ce"
+          },
+          {
+            "rank": 4,
+            "chunk_id": "chk-e35786e0085e",
+            "score": 7.862750440472978,
+            "document_id": "ohr-012",
+            "source_chunk_index": 8,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "cc645d85bd5a59bea829de1e882aa9a153842c332e1078013847983409b8aaed"
+          },
+          {
+            "rank": 5,
+            "chunk_id": "chk-c56abbdb9970",
+            "score": 7.257464679635295,
+            "document_id": "ohr-011",
+            "source_chunk_index": 2,
+            "page_start": 1,
+            "page_end": 1,
+            "content_hash": "e0421c1092758b392689e4469f35d74f3772e71bbe99431d0d914312057f6b73"
+          }
+        ],
+        "gold_evidence": [
+          {
+            "excerpt": "A special task force has shut down 311 unlicensed cannabis shops in the city since early May.",
+            "raw_continuous_in_document": true,
+            "normalized_continuous_in_document": true,
+            "normalized_continuous_in_chunk_ids": [
+              "chk-6fc2a1c9ae43"
+            ],
+            "normalized_continuous_in_top5_chunk_ids": [
+              "chk-6fc2a1c9ae43"
+            ]
+          }
+        ],
+        "all_gold_excerpts_continuous_in_document": true,
+        "all_gold_excerpts_continuous_in_any_chunks": true,
+        "all_gold_excerpts_continuous_in_top5_chunks": true,
+        "required_evidence_terms_in_document": [
+          {
+            "alternatives": [
+              "311"
+            ],
+            "matched_alternatives": [
+              "311"
+            ]
+          },
+          {
+            "alternatives": [
+              "unlicensed cannabis shops"
+            ],
+            "matched_alternatives": [
+              "unlicensed cannabis shops"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_document": true,
+        "required_evidence_terms_in_top5_chunks": [
+          {
+            "alternatives": [
+              "311"
+            ],
+            "matched_alternatives": [
+              "311"
+            ]
+          },
+          {
+            "alternatives": [
+              "unlicensed cannabis shops"
+            ],
+            "matched_alternatives": [
+              "unlicensed cannabis shops"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_top5_chunks": true
+      },
+      "noise_text": {
+        "eligible_chunks": 79,
+        "ranked_chunks": 64,
+        "expected_document_rank": 1,
+        "expected_document_first_chunk_rank": 1,
+        "expected_document_in_top5_documents": true,
+        "expected_document_in_top5_chunks": true,
+        "expected_document_best_chunk_score": 39.76381799838572,
+        "ranked_document_ids": [
+          "ohr-011",
+          "ohr-012",
+          "ohr-002",
+          "ohr-001",
+          "ohr-008",
+          "ohr-007",
+          "ohr-005",
+          "ohr-010",
+          "ohr-003",
+          "ohr-009",
+          "ohr-014",
+          "ohr-004",
+          "ohr-006"
+        ],
+        "top5_chunks": [
+          {
+            "rank": 1,
+            "chunk_id": "chk-10709d5bc11a",
+            "score": 39.76381799838572,
+            "document_id": "ohr-011",
+            "source_chunk_index": 8,
+            "page_start": 1,
+            "page_end": 1,
+            "content_hash": "0566dbcbd309cf081c011069013c280b825beb66bdec2a3d8ae4bfd812397b88"
+          },
+          {
+            "rank": 2,
+            "chunk_id": "chk-61dba3eaad51",
+            "score": 30.612754589177765,
+            "document_id": "ohr-011",
+            "source_chunk_index": 6,
+            "page_start": 1,
+            "page_end": 1,
+            "content_hash": "d5cdef0cc505a6adc6855545fcb10c7a90441b26533a2c15f3cebf9e97189b62"
+          },
+          {
+            "rank": 3,
+            "chunk_id": "chk-6fc2a1c9ae43",
+            "score": 23.559030582196783,
+            "document_id": "ohr-011",
+            "source_chunk_index": 7,
+            "page_start": 1,
+            "page_end": 1,
+            "content_hash": "e85925b127c25023d5ddb5ee1c7962bf5ad2a63d9ae1bea04c62cd8743d5d12f"
+          },
+          {
+            "rank": 4,
+            "chunk_id": "chk-a28e1d477329",
+            "score": 16.519139510775226,
+            "document_id": "ohr-011",
+            "source_chunk_index": 5,
+            "page_start": 1,
+            "page_end": 1,
+            "content_hash": "771045eea7073a25c1a1e9bdd58a99f68c28cfce82d8f4289e7b99bee0d8f540"
+          },
+          {
+            "rank": 5,
+            "chunk_id": "chk-bcbea6f5dc7b",
+            "score": 10.659422180261739,
+            "document_id": "ohr-012",
+            "source_chunk_index": 7,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "673ad20bfa1f1318c0b75e8501d208c3580408e1599271b1407cc56aa5d64f0f"
+          }
+        ],
+        "gold_evidence": [
+          {
+            "excerpt": "A special task force has shut down 311 unlicensed cannabis shops in the city since early May.",
+            "raw_continuous_in_document": false,
+            "normalized_continuous_in_document": false,
+            "normalized_continuous_in_chunk_ids": [],
+            "normalized_continuous_in_top5_chunk_ids": []
+          }
+        ],
+        "all_gold_excerpts_continuous_in_document": false,
+        "all_gold_excerpts_continuous_in_any_chunks": false,
+        "all_gold_excerpts_continuous_in_top5_chunks": false,
+        "required_evidence_terms_in_document": [
+          {
+            "alternatives": [
+              "311"
+            ],
+            "matched_alternatives": [
+              "311"
+            ]
+          },
+          {
+            "alternatives": [
+              "unlicensed cannabis shops"
+            ],
+            "matched_alternatives": [
+              "unlicensed cannabis shops"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_document": true,
+        "required_evidence_terms_in_top5_chunks": [
+          {
+            "alternatives": [
+              "311"
+            ],
+            "matched_alternatives": [
+              "311"
+            ]
+          },
+          {
+            "alternatives": [
+              "unlicensed cannabis shops"
+            ],
+            "matched_alternatives": [
+              "unlicensed cannabis shops"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_top5_chunks": true
+      }
+    },
+    {
+      "case_id": "existing-ohr-012",
+      "sample_id": "ohr-012",
+      "domain": "news",
+      "original_question": "In the report about Steve Sandberg and the GE Anaheim plant, when did the EPA suspend the plant's PCB-handling license?",
+      "retrieval_question": "In the report about Steve Sandberg and the GE Anaheim plant, when did the EPA suspend the plant's PCB-handling license?",
+      "query_sample_id_removed": false,
+      "original_explicit_sample_scope": false,
+      "gold_evidence_excerpts": [
+        "In February 1992, the plant's PCB-handling license was suspended by the EPA because further acceptance of waste into the plant posed \"an unreasonable risk to human health and the environment.\""
+      ],
+      "gt_text": {
+        "eligible_chunks": 62,
+        "ranked_chunks": 55,
+        "expected_document_rank": 1,
+        "expected_document_first_chunk_rank": 1,
+        "expected_document_in_top5_documents": true,
+        "expected_document_in_top5_chunks": true,
+        "expected_document_best_chunk_score": 23.562306975333,
+        "ranked_document_ids": [
+          "ohr-012",
+          "ohr-011",
+          "ohr-004",
+          "ohr-009",
+          "ohr-008",
+          "ohr-007",
+          "ohr-014",
+          "ohr-010",
+          "ohr-006",
+          "ohr-001",
+          "ohr-002",
+          "ohr-003",
+          "ohr-005"
+        ],
+        "top5_chunks": [
+          {
+            "rank": 1,
+            "chunk_id": "chk-bcbea6f5dc7b",
+            "score": 23.562306975333,
+            "document_id": "ohr-012",
+            "source_chunk_index": 7,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "0cc95ab5d67852e19b135ae2dff6b1e24dca637e9873d7d271d2d766ace3a5bc"
+          },
+          {
+            "rank": 2,
+            "chunk_id": "chk-c15a6be2aeb6",
+            "score": 18.572189706021256,
+            "document_id": "ohr-012",
+            "source_chunk_index": 1,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "88a813cefce72ffc46ce6a46e86077b31bb9e66fd032271d794fb66b35ff3c68"
+          },
+          {
+            "rank": 3,
+            "chunk_id": "chk-e35786e0085e",
+            "score": 14.0174588954796,
+            "document_id": "ohr-012",
+            "source_chunk_index": 8,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "cc645d85bd5a59bea829de1e882aa9a153842c332e1078013847983409b8aaed"
+          },
+          {
+            "rank": 4,
+            "chunk_id": "chk-3d5c783a96f8",
+            "score": 13.516114738285326,
+            "document_id": "ohr-012",
+            "source_chunk_index": 4,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "b3e76277b3e9fe3f5033728e5cb86a76bb55a5d10edc8e5e304568c2603d7756"
+          },
+          {
+            "rank": 5,
+            "chunk_id": "chk-187706a01a31",
+            "score": 11.264713012467219,
+            "document_id": "ohr-012",
+            "source_chunk_index": 2,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "15c04a202b2dd80c86f8e07cfa39ab0ffa1d941e7ae1e1b8fb0260975327e17f"
+          }
+        ],
+        "gold_evidence": [
+          {
+            "excerpt": "In February 1992, the plant's PCB-handling license was suspended by the EPA because further acceptance of waste into the plant posed \"an unreasonable risk to human health and the environment.\"",
+            "raw_continuous_in_document": true,
+            "normalized_continuous_in_document": true,
+            "normalized_continuous_in_chunk_ids": [
+              "chk-bcbea6f5dc7b"
+            ],
+            "normalized_continuous_in_top5_chunk_ids": [
+              "chk-bcbea6f5dc7b"
+            ]
+          }
+        ],
+        "all_gold_excerpts_continuous_in_document": true,
+        "all_gold_excerpts_continuous_in_any_chunks": true,
+        "all_gold_excerpts_continuous_in_top5_chunks": true,
+        "required_evidence_terms_in_document": [
+          {
+            "alternatives": [
+              "February 1992"
+            ],
+            "matched_alternatives": [
+              "February 1992"
+            ]
+          },
+          {
+            "alternatives": [
+              "license was suspended"
+            ],
+            "matched_alternatives": [
+              "license was suspended"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_document": true,
+        "required_evidence_terms_in_top5_chunks": [
+          {
+            "alternatives": [
+              "February 1992"
+            ],
+            "matched_alternatives": [
+              "February 1992"
+            ]
+          },
+          {
+            "alternatives": [
+              "license was suspended"
+            ],
+            "matched_alternatives": [
+              "license was suspended"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_top5_chunks": true
+      },
+      "noise_text": {
+        "eligible_chunks": 79,
+        "ranked_chunks": 68,
+        "expected_document_rank": 1,
+        "expected_document_first_chunk_rank": 1,
+        "expected_document_in_top5_documents": true,
+        "expected_document_in_top5_chunks": true,
+        "expected_document_best_chunk_score": 23.905482122233487,
+        "ranked_document_ids": [
+          "ohr-012",
+          "ohr-011",
+          "ohr-009",
+          "ohr-004",
+          "ohr-008",
+          "ohr-010",
+          "ohr-007",
+          "ohr-014",
+          "ohr-002",
+          "ohr-001",
+          "ohr-003",
+          "ohr-006",
+          "ohr-005"
+        ],
+        "top5_chunks": [
+          {
+            "rank": 1,
+            "chunk_id": "chk-187706a01a31",
+            "score": 23.905482122233487,
+            "document_id": "ohr-012",
+            "source_chunk_index": 2,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "8e64cf74e626361740b04e80774b8a90dd7e5c6151b5d6127f662d759fd35be7"
+          },
+          {
+            "rank": 2,
+            "chunk_id": "chk-677fcc142ac5",
+            "score": 23.253046948133644,
+            "document_id": "ohr-012",
+            "source_chunk_index": 10,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "5304efdf1cd7f36db6c9cb62a23e968838860df0e75ac77ad47711e9890d7ce4"
+          },
+          {
+            "rank": 3,
+            "chunk_id": "chk-d332b81399e9",
+            "score": 12.987604299072617,
+            "document_id": "ohr-012",
+            "source_chunk_index": 6,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "4457eb56d431cb5e4a77c31b53580496788912fc12f5969bee68eba69334a4d2"
+          },
+          {
+            "rank": 4,
+            "chunk_id": "chk-bb4c289b28ba",
+            "score": 12.297648609376653,
+            "document_id": "ohr-012",
+            "source_chunk_index": 9,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "b74a80ae01a034ca8cf152445e3658a93712f797642db622341118977443aea3"
+          },
+          {
+            "rank": 5,
+            "chunk_id": "chk-3d5c783a96f8",
+            "score": 11.492811034571853,
+            "document_id": "ohr-012",
+            "source_chunk_index": 4,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "3e7c4861c9206f4c24a9572f1e03807c00d2b24f2500d3547333f103db814dbb"
+          }
+        ],
+        "gold_evidence": [
+          {
+            "excerpt": "In February 1992, the plant's PCB-handling license was suspended by the EPA because further acceptance of waste into the plant posed \"an unreasonable risk to human health and the environment.\"",
+            "raw_continuous_in_document": false,
+            "normalized_continuous_in_document": false,
+            "normalized_continuous_in_chunk_ids": [],
+            "normalized_continuous_in_top5_chunk_ids": []
+          }
+        ],
+        "all_gold_excerpts_continuous_in_document": false,
+        "all_gold_excerpts_continuous_in_any_chunks": false,
+        "all_gold_excerpts_continuous_in_top5_chunks": false,
+        "required_evidence_terms_in_document": [
+          {
+            "alternatives": [
+              "February 1992"
+            ],
+            "matched_alternatives": []
+          },
+          {
+            "alternatives": [
+              "license was suspended"
+            ],
+            "matched_alternatives": []
+          }
+        ],
+        "all_required_evidence_terms_in_document": false,
+        "required_evidence_terms_in_top5_chunks": [
+          {
+            "alternatives": [
+              "February 1992"
+            ],
+            "matched_alternatives": []
+          },
+          {
+            "alternatives": [
+              "license was suspended"
+            ],
+            "matched_alternatives": []
+          }
+        ],
+        "all_required_evidence_terms_in_top5_chunks": false
+      }
+    },
+    {
+      "case_id": "existing-ohr-013",
+      "sample_id": "ohr-013",
+      "domain": "textbook",
+      "original_question": "整车碰撞试验的专用灯光照明系统，其平均照度应不小于多少 lx？",
+      "retrieval_question": "整车碰撞试验的专用灯光照明系统，其平均照度应不小于多少 lx？",
+      "query_sample_id_removed": false,
+      "original_explicit_sample_scope": false,
+      "gold_evidence_excerpts": [
+        "照明系统平均照度应不小于 100 000 lx"
+      ],
+      "gt_text": {
+        "eligible_chunks": 62,
+        "ranked_chunks": 2,
+        "expected_document_rank": 1,
+        "expected_document_first_chunk_rank": 1,
+        "expected_document_in_top5_documents": true,
+        "expected_document_in_top5_chunks": true,
+        "expected_document_best_chunk_score": 51.849453515238814,
+        "ranked_document_ids": [
+          "ohr-013"
+        ],
+        "top5_chunks": [
+          {
+            "rank": 1,
+            "chunk_id": "chk-08f669c1c67a",
+            "score": 51.849453515238814,
+            "document_id": "ohr-013",
+            "source_chunk_index": 0,
+            "page_start": 1,
+            "page_end": 1,
+            "content_hash": "ca2944e3d9dd3ef7b5cb121443b96148d10b751393fa6eda0a88f128dff0421a"
+          },
+          {
+            "rank": 2,
+            "chunk_id": "chk-4ef72b5178e8",
+            "score": 32.308054643911575,
+            "document_id": "ohr-013",
+            "source_chunk_index": 1,
+            "page_start": 1,
+            "page_end": 1,
+            "content_hash": "676404e38ae33eba5317dcc6c612fb18cd90c572cac5394bd77fca4cc18600c8"
+          }
+        ],
+        "gold_evidence": [
+          {
+            "excerpt": "照明系统平均照度应不小于 100 000 lx",
+            "raw_continuous_in_document": true,
+            "normalized_continuous_in_document": true,
+            "normalized_continuous_in_chunk_ids": [
+              "chk-08f669c1c67a"
+            ],
+            "normalized_continuous_in_top5_chunk_ids": [
+              "chk-08f669c1c67a"
+            ]
+          }
+        ],
+        "all_gold_excerpts_continuous_in_document": true,
+        "all_gold_excerpts_continuous_in_any_chunks": true,
+        "all_gold_excerpts_continuous_in_top5_chunks": true,
+        "required_evidence_terms_in_document": [
+          {
+            "alternatives": [
+              "100 000"
+            ],
+            "matched_alternatives": [
+              "100 000"
+            ]
+          },
+          {
+            "alternatives": [
+              "lx"
+            ],
+            "matched_alternatives": [
+              "lx"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_document": true,
+        "required_evidence_terms_in_top5_chunks": [
+          {
+            "alternatives": [
+              "100 000"
+            ],
+            "matched_alternatives": [
+              "100 000"
+            ]
+          },
+          {
+            "alternatives": [
+              "lx"
+            ],
+            "matched_alternatives": [
+              "lx"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_top5_chunks": true
+      },
+      "noise_text": {
+        "eligible_chunks": 79,
+        "ranked_chunks": 2,
+        "expected_document_rank": 1,
+        "expected_document_first_chunk_rank": 1,
+        "expected_document_in_top5_documents": true,
+        "expected_document_in_top5_chunks": true,
+        "expected_document_best_chunk_score": 60.76313721342188,
+        "ranked_document_ids": [
+          "ohr-013"
+        ],
+        "top5_chunks": [
+          {
+            "rank": 1,
+            "chunk_id": "chk-4ef72b5178e8",
+            "score": 60.76313721342188,
+            "document_id": "ohr-013",
+            "source_chunk_index": 1,
+            "page_start": 1,
+            "page_end": 1,
+            "content_hash": "cb68fd7a40603c6ebe6a6f22510af812cfc9e6496e8f12999280af2a29d31010"
+          },
+          {
+            "rank": 2,
+            "chunk_id": "chk-08f669c1c67a",
+            "score": 7.9652881999385,
+            "document_id": "ohr-013",
+            "source_chunk_index": 0,
+            "page_start": 1,
+            "page_end": 1,
+            "content_hash": "94720ea229f1483a6c53f5c8b25a10b6538c986942f4813092fca7b4ac94f460"
+          }
+        ],
+        "gold_evidence": [
+          {
+            "excerpt": "照明系统平均照度应不小于 100 000 lx",
+            "raw_continuous_in_document": false,
+            "normalized_continuous_in_document": true,
+            "normalized_continuous_in_chunk_ids": [
+              "chk-4ef72b5178e8"
+            ],
+            "normalized_continuous_in_top5_chunk_ids": [
+              "chk-4ef72b5178e8"
+            ]
+          }
+        ],
+        "all_gold_excerpts_continuous_in_document": true,
+        "all_gold_excerpts_continuous_in_any_chunks": true,
+        "all_gold_excerpts_continuous_in_top5_chunks": true,
+        "required_evidence_terms_in_document": [
+          {
+            "alternatives": [
+              "100 000"
+            ],
+            "matched_alternatives": [
+              "100 000"
+            ]
+          },
+          {
+            "alternatives": [
+              "lx"
+            ],
+            "matched_alternatives": [
+              "lx"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_document": true,
+        "required_evidence_terms_in_top5_chunks": [
+          {
+            "alternatives": [
+              "100 000"
+            ],
+            "matched_alternatives": [
+              "100 000"
+            ]
+          },
+          {
+            "alternatives": [
+              "lx"
+            ],
+            "matched_alternatives": [
+              "lx"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_top5_chunks": true
+      }
+    },
+    {
+      "case_id": "existing-ohr-014",
+      "sample_id": "ohr-014",
+      "domain": "textbook",
+      "original_question": "Who is the Executive Editor of the International Space Station Researcher's Guide?",
+      "retrieval_question": "Who is the Executive Editor of the International Space Station Researcher's Guide?",
+      "query_sample_id_removed": false,
+      "original_explicit_sample_scope": false,
+      "gold_evidence_excerpts": [
+        "Executive Editor: Amelia Rai"
+      ],
+      "gt_text": {
+        "eligible_chunks": 62,
+        "ranked_chunks": 55,
+        "expected_document_rank": 1,
+        "expected_document_first_chunk_rank": 1,
+        "expected_document_in_top5_documents": true,
+        "expected_document_in_top5_chunks": true,
+        "expected_document_best_chunk_score": 33.37724904451903,
+        "ranked_document_ids": [
+          "ohr-014",
+          "ohr-012",
+          "ohr-011",
+          "ohr-004",
+          "ohr-009",
+          "ohr-001",
+          "ohr-008",
+          "ohr-007",
+          "ohr-003",
+          "ohr-010",
+          "ohr-006",
+          "ohr-002",
+          "ohr-005"
+        ],
+        "top5_chunks": [
+          {
+            "rank": 1,
+            "chunk_id": "chk-ef87c486c3ae",
+            "score": 33.37724904451903,
+            "document_id": "ohr-014",
+            "source_chunk_index": 0,
+            "page_start": 2,
+            "page_end": 2,
+            "content_hash": "9eb60ca593c439525e792f2e2daf70d6ed3da96574cbb71e0cd00f0dbe8bb6ec"
+          },
+          {
+            "rank": 2,
+            "chunk_id": "chk-fd93f598fd49",
+            "score": 6.379805458587821,
+            "document_id": "ohr-012",
+            "source_chunk_index": 5,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "4ff4060d5e10d96b1cef223fe1f621835543fa51a2e3ed6efbf9116fe876af8d"
+          },
+          {
+            "rank": 3,
+            "chunk_id": "chk-d332b81399e9",
+            "score": 5.432740967055856,
+            "document_id": "ohr-012",
+            "source_chunk_index": 6,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "e9916510c2a48e9b0feffd4352847fb00636031a5a6b0286e1d53c64882e8310"
+          },
+          {
+            "rank": 4,
+            "chunk_id": "chk-c525749deee9",
+            "score": 5.26997083996405,
+            "document_id": "ohr-012",
+            "source_chunk_index": 0,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "2724325b63b2cd409059d4a309b6c1ad75d46411fb865817fe42af65a417366d"
+          },
+          {
+            "rank": 5,
+            "chunk_id": "chk-043b46e8d1d0",
+            "score": 4.955703709171685,
+            "document_id": "ohr-011",
+            "source_chunk_index": 10,
+            "page_start": 1,
+            "page_end": 1,
+            "content_hash": "84cfb4da41ffb534aa71f4df5d3e1338b206fc88a41a5bd04beea5209d428620"
+          }
+        ],
+        "gold_evidence": [
+          {
+            "excerpt": "Executive Editor: Amelia Rai",
+            "raw_continuous_in_document": true,
+            "normalized_continuous_in_document": true,
+            "normalized_continuous_in_chunk_ids": [
+              "chk-ef87c486c3ae"
+            ],
+            "normalized_continuous_in_top5_chunk_ids": [
+              "chk-ef87c486c3ae"
+            ]
+          }
+        ],
+        "all_gold_excerpts_continuous_in_document": true,
+        "all_gold_excerpts_continuous_in_any_chunks": true,
+        "all_gold_excerpts_continuous_in_top5_chunks": true,
+        "required_evidence_terms_in_document": [
+          {
+            "alternatives": [
+              "Amelia Rai"
+            ],
+            "matched_alternatives": [
+              "Amelia Rai"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_document": true,
+        "required_evidence_terms_in_top5_chunks": [
+          {
+            "alternatives": [
+              "Amelia Rai"
+            ],
+            "matched_alternatives": [
+              "Amelia Rai"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_top5_chunks": true
+      },
+      "noise_text": {
+        "eligible_chunks": 79,
+        "ranked_chunks": 68,
+        "expected_document_rank": 1,
+        "expected_document_first_chunk_rank": 1,
+        "expected_document_in_top5_documents": true,
+        "expected_document_in_top5_chunks": true,
+        "expected_document_best_chunk_score": 33.58224454663028,
+        "ranked_document_ids": [
+          "ohr-014",
+          "ohr-012",
+          "ohr-011",
+          "ohr-004",
+          "ohr-009",
+          "ohr-006",
+          "ohr-008",
+          "ohr-001",
+          "ohr-010",
+          "ohr-007",
+          "ohr-003",
+          "ohr-005",
+          "ohr-002"
+        ],
+        "top5_chunks": [
+          {
+            "rank": 1,
+            "chunk_id": "chk-ef87c486c3ae",
+            "score": 33.58224454663028,
+            "document_id": "ohr-014",
+            "source_chunk_index": 0,
+            "page_start": 2,
+            "page_end": 2,
+            "content_hash": "fbfaa01b78e67764e2be3db3d901fe74ee1848088b9895820aad64fa43710274"
+          },
+          {
+            "rank": 2,
+            "chunk_id": "chk-c525749deee9",
+            "score": 7.389070466634564,
+            "document_id": "ohr-012",
+            "source_chunk_index": 0,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "e05d18cc00d78e1689cb0b7808af72d3ab3837b5f782f4cad4eb2c88f538c79a"
+          },
+          {
+            "rank": 3,
+            "chunk_id": "chk-bcbea6f5dc7b",
+            "score": 6.6877240705960626,
+            "document_id": "ohr-012",
+            "source_chunk_index": 7,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "673ad20bfa1f1318c0b75e8501d208c3580408e1599271b1407cc56aa5d64f0f"
+          },
+          {
+            "rank": 4,
+            "chunk_id": "chk-5b07c8c85f79",
+            "score": 5.576512607134847,
+            "document_id": "ohr-011",
+            "source_chunk_index": 12,
+            "page_start": 1,
+            "page_end": 1,
+            "content_hash": "8378dc58dbda1fac7fbdba2012a6e47e2740f5a9a97405dc9a55ec43009a536f"
+          },
+          {
+            "rank": 5,
+            "chunk_id": "chk-e35786e0085e",
+            "score": 5.557561510752082,
+            "document_id": "ohr-012",
+            "source_chunk_index": 8,
+            "page_start": 5,
+            "page_end": 5,
+            "content_hash": "638ba7441c6be83556d5c8927bd03d6b3d8713163ab63018822125f2f97c3df4"
+          }
+        ],
+        "gold_evidence": [
+          {
+            "excerpt": "Executive Editor: Amelia Rai",
+            "raw_continuous_in_document": false,
+            "normalized_continuous_in_document": true,
+            "normalized_continuous_in_chunk_ids": [
+              "chk-ef87c486c3ae"
+            ],
+            "normalized_continuous_in_top5_chunk_ids": [
+              "chk-ef87c486c3ae"
+            ]
+          }
+        ],
+        "all_gold_excerpts_continuous_in_document": true,
+        "all_gold_excerpts_continuous_in_any_chunks": true,
+        "all_gold_excerpts_continuous_in_top5_chunks": true,
+        "required_evidence_terms_in_document": [
+          {
+            "alternatives": [
+              "Amelia Rai"
+            ],
+            "matched_alternatives": [
+              "Amelia Rai"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_document": true,
+        "required_evidence_terms_in_top5_chunks": [
+          {
+            "alternatives": [
+              "Amelia Rai"
+            ],
+            "matched_alternatives": [
+              "Amelia Rai"
+            ]
+          }
+        ],
+        "all_required_evidence_terms_in_top5_chunks": true
+      }
+    }
+  ]
+}
