@@ -3,8 +3,8 @@
 The declarations must match what ``ingestion.office`` and ``ingestion.cad_adapter``
 already register, because Task 5 derives upload routing from the registry and a drift
 between the two would silently route a format to the wrong parser. The upload delegators
-are pinned by identity so tests that patch ``PARSERS`` keep working, and the DXF
-``provenance`` fallback is exercised through a mocked adapter, not a real drawing.
+are pinned through the derived ``PARSERS`` table, and the DXF ``provenance`` fallback is
+exercised through a mocked adapter, not a real drawing.
 """
 from __future__ import annotations
 
@@ -122,29 +122,29 @@ class ExtensionRoutingTests(unittest.TestCase):
 
 
 class UploadDelegatorTests(unittest.TestCase):
-    def test_the_table_still_points_at_the_patchable_module_functions(self):
-        for extension in ('.docx', '.pptx', '.xlsx'):
-            self.assertIs(upload_pipeline.PARSERS[extension], upload_pipeline._parse_office)
-        self.assertIs(upload_pipeline.PARSERS['.dxf'], upload_pipeline._parse_dxf)
+    def test_every_office_and_dxf_extension_has_a_callable_entry(self):
+        for extension in ('.docx', '.pptx', '.xlsx', '.dxf'):
+            self.assertTrue(callable(upload_pipeline.PARSERS[extension]))
 
-    def test_the_office_function_delegates_the_whole_claim(self):
+    def test_the_office_entries_delegate_the_whole_claim(self):
         sentinel = ('result', {})
         path, claim = Path('staged.docx'), {'document_id': 'doc-1',
                                             'source_sha256': 'a' * 64}
 
-        with mock.patch.object(office_plugin, 'parse', return_value=sentinel) as parse:
-            self.assertIs(upload_pipeline._parse_office(path, claim), sentinel)
+        for extension in ('.docx', '.pptx', '.xlsx'):
+            with mock.patch.object(office_plugin, 'parse', return_value=sentinel) as parse:
+                self.assertIs(upload_pipeline.PARSERS[extension](path, claim), sentinel)
 
-        parse.assert_called_once_with(path, 'doc-1', 'a' * 64, claim)
+            parse.assert_called_once_with(path, 'doc-1', 'a' * 64, claim)
 
-    def test_the_dxf_function_delegates_the_whole_claim(self):
+    def test_the_dxf_entry_delegates_the_whole_claim(self):
         sentinel = ('result', {'layers': 0})
         path, claim = Path('staged.dxf'), {'document_id': 'doc-1',
                                            'source_sha256': 'a' * 64,
                                            'provenance': 'synthetic_demo'}
 
         with mock.patch.object(dxf_plugin, 'parse', return_value=sentinel) as parse:
-            self.assertIs(upload_pipeline._parse_dxf(path, claim), sentinel)
+            self.assertIs(upload_pipeline.PARSERS['.dxf'](path, claim), sentinel)
 
         parse.assert_called_once_with(path, 'doc-1', 'a' * 64, claim)
 

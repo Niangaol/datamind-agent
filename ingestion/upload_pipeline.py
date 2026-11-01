@@ -80,7 +80,6 @@ from __future__ import annotations
 
 import contextlib
 import hashlib
-import json
 import os
 import re
 import secrets
@@ -94,11 +93,13 @@ from fastapi import HTTPException
 import psycopg2
 from psycopg2.extras import Json, RealDictCursor
 
-from datamind import parse_contract, task_budget
+from datamind import task_budget
 from datamind.auth import lock_identity
 from datamind.knowledge import ROOT
+from datamind.plugin.manifest import PARSE_ADAPTER_UNSUPPORTED, ManifestError
 
 from . import contract_store
+from .plugins import default_context
 
 QUEUE_JOB_TYPE = 'upload_parse'
 ORIGIN = 'upload'
@@ -143,15 +144,6 @@ WORKER_HEARTBEAT_ENV = 'DATAMIND_UPLOAD_WORKER_HEARTBEAT_SECONDS'
 MIN_WORKER_ALIVE_SECONDS = 1.0
 MAX_WORKER_ALIVE_SECONDS = 3600.0
 
-#: Extension -> media type. `.dwg` is deliberately absent: it is reported with its own
-#: "no converter" code instead of the generic unsupported one.
-MEDIA_TYPES = {'.dxf': parse_contract.DXF_MEDIA_TYPE, '.json': 'application/json',
-               '.pdf': 'application/pdf',
-               '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-               '.pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-               '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}
-ADAPTERS = {'.dxf': 'dxf-native', '.json': 'measurement-json', '.pdf': 'pdf-native',
-            '.docx': 'docx-native', '.pptx': 'pptx-native', '.xlsx': 'xlsx-native'}
 #: The upload path builds no vector index; the offline path owns it.
 VECTOR_INDEX = 'deferred'
 VECTOR_INDEX_NOTE = ('上传管道只落元数据与契约证据，不写 chunks/Qdrant 行；'
@@ -244,8 +236,35 @@ def job_id_for(upload_id):
     return 'job-' + upload_id[4:]
 
 
+def _manifest_for(suffix):
+    """The plugin declaring ``suffix``, enabled or not - a disabled one stays reportable.
+
+    The scan is over :meth:`ParserRegistry.list` rather than a lookup so a record already
+    stored under a since-disabled plugin keeps naming it instead of going blank.
+    """
+    for manifest in default_context().parser.list():
+        if suffix in manifest.extensions:
+            return manifest
+    return None
+
+
+def _media_type_for(suffix):
+    manifest = _manifest_for(suffix)
+    return manifest.media_types[0] if manifest is not None else None
+
+
+def _adapter_for(suffix):
+    manifest = _manifest_for(suffix)
+    return manifest.name if manifest is not None else None
+
+
 def target(filename):
-    """Validate the requested name and return its suffix, before any byte is read."""
+    """Validate the requested name and return its suffix, before any byte is read.
+
+    The suffix is an admission gate answered by the parser registry: an extension no
+    enabled plugin declares is refused here, while what the staged bytes really are is
+    still decided by signature sniffing at parse time (G3).
+    """
     if (not isinstance(filename, str) or not filename or len(filename) > 200
             or Path(filename).name != filename or '\\' in filename
             or any(ord(c) < 32 for c in filename)):
@@ -254,7 +273,13 @@ def target(filename):
     if suffix == '.dwg':
         # This repository ships no DWG converter; the frozen interface pins the exact body.
         fail(DWG_ERROR_CODE, 415)
-    if suffix not in MEDIA_TYPES:
+    _sync_parsers()
+    try:
+        default_context().parser.lookup_by_extension(suffix)
+    except ManifestError as error:
+        if error.error_code == PARSE_ADAPTER_UNSUPPORTED:
+            fail('UNSUPPORTED_MEDIA_TYPE', 415, suffix=suffix or None,
+                 reason='plugin_disabled', plugin=error.details.get('plugin'))
         fail('UNSUPPORTED_MEDIA_TYPE', 415, suffix=suffix or None)
     return suffix
 
@@ -305,7 +330,12 @@ def enqueue(staged, provenance, dsn, identity):
       generation (`attempt+1` + a fresh token).
     """
     suffix = staged['suffix']
-    media_type = MEDIA_TYPES[suffix]
+    try:
+        media_type = default_context().parser.lookup_by_extension(suffix).media_types[0]
+    except ManifestError:
+        # The suffix passed `target`; it can only have lost its plugin since then, and a
+        # disabled plugin must be refused here rather than queued into a failing parse.
+        fail('UNSUPPORTED_MEDIA_TYPE', 415, suffix=suffix)
     ids = identities(staged['source_sha256'])
     # `document_assets.object_uri` follows the repository-wide convention of an **absolute**
     # path (every other row, e.g. the knowledge base, stores an absolute path). The old
@@ -351,7 +381,7 @@ def _upload_meta(asset):
     ids = identities(asset['sha256'])
     suffix = '.' + str(asset.get('file_type') or '').lower()
     return {'upload_id': ids['upload_id'], 'job_id': ids['job_id'],
-            'filename': asset.get('title'), 'media_type': MEDIA_TYPES.get(suffix),
+            'filename': asset.get('title'), 'media_type': _media_type_for(suffix),
             'provenance': None, 'source_path': asset.get('object_uri'),
             'source_sha256': asset['sha256'], 'bytes': None}
 
@@ -451,7 +481,7 @@ def _analysis(job, asset):
     if isinstance(stored, dict):
         return stored
     suffix = '.' + str(asset.get('file_type') or '').lower()
-    return {'parse_status': job['status'], 'adapter': ADAPTERS.get(suffix), 'blocks': 0,
+    return {'parse_status': job['status'], 'adapter': _adapter_for(suffix), 'blocks': 0,
             'locators_written': 0, 'relations': 0, 'block_types': {},
             'unsupported_features': [], 'quality_findings': []}
 
@@ -615,7 +645,7 @@ def _claim(cur, upload_id=None):
             'claim_token': token, 'attempt': attempt,
             'source_path': asset['object_uri'], 'source_sha256': asset['sha256'],
             'filename': upload.get('filename') or asset['title'], 'suffix': suffix,
-            'media_type': upload.get('media_type') or MEDIA_TYPES.get(suffix),
+            'media_type': upload.get('media_type') or _media_type_for(suffix),
             'provenance': upload.get('provenance'),
             'upload': {key: upload[key] for key in
                        ('upload_id', 'job_id', 'filename', 'media_type', 'provenance',
@@ -1058,86 +1088,33 @@ def _staged_path(claim):
     return path
 
 
-def _parse_dxf(path, claim):
-    """DXF parse: the built-in ``dxf-native`` plugin owns the composition.
+#: Extension -> parser, derived from the parser registry. A plain dict because callers
+#: patch a single entry; `_sync_parsers` only fills missing keys, so a patched entry
+#: survives the mid-life re-sync in `run_parse`.
+PARSERS = {}
 
-    Kept as a module-level function behind ``PARSERS['.dxf']`` because tests patch both;
-    the plugin is imported here so importing this module stays light.
+
+def _plugin_parser(manifest):
+    """A ``parse(path, claim)`` entry point for ``manifest``, loader resolved per call.
+
+    Resolution stays inside the call because the loader is an import reference (G7) and
+    because a patched plugin function must be picked up by the next parse.
     """
-    from .plugins import dxf_plugin
-    return dxf_plugin.parse(path, claim['document_id'], claim['source_sha256'], claim)
+    def parse(path, claim):
+        loader = manifest.resolve()
+        return loader(path, claim['document_id'], claim['source_sha256'], claim)
+
+    return parse
 
 
-def _parse_office(path, claim):
-    """Office parse: the built-in ``docx/pptx/xlsx-native`` plugins own the composition.
-
-    All three extensions share one parser function and one plugin loader;
-    ``ingestion.office.parse`` re-sniffs the package and dispatches.
-    """
-    from .plugins import office_plugin
-    return office_plugin.parse(path, claim['document_id'], claim['source_sha256'], claim)
+def _sync_parsers():
+    """Fill `PARSERS` from the enabled extensions the registry reports, never overwriting."""
+    parser = default_context().parser
+    for extension in parser.known_extensions(include_disabled=False):
+        PARSERS.setdefault(extension, _plugin_parser(parser.lookup_by_extension(extension)))
 
 
-def _parse_pdf(path, claim):
-    """PDF parse: the built-in ``pdf-native`` plugin owns the composition.
-
-    The function stays module-level and behind ``PARSERS['.pdf']`` because tests patch
-    both; the plugin is imported here so importing this module stays light.
-    """
-    from .plugins import pdf_plugin
-    return pdf_plugin.parse(path, claim['document_id'], claim['source_sha256'], claim)
-
-
-def _measurement_id(data):
-    """Read the measurement identity the JSON declares; the parser re-validates it."""
-    try:
-        raw = json.loads(data.decode('utf-8'))
-        first = raw['measurements'][0]
-        measurement_id, version = first['measurement_id'], raw['record_version']
-        if not isinstance(measurement_id, str) or isinstance(version, bool) \
-                or not isinstance(version, int):
-            raise ValueError('identity')
-        return measurement_id, version
-    except (ValueError, TypeError, KeyError, IndexError, UnicodeDecodeError,
-            json.JSONDecodeError):
-        fail('UPLOAD_MEASUREMENT_SOURCE_INVALID', 422)
-
-
-def _parse_json(path, claim):
-    """Measurement JSON: the existing parser, with the honest no-locator gap declared.
-
-    `cad_dimensions.measurement_from_bytes` is the parser behind the existing
-    `file_jobs` measurement target. A measurement record has no page/region geometry, so
-    the contract cannot carry a block-level locator for it; rather than inventing one,
-    the result declares `unsupported_features=['locator_unavailable']` exactly as the
-    OHR-Bench JSON branch of `ingestion/ingest.py` does. The record itself is validated,
-    not merely decoded.
-    """
-    from datamind import cad_dimensions
-    data = path.read_bytes()
-    measurement_id, version = _measurement_id(data)
-    record = cad_dimensions.measurement_from_bytes(data, measurement_id, version,
-                                                   claim['provenance'])
-    payload = {
-        'classification': {'detected_media_type': MEDIA_TYPES['.json'],
-                           'source_name': claim['filename']},
-        'adapter_capabilities': ['measurement_json'],
-        'blocks': [], 'relations': [], 'parsed_scope': [],
-        'failed_scope': [{'kind': 'object', 'ref': claim['document_id'],
-                          'status': 'unsupported', 'detail': 'locator_unavailable'}],
-        'quality_findings': [], 'unsupported_features': ['locator_unavailable'],
-        'artifact_refs': [],
-        'manifest': {'parser_version': 'cad-measurement-adapter-v1',
-                     'adapter': ADAPTERS['.json'], 'measurement_id': measurement_id,
-                     'record_version': record['source']['record_version']},
-        'parse_status': 'unsupported'}
-    return parse_contract.validate_parse_result(payload), {
-        'measurement_id': measurement_id, 'record_version': record['source']['record_version'],
-        'measurements': len(record.get('measurements') or [])}
-
-
-PARSERS = {'.dxf': _parse_dxf, '.json': _parse_json, '.pdf': _parse_pdf,
-           '.docx': _parse_office, '.pptx': _parse_office, '.xlsx': _parse_office}
+_sync_parsers()
 
 
 def run_parse(claim, dsn):
@@ -1157,6 +1134,8 @@ def run_parse(claim, dsn):
     was superseded while the parse ran commits nothing at all: no blocks, no locators, no
     quality detail, no terminal state — it returns `claim_lost` instead.
     """
+    # The parsing child owns its own process, so the table is bootstrapped here too (G8).
+    _sync_parsers()
     path = _staged_path(claim)
     with contextlib.redirect_stdout(sys.stderr):
         result, extra = PARSERS[claim['suffix']](path, claim)
@@ -1203,7 +1182,7 @@ def _analysis_of(claim, payload, stored, extra):
     for block in payload['blocks']:
         block_types[block['block_type']] = block_types.get(block['block_type'], 0) + 1
     analysis = {'parse_status': payload['parse_status'],
-                'adapter': payload['manifest'].get('adapter') or ADAPTERS.get(claim['suffix']),
+                'adapter': payload['manifest'].get('adapter') or _adapter_for(claim['suffix']),
                 'blocks': stored['blocks'], 'locators_written': stored['locators'],
                 'relations': stored['relations'], 'block_types': block_types,
                 'unsupported_features': list(payload['unsupported_features']),

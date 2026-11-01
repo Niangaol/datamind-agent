@@ -50,7 +50,7 @@ import {
  *      触发不了重试/取消（上传管道没有这两个 HTTP 路由）。
  */
 
-/* ── 列表筛选用的 media_type 选项（值与 ingestion/upload_pipeline.py::MEDIA_TYPES 一致）── */
+/* ── 列表筛选用的 media_type 选项（值与 ingestion/plugins/ 各 manifest 声明一致）── */
 const MEDIA_TYPE_OPTIONS = [
   { value: 'application/pdf', label: 'PDF' },
   {

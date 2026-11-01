@@ -26,9 +26,12 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class BuiltinDeclarationTests(unittest.TestCase):
     def test_the_builtins_are_the_adapters_the_parsers_already_register(self):
-        self.assertEqual([manifest.name for manifest in builtin_manifests()],
-                         [ingest._PDF_ADAPTER, ingest.OHR_ADAPTER, *sorted(office.ADAPTERS),
-                          'dxf-native'])
+        names = [manifest.name for manifest in builtin_manifests()]
+
+        # `measurement-json` is the one display name that is not a registered contract
+        # adapter (G10): a measurement record is parsed by `datamind.cad_dimensions`.
+        self.assertEqual(names, [ingest._PDF_ADAPTER, ingest.OHR_ADAPTER, *sorted(office.ADAPTERS),
+                                 'dxf-native', 'measurement-json'])
 
     def test_the_pdf_manifest_declares_the_adapter_capability_set(self):
         pdf = builtin_manifests()[0]
@@ -55,6 +58,16 @@ class BuiltinDeclarationTests(unittest.TestCase):
             self.assertNotIn('json', extension)
         self.assertNotIn('.json', repr(ohr))
 
+    def test_the_measurement_manifest_claims_the_json_extension(self):
+        measurement = builtin_manifests()[-1]
+
+        self.assertEqual(measurement.name, 'measurement-json')
+        self.assertEqual(measurement.media_types, ('application/json',))
+        self.assertEqual(measurement.extensions, ('.json',))
+        self.assertEqual(measurement.capabilities, ('measurement_json',))
+        self.assertEqual(measurement.loader,
+                         'ingestion.plugins.measurement_json_plugin:parse')
+
 
 class DefaultContextTests(unittest.TestCase):
     def test_the_default_context_is_created_once(self):
@@ -66,7 +79,7 @@ class DefaultContextTests(unittest.TestCase):
         self.assertIsInstance(ctx.parser.list(), tuple)
         self.assertEqual([manifest.name for manifest in ctx.parser.list()],
                          ['pdf-native', 'ohr-bench-json', 'docx-native', 'pptx-native',
-                          'xlsx-native', 'dxf-native'])
+                          'xlsx-native', 'dxf-native', 'measurement-json'])
         self.assertEqual(ctx.parser.capabilities(),
                          {'pdf-native': ('native_text', 'pixel_ocr', 'tables', 'formula'),
                           'ohr-bench-json': ('native_text',),
@@ -74,7 +87,8 @@ class DefaultContextTests(unittest.TestCase):
                           'pptx-native': ('text', 'slides'),
                           'xlsx-native': ('text', 'sheet_rows', 'cached_values'),
                           'dxf-native': ('entities', 'text', 'layers', 'dimensions', 'blocks',
-                                         'arcs', 'polylines', 'mtext', 'native_dimensions')})
+                                         'arcs', 'polylines', 'mtext', 'native_dimensions'),
+                          'measurement-json': ('measurement_json',)})
 
     def test_every_media_type_and_extension_routes_to_its_plugin(self):
         parser = default_context().parser
@@ -91,7 +105,7 @@ class DefaultContextTests(unittest.TestCase):
                                 ('.xlsx', 'xlsx-native'), ('.dxf', 'dxf-native')):
             self.assertEqual(parser.lookup_by_extension(extension).name, name)
         self.assertEqual(parser.known_extensions(),
-                         ('.docx', '.dxf', '.pdf', '.pptx', '.xlsx'))
+                         ('.docx', '.dxf', '.json', '.pdf', '.pptx', '.xlsx'))
 
     def test_loader_references_stay_strings(self):
         for manifest in default_context().parser.list():
@@ -149,16 +163,26 @@ class AdapterBootstrapTests(unittest.TestCase):
 
 
 class ParserTableTests(unittest.TestCase):
-    def test_the_pdf_entry_still_points_at_the_patchable_module_function(self):
-        self.assertIs(upload_pipeline.PARSERS['.pdf'], upload_pipeline._parse_pdf)
+    def test_the_table_is_the_registrys_enabled_extension_set(self):
+        self.assertEqual(set(upload_pipeline.PARSERS),
+                         set(default_context().parser.known_extensions()))
 
-    def test_the_pdf_function_delegates_to_the_plugin_unchanged(self):
+    def test_a_sync_never_overwrites_an_entry_a_caller_already_set(self):
+        marker = object()
+
+        with mock.patch.dict(upload_pipeline.PARSERS, {'.pdf': marker}):
+            upload_pipeline._sync_parsers()
+            self.assertIs(upload_pipeline.PARSERS['.pdf'], marker)
+
+        self.assertIsNot(upload_pipeline.PARSERS['.pdf'], marker)
+
+    def test_the_generated_pdf_entry_calls_the_plugin_loader_with_the_claim(self):
         sentinel = ('result', {'pages': 3})
         path, claim = Path('staged.pdf'), {'document_id': 'doc-1',
                                            'source_sha256': 'a' * 64}
 
         with mock.patch('ingestion.plugins.pdf_plugin.parse', return_value=sentinel) as parse:
-            self.assertIs(upload_pipeline._parse_pdf(path, claim), sentinel)
+            self.assertIs(upload_pipeline.PARSERS['.pdf'](path, claim), sentinel)
 
         parse.assert_called_once_with(path, 'doc-1', 'a' * 64, claim)
 
