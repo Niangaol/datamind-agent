@@ -98,6 +98,11 @@ def register(ctx):
 三种形态都受 §4.2 的 stem loader 改写约束；`register(ctx)` 与 `MANIFEST` 同时存在时，
 `register` 优先。
 
+与 `MANIFEST` 形态一样，`register(ctx)` 形态也是可回滚的：只要 `register` 抛异常、它一个
+manifest 都没声明，或随后的 loader 改写/配置应用失败，该模块已注册的 parser manifest 会被
+全部撤销，模块被跳过（§4.1），注册表里不留半成品。`register` 用 `ctx` 注册的其它东西
+（服务、事件处理器、它自己的 disposer）不在此保证内，由插件自己负责。
+
 ## 3. Handler 契约
 
 ### 3.1 签名与返回值
@@ -157,7 +162,8 @@ def parse(path, document_id, source_version, options=None):
   以 `_` 开头的模块跳过（如 `_helper.py`）。
 - 多个目录按声明顺序扫描，文件按名称排序，绝对路径去重；同一文件只导入一次。
 - 单个模块导入或声明失败：记录 warning 并**跳过该模块**，不影响其它插件；配置错误则
-  整轮失败（fail-fast）。
+  整轮失败（fail-fast）。跳过是彻底跳过——两种声明形态（`MANIFEST` 与 `register(ctx)`）
+  失败时都会撤销该模块已占用的 manifest，注册表里不留半成品。
 - 设置该变量后，内置插件与外部插件共用同一个进程级 parser 注册表；外部插件的
   `loaded_from` 是该模块的绝对路径。
 
@@ -193,8 +199,9 @@ MANIFEST = ParserPluginManifest(..., loader='csv_parser:parse')   # 文件 csv_p
   `plugin.<name>.<field>`）。当前版本只把校验后的 config 记录在 `LoadedPlugin.config`，
   **尚未注入 handler**，清单端点也不回显配置值。
 - fail-fast：文件不可读、JSON 非法、条目形状错误、`enabled` 非布尔、`config` 违反 schema、
-  或插件名不存在，都会抛 `ConfigError`，进程不应带着错误配置启动。配置错误与模块加载
-  错误不同，不会被跳过。
+  或插件名不存在，都会抛 `ConfigError`。API 进程在启动时（FastAPI lifespan）与 `upload_worker`
+  在启动时都会跑一次发现并校验配置，所以错误配置会让进程**起不来**，而不是在第一次上传或
+  第一次 `GET /v1/parsers` 时才变成一个无标注的 500。配置错误与模块加载错误不同，不会被跳过。
 - 发现是显式且非原子的：配置错误可能在部分插件已注册后才暴露；修正配置后重启即可。
 
 ### 4.4 启停语义
@@ -217,8 +224,9 @@ MANIFEST = ParserPluginManifest(..., loader='csv_parser:parse')   # 文件 csv_p
 
 - 只扫描**运维显式配置**的目录（`DATAMIND_PLUGIN_PATH`），不扫描代码仓库、用户上传目录、
   `site-packages` 或递归子目录；默认（未设置）时只有内置插件。
-- 发现发生在 `ensure_loaded()`：API 进程的首次上传准入或首次请求 `GET /v1/parsers`，
-  以及每个解析子进程启动时（G8）。也就是说，配置进来的代码在这些入口已经被执行过。
+- 发现发生在 `ensure_loaded()`：API 进程启动时（FastAPI lifespan）、`upload_worker` 启动时、
+  每个解析子进程的**第一次解析之前**（不是子进程启动时，G8），以及首次上传准入和首次请求
+  `GET /v1/parsers`。也就是说，配置进来的代码在这些入口已经被执行过。
 - 外部插件的 `loaded_from` 是绝对路径，会暴露部署目录结构，所以清单端点只对 `admin`
   开放，且永不缓存。
 - 插件失败被归属为 422 并在日志里留下 traceback，但错误文本不进入 HTTP 响应体。

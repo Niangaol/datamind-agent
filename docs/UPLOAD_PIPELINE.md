@@ -609,6 +609,11 @@ python -m ingestion.upload_worker --watch --interval 5 --workers 2 --deadline 60
   `插件名 -> {"enabled": bool, "config": object|null}`。文件不可读、JSON 非法、条目形状
   错误、`enabled` 非布尔、`config` 违反插件 schema 或插件名不存在都会 **fail-fast**
   （`ConfigError`），不要带着错误配置启动。`config` 当前只记录、尚未注入 handler。
+- **worker 启动即跑发现**：`python -m ingestion.upload_worker` 在参数校验之后、解析 DSN
+  之前调用 `ensure_loaded()`。worker 父进程是 `_record_wave_timeout`/`_adapter_for` 的唯一
+  写入者，它因此也认识 `DATAMIND_PLUGIN_PATH` 里的外部插件——下面的 `analysis.plugin` 与
+  波次超时的 `plugin` 归属对外部插件同样成立（否则父进程只认识内置插件，只能记 `null`）。
+  配置错误会让 worker 打印一行 `plugin config error ...` 并以退出码 1 停止，不会先连库。
 - **停用插件后的 415**：后缀由已声明但 `enabled=false` 的插件占用时，
   `POST /v1/uploads` 返回
 
