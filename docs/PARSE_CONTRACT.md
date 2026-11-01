@@ -52,6 +52,16 @@
 
 `ingestion/ingest.py` 注册了 `pdf-native`（capabilities：`native_text`/`pixel_ocr`/`tables`/`formula`），`parse_pdf` 经 `dispatch` 走这条路由，因此质量明细里会出现 `adapter: pdf-native`——这是路由**真的被走到**的证据，而不只是登记表里有一行。
 
+**生产上传路由已迁移到解析插件注册表**：`/v1/uploads` 的后缀准入与解析派发由
+`datamind.plugin.manifest.ParserPluginManifest` + `ParserRegistry.lookup_by_extension`
+决定（内置声明在 `ingestion/plugins/`，外部插件由 `DATAMIND_PLUGIN_PATH` 发现），
+`ingestion/upload_pipeline.py` 只在注册表放行后调用插件的 `parse(path, document_id,
+source_version, options)`。`register_adapter` / `dispatch` 仍是**进程内契约门面**：适配器
+能力登记、`parse_pdf` 内部的 `dispatch` 与直接调用方继续按本节工作，但它们不再是上传
+路径的准入表。签名嗅探 `detect_media_type` 的行为**没有改变**，扩展名依然只是声明提示
+（G3）——上传准入问的是"有没有启用插件声明这个后缀"，字节是什么仍由签名回答。插件
+系统的完整说明见 [PLUGIN_SYSTEM.md](PLUGIN_SYSTEM.md)。
+
 ## Adapter 能力登记
 
 `register_adapter(name, media_types=…, capabilities=…)` 登记进程内契约（**不是生产路由表**）；同一 media type 不能重复登记。`adapter_for(media_type)` 对未登记类型抛 `PARSE_ADAPTER_UNKNOWN`，**绝不返回「空解析成功」**。`require_capability` 区分「适配器未知」（`PARSE_ADAPTER_UNKNOWN`）与「能力不支持」（`PARSE_ADAPTER_UNSUPPORTED`）。

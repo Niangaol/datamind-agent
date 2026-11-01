@@ -346,6 +346,9 @@ R05 的症状。
 - `adapter`：产生该结果的适配器名。取值来源优先级：`ParseResult.manifest.adapter`，
   否则按后缀取
   `dxf-native|measurement-json|pdf-native|docx-native|pptx-native|xlsx-native`。
+- `plugin`（本版新增）：声明该后缀的**插件名**，按注册表声明扫描而非启用状态查询，所以
+  插件停用后已有记录仍如实归因；没有声明时为 `null`。它来自声明，`adapter` 来自解析结果，
+  两者是不同字段（内置插件按适配器同名，通常取值相同）。
 - `blocks`：写入统一契约存储（`document_contract_blocks`）的块数。
 - `locators_written`：**已验证定位**的块数（当前等于 `blocks`，因为契约要求每个块都带
   合法 locator）。
@@ -592,6 +595,41 @@ python -m ingestion.upload_worker --watch --interval 5 --workers 2 --deadline 60
 - `--sql-only`：不启动 worker（该部署没有上传管道）。
 - 手动：`.venv/bin/python -m ingestion.upload_worker --watch`。若任务停在 `queued` 且
   `worker.alive=false`，先启动它。
+
+### 解析插件：路由、配置与清单（本版新增）
+
+上传后缀的准入与解析派发由**解析插件注册表**决定（`ParserPluginManifest` +
+`lookup_by_extension`）；`PARSERS` 只是入口缓存，每次派发仍先问注册表，因此运行期被停用的
+插件不会被陈旧缓存继续解析。完整说明见 [PLUGIN_SYSTEM.md](PLUGIN_SYSTEM.md)。
+
+- `DATAMIND_PLUGIN_PATH`：`os.pathsep` 分隔的目录列表，只扫描每个目录**一层**顶层
+  `*.py`（`_` 开头跳过，不递归、不扫 `site-packages`）。目录不存在是启动配置错误。未设置
+  时只有内置插件；示例见 `examples/plugins/csv_parser/`。
+- `DATAMIND_PLUGIN_CONFIG`：指向一个 JSON 文件，内容为
+  `插件名 -> {"enabled": bool, "config": object|null}`。文件不可读、JSON 非法、条目形状
+  错误、`enabled` 非布尔、`config` 违反插件 schema 或插件名不存在都会 **fail-fast**
+  （`ConfigError`），不要带着错误配置启动。`config` 当前只记录、尚未注入 handler。
+- **停用插件后的 415**：后缀由已声明但 `enabled=false` 的插件占用时，
+  `POST /v1/uploads` 返回
+
+  ```json
+  {"detail": {"error_code": "UNSUPPORTED_MEDIA_TYPE",
+              "details": {"suffix": ".csv", "reason": "plugin_disabled",
+                          "plugin": "csv-example"}}}
+  ```
+
+  未知后缀仍是同一错误码、只带 `details.suffix`。解析派发（`run_parse`）在任务已入队后
+  发现插件被停用，同样以 `reason='plugin_disabled'` 失败，而不是用旧缓存解析。
+- **`analysis.plugin`（增量字段）**：上传详情的 `quality_detail.analysis` 新增 `plugin`，
+  值为声明该后缀的插件名。它按**声明**扫描（不是启用状态查询），所以停用后已有记录仍能
+  说出是谁解析的；没有声明时为 `null`。`adapter` 字段保持不变（可能等于 `plugin`）。
+- **波次超时的归属**：`_record_wave_timeout` 在 `quality_detail.upload` 里写
+  `wave_timeouts` 的同时写 `plugin`，原因同上——超时/重试必须能归因到插件声明。
+- `GET /v1/parsers`：**仅 admin**、`no-store` 的**进程本地**清单（响应体
+  `{"process_local": true, "parsers": [...]}`）。每项恰好八个字段（`name`、`version`、
+  `media_types`、`extensions`、`capabilities`、`enabled`、`loaded_from`、
+  `registered_in_contract`），**不回显配置值**；`loaded_from` 是外部插件的绝对路径，因此
+  只给 admin。两个 worker 可以给出不同答案。
 
 ### `run_parse` 不会做的事
 
