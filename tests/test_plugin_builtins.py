@@ -165,7 +165,7 @@ class AdapterBootstrapTests(unittest.TestCase):
 class ParserTableTests(unittest.TestCase):
     def test_the_table_is_the_registrys_enabled_extension_set(self):
         self.assertEqual(set(upload_pipeline.PARSERS),
-                         set(default_context().parser.known_extensions()))
+                         set(default_context().parser.known_extensions(include_disabled=False)))
 
     def test_a_sync_never_overwrites_an_entry_a_caller_already_set(self):
         marker = object()

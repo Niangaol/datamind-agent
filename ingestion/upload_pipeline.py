@@ -99,7 +99,7 @@ from datamind.knowledge import ROOT
 from datamind.plugin.manifest import PARSE_ADAPTER_UNSUPPORTED, ManifestError
 
 from . import contract_store
-from .plugins import default_context
+from .plugins import default_context, ensure_loaded
 
 QUEUE_JOB_TYPE = 'upload_parse'
 ORIGIN = 'upload'
@@ -273,8 +273,10 @@ def target(filename):
     if suffix == '.dwg':
         # This repository ships no DWG converter; the frozen interface pins the exact body.
         fail(DWG_ERROR_CODE, 415)
-    _sync_parsers()
+    # Config and discovery failures are startup errors and stay outside the routing try.
+    ensure_loaded()
     try:
+        _sync_parsers()
         default_context().parser.lookup_by_extension(suffix)
     except ManifestError as error:
         if error.error_code == PARSE_ADAPTER_UNSUPPORTED:
@@ -330,11 +332,16 @@ def enqueue(staged, provenance, dsn, identity):
       generation (`attempt+1` + a fresh token).
     """
     suffix = staged['suffix']
+    ensure_loaded()
     try:
         media_type = default_context().parser.lookup_by_extension(suffix).media_types[0]
-    except ManifestError:
+    except ManifestError as error:
         # The suffix passed `target`; it can only have lost its plugin since then, and a
         # disabled plugin must be refused here rather than queued into a failing parse.
+        # The body matches `target`'s so a client sees one refusal shape for one cause.
+        if error.error_code == PARSE_ADAPTER_UNSUPPORTED:
+            fail('UNSUPPORTED_MEDIA_TYPE', 415, suffix=suffix,
+                 reason='plugin_disabled', plugin=error.details.get('plugin'))
         fail('UNSUPPORTED_MEDIA_TYPE', 415, suffix=suffix)
     ids = identities(staged['source_sha256'])
     # `document_assets.object_uri` follows the repository-wide convention of an **absolute**
@@ -1108,7 +1115,11 @@ def _plugin_parser(manifest):
 
 
 def _sync_parsers():
-    """Fill `PARSERS` from the enabled extensions the registry reports, never overwriting."""
+    """Fill `PARSERS` from the enabled extensions the registry reports, never overwriting.
+
+    A key is never replaced (G6): a patched entry survives a re-sync, and so does the
+    closure an extension was filled with before its manifest was replaced.
+    """
     parser = default_context().parser
     for extension in parser.known_extensions(include_disabled=False):
         PARSERS.setdefault(extension, _plugin_parser(parser.lookup_by_extension(extension)))
@@ -1135,10 +1146,14 @@ def run_parse(claim, dsn):
     quality detail, no terminal state — it returns `claim_lost` instead.
     """
     # The parsing child owns its own process, so the table is bootstrapped here too (G8).
+    ensure_loaded()
     _sync_parsers()
+    parser_entry = PARSERS.get(claim['suffix'])
+    if parser_entry is None:
+        fail('UNSUPPORTED_MEDIA_TYPE', 415, suffix=claim['suffix'])
     path = _staged_path(claim)
     with contextlib.redirect_stdout(sys.stderr):
-        result, extra = PARSERS[claim['suffix']](path, claim)
+        result, extra = parser_entry(path, claim)
     payload = result.payload
     parse_status = payload['parse_status']
     terminal = ('succeeded' if parse_status == 'parsed'
