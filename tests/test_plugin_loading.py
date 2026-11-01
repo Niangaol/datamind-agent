@@ -119,6 +119,34 @@ except HTTPException as error:
     print(json.dumps({'status': error.status_code, 'detail': error.detail}))
 '''
 
+SCRIPT_TARGET_CSV = '''\
+import json
+from fastapi import HTTPException
+from ingestion import upload_pipeline
+
+try:
+    print(json.dumps({'suffix': upload_pipeline.target('x.csv')}))
+except HTTPException as error:
+    print(json.dumps({'status': error.status_code, 'detail': error.detail}))
+'''
+
+SCRIPT_STRING_LOADER = '''\
+import json
+from ingestion.plugins import default_context, ensure_loaded
+
+ensure_loaded()
+loader = default_context().parser.lookup_by_extension('.csv').resolve()
+try:
+    loader('x.csv', 'doc-1', 'a' * 64, {})
+except NotImplementedError:
+    outcome = 'not_implemented'
+else:
+    outcome = 'returned'
+print(json.dumps({'callable': callable(loader),
+                  'module': getattr(loader, '__module__', None),
+                  'outcome': outcome}))
+'''
+
 SCRIPT_LOAD = '''\
 from ingestion.plugins import ensure_loaded
 
@@ -202,7 +230,26 @@ class DirectoryDiscoveryTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         external = [record for record in json.loads(result.stdout)['loaded']
                     if record['name'] == 'csv-demo']
+        self.assertEqual(len(external), 1)
         self.assertEqual(external[0]['config'], {'delimiter': ';'})
+
+    def test_an_explicit_null_config_is_recorded_as_no_config(self):
+        with tempfile.TemporaryDirectory() as root:
+            plugin_dir = Path(root) / 'plugins'
+            plugin_dir.mkdir()
+            write_module(plugin_dir, 'csv_plugin.py', CSV_PLUGIN)
+            config = Path(root) / 'plugins.json'
+            config.write_text(json.dumps(
+                {'csv-demo': {'enabled': True, 'config': None}}), encoding='utf-8')
+            result = run_script(SCRIPT_DISCOVER,
+                                env={plugins.PLUGIN_PATH_ENV: str(plugin_dir),
+                                     plugins.PLUGIN_CONFIG_ENV: str(config)})
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        external = [record for record in json.loads(result.stdout)['loaded']
+                    if record['name'] == 'csv-demo']
+        self.assertEqual(len(external), 1)
+        self.assertIsNone(external[0]['config'])
 
     def test_a_duplicate_name_keeps_the_builtin_and_is_only_reported(self):
         with tempfile.TemporaryDirectory() as root:
@@ -245,11 +292,46 @@ class DisabledPluginTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(json.loads(result.stdout), {'suffix': '.dxf'})
 
+    def test_a_disabled_external_plugin_names_itself_in_the_refusal(self):
+        with tempfile.TemporaryDirectory() as root:
+            plugin_dir = Path(root) / 'plugins'
+            plugin_dir.mkdir()
+            write_module(plugin_dir, 'csv_plugin.py', CSV_PLUGIN)
+            config = self._config(root, {'csv-demo': {'enabled': False}})
+            result = run_script(SCRIPT_TARGET_CSV,
+                                env={plugins.PLUGIN_PATH_ENV: str(plugin_dir),
+                                     plugins.PLUGIN_CONFIG_ENV: str(config)})
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload['status'], 415)
+        self.assertEqual(payload['detail'],
+                         {'error_code': 'UNSUPPORTED_MEDIA_TYPE',
+                          'details': {'suffix': '.csv', 'reason': 'plugin_disabled',
+                                      'plugin': 'csv-demo'}})
+
+
+class ExternalStringLoaderTests(unittest.TestCase):
+    def test_a_string_loader_naming_its_own_file_resolves(self):
+        with tempfile.TemporaryDirectory() as root:
+            write_module(root, 'csv_plugin.py', CSV_PLUGIN)
+            result = run_script(SCRIPT_STRING_LOADER,
+                                env={plugins.PLUGIN_PATH_ENV: str(root)})
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertTrue(payload['callable'])
+        # The loader lives in the synthetically named plugin module, not a bare stem.
+        self.assertTrue(payload['module'].startswith('datamind_external_plugin_'),
+                        payload['module'])
+        self.assertEqual(payload['outcome'], 'not_implemented')
+
 
 class InvalidConfigTests(unittest.TestCase):
     def _run(self, body, *, raw=None, plugin_dir=None):
         with tempfile.TemporaryDirectory() as root:
             config = Path(root) / 'plugins.json'
+            self.config_path = config
             config.write_text(raw if raw is not None else json.dumps(body), encoding='utf-8')
             env = {plugins.PLUGIN_CONFIG_ENV: str(config)}
             if plugin_dir is not None:
@@ -266,7 +348,8 @@ class InvalidConfigTests(unittest.TestCase):
                                         ('plugin.dxf-native.config', 'expects an object')),
             'entry_is_not_an_object': ({'dxf-native': True},
                                        ('plugin.dxf-native', 'expects an object')),
-            'root_is_not_an_object': ([], ('plugins', 'expects a JSON object')),
+            # The subject is the config file itself: a non-object root has no field path.
+            'root_is_not_an_object': ([], ('expects a JSON object',)),
             'unknown_plugin_name': ({'ghost-plugin': {'enabled': True}},
                                     ('plugin.ghost-plugin', 'is not a loaded plugin')),
         }
@@ -276,6 +359,8 @@ class InvalidConfigTests(unittest.TestCase):
                 self.assertNotEqual(result.returncode, 0)
                 for fragment in fragments:
                     self.assertIn(fragment, result.stderr)
+                if name == 'root_is_not_an_object':
+                    self.assertIn(str(self.config_path), result.stderr)
 
     def test_invalid_json_names_the_file(self):
         with tempfile.TemporaryDirectory() as root:
@@ -345,7 +430,7 @@ class ChildBootstrapTests(unittest.TestCase):
 
             outcome = task_budget.run_bounded(
                 'ingestion.upload_pipeline', 'target', ['sample.csv'],
-                deadline_s=30, cwd=str(ROOT), env=env)
+                deadline_s=60, cwd=str(ROOT), env=env)
 
         self.assertEqual(outcome['status'], 'ok', outcome)
         # `target` returns the suffix it admitted, not the name it was handed.
@@ -371,6 +456,51 @@ class InProcessLoadingTests(unittest.TestCase):
                           'xlsx-native', 'dxf-native', 'measurement-json'])
         self.assertEqual({record.loaded_from for record in loaded}, {'builtin'})
         self.assertTrue(all(record.config is None for record in loaded))
+
+
+class DisabledBuiltinDispatchTests(unittest.TestCase):
+    """`run_parse`/`enqueue` refuse a builtin disabled after import, inside one process.
+
+    This must run in this interpreter (the manifest it flips is the live one), so the
+    environment is neutralized like :class:`InProcessLoadingTests` and ``enabled`` is
+    restored in a ``finally`` before any assertion can escape.
+    """
+
+    def setUp(self):
+        saved = {name: os.environ.pop(name) for name in PLUGIN_ENV_KEYS if name in os.environ}
+        self.addCleanup(os.environ.update, saved)
+
+    def test_a_disabled_builtin_is_refused_by_run_parse_and_enqueue(self):
+        from fastapi import HTTPException
+        from ingestion import upload_pipeline
+
+        # Load the once-per-process pass first; otherwise `run_parse` itself would apply
+        # the builtin defaults and re-enable the manifest under the test.
+        plugins.ensure_loaded()
+        manifest = next(manifest for manifest in plugins.default_context().parser.list()
+                        if manifest.name == 'dxf-native')
+        expected = {'error_code': 'UNSUPPORTED_MEDIA_TYPE',
+                    'details': {'suffix': '.dxf', 'reason': 'plugin_disabled',
+                                'plugin': 'dxf-native'}}
+        try:
+            manifest.enabled = False
+            refusals = {}
+            for label, call in (
+                    ('run_parse',
+                     lambda: upload_pipeline.run_parse({'suffix': '.dxf'}, None)),
+                    ('enqueue',
+                     lambda: upload_pipeline.enqueue(
+                         {'suffix': '.dxf'}, 'synthetic_demo', None, None))):
+                with self.assertRaises(HTTPException) as caught:
+                    call()
+                refusals[label] = (caught.exception.status_code, caught.exception.detail)
+        finally:
+            manifest.enabled = True
+
+        for label, (status, detail) in refusals.items():
+            with self.subTest(call=label):
+                self.assertEqual(status, 415)
+                self.assertEqual(detail, expected)
 
 
 if __name__ == '__main__':

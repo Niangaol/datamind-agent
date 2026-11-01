@@ -1095,9 +1095,11 @@ def _staged_path(claim):
     return path
 
 
-#: Extension -> parser, derived from the parser registry. A plain dict because callers
-#: patch a single entry; `_sync_parsers` only fills missing keys, so a patched entry
-#: survives the mid-life re-sync in `run_parse`.
+#: Extension -> parser entry point, derived from the parser registry. A plain dict because
+#: callers patch a single entry; `_sync_parsers` only fills missing keys, so a patched entry
+#: survives the mid-life re-sync in `run_parse`. The table supplies the callable only:
+#: whether a suffix is served at all is decided by a registry lookup on every dispatch, so an
+#: extension disabled after import is refused even though its stale entry is still here.
 PARSERS = {}
 
 
@@ -1118,7 +1120,10 @@ def _sync_parsers():
     """Fill `PARSERS` from the enabled extensions the registry reports, never overwriting.
 
     A key is never replaced (G6): a patched entry survives a re-sync, and so does the
-    closure an extension was filled with before its manifest was replaced.
+    closure an extension was filled with before its manifest was replaced. The table is
+    only the entry-point cache, not the dispatch decision - `run_parse` asks the registry
+    first on every call, so a manifest disabled after import cannot keep parsing through
+    the stale closure this function left behind.
     """
     parser = default_context().parser
     for extension in parser.known_extensions(include_disabled=False):
@@ -1148,9 +1153,17 @@ def run_parse(claim, dsn):
     # The parsing child owns its own process, so the table is bootstrapped here too (G8).
     ensure_loaded()
     _sync_parsers()
-    parser_entry = PARSERS.get(claim['suffix'])
-    if parser_entry is None:
+    # The registry, not `PARSERS`, decides whether the suffix is served: a plugin disabled
+    # after import keeps its entry point in the table and must be refused here instead.
+    try:
+        manifest = default_context().parser.lookup_by_extension(claim['suffix'])
+    except ManifestError as error:
+        if error.error_code == PARSE_ADAPTER_UNSUPPORTED:
+            fail('UNSUPPORTED_MEDIA_TYPE', 415, suffix=claim['suffix'],
+                 reason='plugin_disabled', plugin=error.details.get('plugin'))
         fail('UNSUPPORTED_MEDIA_TYPE', 415, suffix=claim['suffix'])
+    # A patched entry still wins for an enabled extension; the lookup above only gates.
+    parser_entry = PARSERS.get(claim['suffix']) or _plugin_parser(manifest)
     path = _staged_path(claim)
     with contextlib.redirect_stdout(sys.stderr):
         result, extra = parser_entry(path, claim)

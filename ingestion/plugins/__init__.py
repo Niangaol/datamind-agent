@@ -65,8 +65,9 @@ class LoadedPlugin:
     ``loaded_from`` is ``'builtin'`` for the declarations this package ships and the
     absolute file path of the module for an external plugin. ``config`` is the subset a
     ``DATAMIND_PLUGIN_CONFIG`` entry declared, validated against the manifest schema; it
-    is ``None`` when the entry declared no config. Nothing injects it into a parse handler
-    yet - it is recorded so a later task can, and so the listing endpoint can report it.
+    is ``None`` when the entry declared no config or an explicit ``null``. Nothing injects
+    it into a parse handler yet - it is recorded so a later task can, and so the listing
+    endpoint can report it.
     """
 
     manifest: ParserPluginManifest
@@ -111,10 +112,12 @@ def ensure_loaded() -> Context:
 
     A failing *module* is logged and skipped so one broken plugin cannot disable the rest;
     a failing *configuration* (bad JSON, an unknown plugin name, an invalid ``enabled``
-    value or a config the manifest schema rejects) raises :class:`ConfigError` and leaves
-    ``_loaded`` unset, because a process that mis-declares what it may parse must not
-    start. The flag is set only after a complete pass, so a raised error is retried by the
-    next caller instead of being memoized as success.
+    value or a config the manifest schema rejects) raises :class:`ConfigError`, because a
+    process that mis-declares what it may parse must not start. The flag is only set after
+    a complete pass, so a caller that caught the error tries the pass again rather than
+    seeing a memoized success. The pass is not atomic, though: a config error can surface
+    after some plugins already registered, and a retry may then fail on a duplicate name.
+    In practice a configuration error is a startup error - fix the config and restart.
     """
     global _loaded, _loaded_plugins
     if _loaded:
@@ -168,7 +171,7 @@ def _plugin_config() -> dict[str, dict[str, Any]]:
     except ValueError as error:
         raise ConfigError(path, f'is not valid JSON: {error}') from error
     if not isinstance(data, dict):
-        raise ConfigError('plugins', f'expects a JSON object, got {type(data).__name__}')
+        raise ConfigError(path, f'expects a JSON object, got {type(data).__name__}')
     return {name: _config_entry(name, value) for name, value in data.items()}
 
 
@@ -203,7 +206,9 @@ def _apply_entry(manifest: ParserPluginManifest, entry: dict[str, Any] | None,
     if entry is not None:
         if 'enabled' in entry:
             manifest.enabled = entry['enabled']
-        if 'config' in entry:
+        # An absent config and an explicit null both mean "nothing declared", so both keep
+        # ``config`` at None instead of recording the validator's ``{}`` for null.
+        if entry.get('config') is not None:
             config = manifest.validate_config(entry['config'])
     return LoadedPlugin(manifest=manifest, loaded_from=loaded_from, config=config)
 
@@ -263,16 +268,22 @@ def _discover(context: Context, entries: dict[str, dict[str, Any]]) -> list[Load
     return records
 
 
+def _external_module_name(path: Path) -> str:
+    """The synthetic module name an external plugin file is imported under."""
+    return ('datamind_external_plugin_'
+            + hashlib.sha1(str(path).encode('utf-8')).hexdigest()[:16])
+
+
 def _import_file(path: Path) -> Any:
     """Import one plugin file under a synthetic name derived from its absolute path."""
-    name = ('datamind_external_plugin_'
-            + hashlib.sha1(str(path).encode('utf-8')).hexdigest()[:16])
+    name = _external_module_name(path)
     spec = importlib.util.spec_from_file_location(name, path)
     if spec is None or spec.loader is None:
         raise ImportError(f'cannot create an import spec for {path}')
     module = importlib.util.module_from_spec(spec)
     # Registered before execution so a module that imports itself or defines a dataclass
-    # resolves; removed again on failure so a retry does not see half a module.
+    # resolves; removed again on failure so a retry does not see half a module. Only the
+    # synthetic name is registered - never the bare stem, which could shadow a real module.
     sys.modules[name] = module
     try:
         spec.loader.exec_module(module)
@@ -280,6 +291,20 @@ def _import_file(path: Path) -> Any:
         sys.modules.pop(name, None)
         raise
     return module
+
+
+def _bind_loader(manifest: ParserPluginManifest, module_name: str, path: Path) -> None:
+    """Point a string loader that names its own file by stem at the synthetic module name.
+
+    The plugin directory is not on ``sys.path``, so ``loader='csv_plugin:parse'`` in
+    ``csv_plugin.py`` would otherwise fail to import. ``resolve()`` reads ``loader`` at
+    call time, so rewriting it here is enough for both declaration shapes.
+    """
+    loader = manifest.loader
+    if isinstance(loader, str):
+        module_part, separator, attribute = loader.partition(':')
+        if separator and module_part == path.stem:
+            manifest.loader = f'{module_name}:{attribute}'
 
 
 def _load_external(context: Context, path: Path,
@@ -290,8 +315,12 @@ def _load_external(context: Context, path: Path,
     registration, so its declarations are whatever new names it left in the registry. A
     module-level ``MANIFEST`` (one manifest or an iterable of them) is registered here,
     which lets a failure dispose the manifests this module already claimed.
+
+    A string loader may name its own file by stem (rewritten to the synthetic module name)
+    or another importable module; callables work unchanged.
     """
     module = _import_file(path)
+    module_name = _external_module_name(path)
     registry = context.parser
     loaded_from = str(path)
     register = getattr(module, 'register', None)
@@ -301,6 +330,8 @@ def _load_external(context: Context, path: Path,
         manifests = [manifest for manifest in registry.list() if manifest.name not in before]
         if not manifests:
             raise PluginError(f'{path} register(ctx) declared no parser manifest')
+        for manifest in manifests:
+            _bind_loader(manifest, module_name, path)
         return [_apply_entry(manifest, entries.get(manifest.name), loaded_from)
                 for manifest in manifests]
 
@@ -308,6 +339,7 @@ def _load_external(context: Context, path: Path,
     records: list[LoadedPlugin] = []
     try:
         for manifest in _declared_manifests(module, path):
+            _bind_loader(manifest, module_name, path)
             record = _apply_entry(manifest, entries.get(manifest.name), loaded_from)
             disposers.append(registry.register(manifest))
             records.append(record)
