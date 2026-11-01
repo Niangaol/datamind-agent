@@ -31,7 +31,7 @@ Example::
     from datamind.plugin.manifest import ParserPluginManifest, ParserRegistry
 
     ctx = Context()
-    ctx.set('parser', ParserRegistry(ctx))          # the registry rides on the context
+    ctx.set('parser', ParserRegistry())             # registered as the contextual service
 
     dispose = ctx.parser.register(ParserPluginManifest(
         'pdf', '1.0.0', ['application/pdf'], ['.pdf'],
