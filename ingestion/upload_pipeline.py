@@ -1059,35 +1059,23 @@ def _staged_path(claim):
 
 
 def _parse_dxf(path, claim):
-    from . import cad_adapter
-    try:
-        result = cad_adapter.parse(path, document_id=claim['document_id'],
-                                   source_version=claim['source_sha256'],
-                                   provenance=claim['provenance'])
-    except HTTPException as error:
-        detail = error.detail if isinstance(error.detail, dict) else {}
-        # The adapter may not accept `provenance` after a future profile revision; the
-        # documented entry point stays `parse(path, document_id=, source_version=)`.
-        if (detail.get('details') or {}).get('reason') != 'handler_signature':
-            raise
-        result = cad_adapter.parse(path, document_id=claim['document_id'],
-                                   source_version=claim['source_sha256'])
-    payload = result.payload
-    layers = sorted({block['locator'].get('layer') for block in payload['blocks']
-                     if isinstance(block.get('locator'), dict)
-                     and block['locator'].get('locator_kind') == 'cad_entity'
-                     and block['locator'].get('layer')})
-    entities = sum(1 for block in payload['blocks'] if block['block_type'] != 'dimension')
-    dimensions = sum(1 for block in payload['blocks'] if block['block_type'] == 'dimension')
-    return result, {'layers': len(layers), 'layer_names': layers, 'entities': entities,
-                    'dimensions': dimensions}
+    """DXF parse: the built-in ``dxf-native`` plugin owns the composition.
+
+    Kept as a module-level function behind ``PARSERS['.dxf']`` because tests patch both;
+    the plugin is imported here so importing this module stays light.
+    """
+    from .plugins import dxf_plugin
+    return dxf_plugin.parse(path, claim['document_id'], claim['source_sha256'], claim)
 
 
 def _parse_office(path, claim):
-    from . import office
-    result = office.parse(path, document_id=claim['document_id'],
-                          source_version=claim['source_sha256'])
-    return result, {}
+    """Office parse: the built-in ``docx/pptx/xlsx-native`` plugins own the composition.
+
+    All three extensions share one parser function and one plugin loader;
+    ``ingestion.office.parse`` re-sniffs the package and dispatches.
+    """
+    from .plugins import office_plugin
+    return office_plugin.parse(path, claim['document_id'], claim['source_sha256'], claim)
 
 
 def _parse_pdf(path, claim):

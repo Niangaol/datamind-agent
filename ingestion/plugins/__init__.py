@@ -16,7 +16,7 @@ import threading
 from datamind.plugin import Context
 from datamind.plugin.manifest import ParserPluginManifest, ParserRegistry
 
-from . import ohr_json_plugin, pdf_plugin
+from . import dxf_plugin, office_plugin, ohr_json_plugin, pdf_plugin
 
 __all__ = ['builtin_manifests', 'default_context']
 
@@ -26,7 +26,8 @@ _context: Context | None = None
 
 def builtin_manifests() -> tuple[ParserPluginManifest, ...]:
     """Every built-in parser manifest, in registration order."""
-    return (pdf_plugin.MANIFEST, ohr_json_plugin.MANIFEST)
+    return (pdf_plugin.MANIFEST, ohr_json_plugin.MANIFEST, *office_plugin.MANIFESTS,
+            dxf_plugin.MANIFEST)
 
 
 def default_context() -> Context:

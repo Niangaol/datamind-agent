@@ -1,9 +1,10 @@
-"""Built-in parser plugins: the PDF and OHR-Bench JSON declarations and their bootstrap.
+"""Built-in parser plugins: the declaration inventory and its bootstrap.
 
 These tests pin the two contracts the plugin layer adds without changing parse behaviour:
-the declarations must match the adapters ``ingestion.ingest`` already registers, and the
-process-wide default context must be the one place both the API process and the parsing
-child process bootstrap from. Listing them must never import a parser dependency (G7).
+the declarations must match the adapters ``ingestion.ingest`` and ``ingestion.office``
+already register, and the process-wide default context must be the one place both the API
+process and the parsing child process bootstrap from. Listing them must never import a
+parser dependency (G7).
 """
 from __future__ import annotations
 
@@ -17,16 +18,17 @@ from unittest import mock
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from datamind import parse_contract as contract
-from ingestion import ingest, upload_pipeline
+from ingestion import ingest, office, upload_pipeline
 from ingestion.plugins import builtin_manifests, default_context
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 class BuiltinDeclarationTests(unittest.TestCase):
-    def test_the_builtins_are_the_adapters_ingest_already_registers(self):
+    def test_the_builtins_are_the_adapters_the_parsers_already_register(self):
         self.assertEqual([manifest.name for manifest in builtin_manifests()],
-                         [ingest._PDF_ADAPTER, ingest.OHR_ADAPTER])
+                         [ingest._PDF_ADAPTER, ingest.OHR_ADAPTER, *sorted(office.ADAPTERS),
+                          'dxf-native'])
 
     def test_the_pdf_manifest_declares_the_adapter_capability_set(self):
         pdf = builtin_manifests()[0]
@@ -58,15 +60,21 @@ class DefaultContextTests(unittest.TestCase):
     def test_the_default_context_is_created_once(self):
         self.assertIs(default_context(), default_context())
 
-    def test_the_default_context_installs_the_registry_with_both_builtins(self):
+    def test_the_default_context_installs_the_registry_with_every_builtin(self):
         ctx = default_context()
 
         self.assertIsInstance(ctx.parser.list(), tuple)
         self.assertEqual([manifest.name for manifest in ctx.parser.list()],
-                         ['pdf-native', 'ohr-bench-json'])
+                         ['pdf-native', 'ohr-bench-json', 'docx-native', 'pptx-native',
+                          'xlsx-native', 'dxf-native'])
         self.assertEqual(ctx.parser.capabilities(),
                          {'pdf-native': ('native_text', 'pixel_ocr', 'tables', 'formula'),
-                          'ohr-bench-json': ('native_text',)})
+                          'ohr-bench-json': ('native_text',),
+                          'docx-native': ('text', 'headings', 'tables'),
+                          'pptx-native': ('text', 'slides'),
+                          'xlsx-native': ('text', 'sheet_rows', 'cached_values'),
+                          'dxf-native': ('entities', 'text', 'layers', 'dimensions', 'blocks',
+                                         'arcs', 'polylines', 'mtext', 'native_dimensions')})
 
     def test_every_media_type_and_extension_routes_to_its_plugin(self):
         parser = default_context().parser
@@ -76,7 +84,14 @@ class DefaultContextTests(unittest.TestCase):
         self.assertEqual(parser.lookup_by_extension('.pdf').name, 'pdf-native')
         self.assertEqual(parser.lookup_by_extension('pdf').name, 'pdf-native')
         self.assertEqual(parser.lookup(ingest.OHR_MEDIA_TYPE).name, 'ohr-bench-json')
-        self.assertEqual(parser.known_extensions(), ('.pdf',))
+        for name, media_type in office.ADAPTERS.items():
+            self.assertEqual(parser.lookup(media_type).name, name)
+        self.assertEqual(parser.lookup(contract.DXF_MEDIA_TYPE).name, 'dxf-native')
+        for extension, name in (('.docx', 'docx-native'), ('.pptx', 'pptx-native'),
+                                ('.xlsx', 'xlsx-native'), ('.dxf', 'dxf-native')):
+            self.assertEqual(parser.lookup_by_extension(extension).name, name)
+        self.assertEqual(parser.known_extensions(),
+                         ('.docx', '.dxf', '.pdf', '.pptx', '.xlsx'))
 
     def test_loader_references_stay_strings(self):
         for manifest in default_context().parser.list():
@@ -89,7 +104,8 @@ class StdlibOnlyTests(unittest.TestCase):
         code = ('import sys, ingestion.plugins as plugins; '
                 'plugins.builtin_manifests(); '
                 '[(m.name, m.capabilities) for m in plugins.default_context().parser.list()]; '
-                'banned = {"pymupdf", "qdrant_client", "ingestion.ingest"}; '
+                'banned = {"pymupdf", "qdrant_client", "ingestion.ingest", '
+                '"ingestion.office", "ingestion.cad_adapter", "docx", "ezdxf"}; '
                 'print(",".join(sorted(banned & set(sys.modules))))')
         result = subprocess.run([sys.executable, '-c', code], capture_output=True, text=True,
                                 cwd=str(ROOT), env=dict(os.environ, PYTHONPATH=str(ROOT)))
