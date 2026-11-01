@@ -627,6 +627,28 @@ def register_adapter(name, *, media_types, capabilities, handler=None):
     return record
 
 
+def _unregister_adapter(name):
+    """Free every media type held by the adapter record called ``name``.
+
+    Internal counterpart of `register_adapter`, used by the parser plugin registry when a
+    plugin is unloaded or reloaded: a reload must free the media types its previous record
+    claimed, otherwise `register_adapter` refuses the reload with
+    `media_type_already_registered`. Only the named record's media types are removed - a
+    sibling whose name merely starts with the same prefix stays registered - and the
+    removed record is returned, or None when nothing has that name. Running it twice is a
+    no-op the second time.
+    """
+    target = name.strip() if isinstance(name, str) else name
+    media_types = [media_type for media_type, record in _ADAPTERS.items()
+                   if record['name'] == target]
+    if not media_types:
+        return None
+    record = _ADAPTERS.pop(media_types[0])
+    for media_type in media_types[1:]:
+        del _ADAPTERS[media_type]
+    return record
+
+
 def _ooxml_subtype(path):
     """Distinguish an OOXML subtype from a plain ZIP by its package index."""
     try:
