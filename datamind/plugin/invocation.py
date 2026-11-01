@@ -7,30 +7,46 @@ which is why ``ingestion.upload_pipeline`` never calls a loader directly any mor
 
 Two rules shape it:
 
-*the kernel stays standard library only (G2)*
-    ``fastapi`` is imported inside the exception path only, never at module top, so the
-    kernel stays importable without the application's web stack and a listing endpoint
-    cannot pull a web framework through a plugin import.
+*importing this module is standard library only (G2)*
+    ``fastapi`` is imported inside the exception path only, never at module top, so
+    importing this module pulls no web framework, and a listing endpoint cannot drag one in
+    through a plugin import. (Turning a failure into an ``HTTPException`` does require
+    fastapi - a runtime dependency of the application - but only the import of this module
+    is stdlib-only.)
 
 *passthrough is not a failure*
     A plugin that raises ``HTTPException`` has deliberately refused the input and already
     named its own stable code (G12); that exception is re-raised unchanged, so the contract
-    error the caller sees is exactly the one the plugin raised. Everything else is mapped
-    onto ``PARSE_ADAPTER_UNSUPPORTED``: an ``ImportError`` (including
-    ``ModuleNotFoundError``) means an optional parser library is absent and is reported as
-    ``reason='library_missing'``, any other ``Exception`` as ``reason='handler_failed'``.
-    The original error stays attached as ``__cause__``. ``KeyboardInterrupt`` and
-    ``SystemExit`` are not the plugin's failure to report, so only ``Exception`` is caught.
+    error the caller sees is exactly the one the plugin raised. It is logged with
+    ``reason='passed_through'``: a deliberate refusal, neither a success nor a crash.
+    Everything else is mapped onto ``PARSE_ADAPTER_UNSUPPORTED``: an ``ImportError``
+    (including ``ModuleNotFoundError``) means an optional parser library is absent and is
+    reported as ``reason='library_missing'``, any other ``Exception`` as
+    ``reason='handler_failed'``. ``library_missing`` covers imports raised *inside* the
+    handler; a loader declared as an import string whose module cannot be imported at all
+    fails earlier, because ``manifest.resolve()`` reports it as
+    ``ManifestError(PARSE_RESULT_INVALID, reason='unresolvable_loader')`` before this
+    wrapper runs. The original error stays attached as ``__cause__``. ``KeyboardInterrupt``
+    and ``SystemExit`` are not the plugin's failure to report, so only ``Exception`` is
+    caught.
 
 The log record is the attribution channel: every invocation emits ``plugin``,
-``media_type``, ``reason`` and ``duration_ms``, and the HTTP body never carries exception
-text - a message that quotes a str(error) can leak paths, connection secrets or SQL.
+``media_type``, ``reason`` (one of ``ok``, ``passed_through``, ``library_missing``,
+``handler_failed``) and ``duration_ms``, and the HTTP body never carries exception text - a
+message that quotes a str(error) can leak paths, connection secrets or SQL.
 
 Example::
 
     from datamind.plugin.invocation import invoke_plugin
 
-    result, extra = invoke_plugin(manifest, manifest.resolve(), path, document_id, sha)
+    # path, document_id, source_version and options are the upload handler's own four
+    # arguments; the wrapper forwards them untouched.
+    result, extra = invoke_plugin(manifest, manifest.resolve(), path, document_id,
+                                  source_version, options)
+
+The ``(result, extra)`` tuple above is the *upload handler's* return shape, not the
+wrapper's: :func:`invoke_plugin` returns whatever the loader returned, unchanged, so a
+handler returning one object yields that object.
 """
 from __future__ import annotations
 
@@ -59,7 +75,8 @@ def invoke_plugin(manifest: ParserPluginManifest, loader: Callable[..., Any],
     :param loader: the resolved handler. Resolution (and therefore the import) is the
         caller's job, so a caller that caches entry points still imports lazily (G7).
     :returns: whatever ``loader`` returned, untouched.
-    :raises HTTPException: the plugin's own ``HTTPException``, unchanged; or one carrying
+    :raises HTTPException: the plugin's own ``HTTPException``, unchanged and logged with
+        ``reason='passed_through'``; or one carrying
         ``{'error_code': 'PARSE_ADAPTER_UNSUPPORTED', 'details': {...}}`` when the handler
         raised ``ImportError`` (``reason='library_missing'``) or anything else
         (``reason='handler_failed'``), with the original error as ``__cause__``.
@@ -115,7 +132,8 @@ def _log(reason: str, manifest: ParserPluginManifest, duration_ms: float,
     """Emit the structured attribution record: one line, four fields, no exception text.
 
     A failure is a ``WARNING`` with ``exc_info=True`` so the traceback is in the log where
-    an operator looks for it, never in the response a client receives.
+    an operator looks for it, never in the response a client receives. ``ok`` and
+    ``passed_through`` are not failures and log at ``INFO`` without a traceback.
     """
     extra = {'plugin': manifest.name, 'media_type': manifest.media_types[0],
              'reason': reason, 'duration_ms': duration_ms}

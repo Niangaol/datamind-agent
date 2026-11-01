@@ -486,8 +486,10 @@ def _item(job, asset, counts):
 def _analysis(job, asset):
     """The stored parse analysis, or an honest "not parsed yet" placeholder.
 
-    The placeholder carries the same ``adapter``/``plugin`` pair a stored analysis does, so
-    a client reads one shape whether the upload was parsed or not.
+    The placeholder mirrors the *current* stored shape, ``adapter``/``plugin`` pair
+    included, so a client reads one shape whether the upload was parsed or not. ``plugin``
+    is additive: analyses stored before it was recorded are returned as they are and may
+    lack the key.
     """
     stored = (asset.get('quality_detail') or {}).get('analysis')
     if isinstance(stored, dict):

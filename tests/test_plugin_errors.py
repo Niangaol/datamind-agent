@@ -16,8 +16,10 @@ Two concerns are pinned here, both DB-free:
 """
 from __future__ import annotations
 
+import os
 import sys
-import json
+import logging
+import subprocess
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
@@ -33,19 +35,34 @@ from datamind.plugin.manifest import ParserPluginManifest
 from ingestion import upload_pipeline
 from ingestion.plugins import default_context, parser_inventory
 
+ROOT = Path(__file__).resolve().parents[1]
 UNSUPPORTED = 'PARSE_ADAPTER_UNSUPPORTED'
 INVENTORY_KEYS = {'name', 'version', 'media_types', 'extensions', 'capabilities',
                   'enabled', 'loaded_from', 'registered_in_contract'}
 BUILTIN_NAMES = {'pdf-native', 'ohr-bench-json', 'docx-native', 'pptx-native', 'xlsx-native',
                  'dxf-native', 'measurement-json'}
 
-try:  # The app needs the optional SQL stack; its absence must not fail this suite.
+try:  # The app needs the optional SQL stack; *only* that absence may skip this suite.
     from datamind import api as api_module
-except ImportError as api_import_error:  # pragma: no cover - depends on the environment
+except ImportError as api_import_error:
     api_module = None
     API_IMPORT_ERROR = api_import_error
+    if 'sqlglot' not in str(api_import_error):
+        # A broken `datamind.api` is a regression in the reviewed code, not an environment
+        # fact: let it surface as an error instead of a green skip.
+        raise
 else:  # pragma: no cover
     API_IMPORT_ERROR = None
+
+
+def _run_script(script):
+    """Run ``script`` in a fresh interpreter that can import the repository."""
+    child = {name: value for name, value in os.environ.items()
+             if not name.startswith('DATAMIND_PLUGIN_')}
+    child.update({'PYTHONPATH': str(ROOT), 'PYTHONDONTWRITEBYTECODE': '1',
+                  'PYTHONIOENCODING': 'utf-8'})
+    return subprocess.run([sys.executable, '-c', script], cwd=str(ROOT), env=child,
+                          capture_output=True, text=True, encoding='utf-8', timeout=180)
 
 
 def _manifest(name='probe', loader=None, media_types=('application/x-probe',)):
@@ -137,6 +154,21 @@ class InvocationLoggingTests(unittest.TestCase):
         self.assertIsInstance(record.duration_ms, float)
         self.assertIsNone(record.exc_info)
 
+    def test_a_passthrough_logs_an_info_record_with_the_passthrough_reason(self):
+        error = HTTPException(415, detail={'error_code': 'UNSUPPORTED_MEDIA_TYPE'})
+
+        with self.assertLogs('datamind.plugin', level='INFO') as captured:
+            with self.assertRaises(HTTPException):
+                invoke_plugin(_manifest('probe'), _raising(error))
+
+        record = captured.records[-1]
+        self.assertEqual(record.reason, 'passed_through')
+        self.assertEqual(record.levelno, logging.INFO)
+        self.assertEqual(record.plugin, 'probe')
+        self.assertEqual(record.media_type, 'application/x-probe')
+        self.assertIsInstance(record.duration_ms, float)
+        self.assertIsNone(record.exc_info)
+
     def test_a_failure_logs_a_warning_with_the_reason_and_the_traceback(self):
         with self.assertLogs('datamind.plugin', level='WARNING') as captured:
             with self.assertRaises(HTTPException):
@@ -148,6 +180,25 @@ class InvocationLoggingTests(unittest.TestCase):
         self.assertEqual(record.reason, 'library_missing')
         self.assertIsInstance(record.duration_ms, float)
         self.assertIsNotNone(record.exc_info)
+
+
+class InvocationBaseExceptionTests(unittest.TestCase):
+    def test_a_base_exception_is_not_mapped_and_is_not_left_to_escape(self):
+        with self.assertRaises(KeyboardInterrupt):
+            invoke_plugin(_manifest('probe'), _raising(KeyboardInterrupt()))
+
+
+class KernelImportTests(unittest.TestCase):
+    """G2: importing the invocation kernel must not pull fastapi into the process."""
+
+    def test_importing_the_kernel_does_not_import_fastapi(self):
+        result = _run_script(
+            'import sys\n'
+            'import datamind.plugin.invocation\n'
+            'print("fastapi" in sys.modules)\n')
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout.strip(), 'False')
 
 
 class PluginParserEntryTests(unittest.TestCase):
@@ -232,6 +283,22 @@ class WaveTimeoutAttributionTests(unittest.TestCase):
                         'suffix': '.dxf'}))
 
 
+class JobOutcomeTests(unittest.TestCase):
+    def test_a_mapped_plugin_failure_reaches_the_job_outcome(self):
+        claim = {'job_id': 'job-1', 'document_id': 'doc-1', 'suffix': '.pdf',
+                 'claim_token': 'token'}
+        error = HTTPException(422, detail={'error_code': UNSUPPORTED,
+                                           'details': {'reason': 'handler_failed'}})
+
+        with mock.patch.object(upload_pipeline, 'run_parse', side_effect=error), \
+                mock.patch.object(upload_pipeline, '_finish', return_value=True):
+            # `in_process=True` runs the parse inline, so no subprocess and no database
+            # (writes are fenced by the patched `_finish`).
+            outcome = upload_pipeline._execute(None, claim, in_process=True)
+
+        self.assertEqual(outcome, {'outcome': 'failed', 'error_code': UNSUPPORTED})
+
+
 class InventoryShapeTests(unittest.TestCase):
     def test_every_item_has_exactly_the_eight_declaration_fields(self):
         inventory = parser_inventory()
@@ -286,7 +353,8 @@ class InventoryShapeTests(unittest.TestCase):
             parse_contract._ADAPTERS.update(saved)
 
 
-@unittest.skipIf(api_module is None, f'datamind.api is not importable here: {API_IMPORT_ERROR}')
+@unittest.skipIf(api_module is None,
+                 f'the optional SQL stack (sqlglot) is not installed here: {API_IMPORT_ERROR}')
 class ParsersEndpointTests(unittest.TestCase):
     """The endpoint is called directly: its route needs no database, only the app module."""
 
@@ -303,11 +371,13 @@ class ParsersEndpointTests(unittest.TestCase):
         payload = self._route().endpoint()
 
         self.assertIs(payload['process_local'], True)
+        self.assertEqual(set(payload), {'process_local', 'parsers'})
         self.assertIsInstance(payload['parsers'], list)
-        first = payload['parsers'][0]
-        self.assertEqual(set(first), INVENTORY_KEYS)
-        # No config value, and no field beyond the eight declarations, anywhere in the body.
-        self.assertNotIn('config', json.dumps(payload))
+        self.assertTrue(payload['parsers'])
+        for item in payload['parsers']:
+            with self.subTest(plugin=item.get('name')):
+                self.assertEqual(set(item), INVENTORY_KEYS)
+                self.assertNotIn('config', item)
 
     def test_the_listing_is_no_store_and_admin_only(self):
         self.assertTrue(api_module._no_store_path('/v1/parsers'))

@@ -822,8 +822,10 @@ def upload_approve(upload_id: str,request: Request):
 
 
 # 只读的解析插件清单（admin-only，见 `_required_permission`）。它报告的是**本进程**装了
-# 什么、从哪加载、是否启用、是否同时是契约适配器；不解析 loader（G7），因此不会把
-# `pymupdf`/`ezdxf`/`python-docx` 拉进 API 进程。
+# 什么、从哪加载、是否启用、是否同时是契约适配器；不解析 loader（G7），因此内置插件的
+# `pymupdf`/`ezdxf`/`python-docx` 都不会被拉进 API 进程。这条保证只覆盖内置插件：由
+# `DATAMIND_PLUGIN_PATH` 发现的外部插件模块是由发现流程本身（`ensure_loaded()`）导入的，
+# 运维自己放进来的代码在第一次请求这个端点时就已经在进程里执行过了。
 @app.get('/v1/parsers')
 def parsers_listing():
     """Process-local parser inventory; each process reports its own plugins.
