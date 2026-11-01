@@ -236,20 +236,45 @@ class ParserRegistry:
                 self._extensions[extension] = manifest.name
 
         def dispose() -> None:
-            with self._lock:
-                # Identity, not just the name: a replacement registered after this disposer
-                # was handed out must survive a late second call.
-                if self._manifests.get(manifest.name) is not manifest:
-                    return
-                del self._manifests[manifest.name]
-                for media_type in media_types:
-                    if self._media_types.get(media_type) == manifest.name:
-                        del self._media_types[media_type]
-                for extension in extensions:
-                    if self._extensions.get(extension) == manifest.name:
-                        del self._extensions[extension]
+            # The snapshot taken above, not the manifest's current fields: a late call must
+            # free exactly the names this registration took.
+            self._release(manifest, media_types, extensions)
 
         return dispose
+
+    def unregister(self, name: str) -> bool:
+        """Remove the manifest registered as ``name`` and free the names it holds.
+
+        This is the rollback seam a loader needs when a plugin registers several manifests
+        and then fails part-way: the caller names what it registered and gets the same
+        release the :meth:`register` disposer performs. Returns whether anything was
+        removed, so an unknown or already-released name is a silent no-op rather than an
+        error. The identity check is the disposer's: a manifest registered under this name
+        *after* a replacement must survive.
+        """
+        key = name.strip() if isinstance(name, str) else name
+        with self._lock:
+            manifest = self._manifests.get(key)
+        if manifest is None:
+            return False
+        self._release(manifest, manifest.media_types, manifest.extensions)
+        return True
+
+    def _release(self, manifest: ParserPluginManifest,
+                 media_types: tuple[str, ...], extensions: tuple[str, ...]) -> None:
+        """Free one registration's claims; identity-checked so a replacement survives."""
+        with self._lock:
+            # Identity, not just the name: a replacement registered after this disposer
+            # was handed out must survive a late second call.
+            if self._manifests.get(manifest.name) is not manifest:
+                return
+            del self._manifests[manifest.name]
+            for media_type in media_types:
+                if self._media_types.get(media_type) == manifest.name:
+                    del self._media_types[media_type]
+            for extension in extensions:
+                if self._extensions.get(extension) == manifest.name:
+                    del self._extensions[extension]
 
     def _require_available(self, manifest: ParserPluginManifest) -> None:
         """Refuse a manifest whose name, media type or extension is taken; insert nothing."""

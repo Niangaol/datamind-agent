@@ -353,8 +353,11 @@ def _load_external(context: Context, path: Path,
 
     Two declaration shapes are accepted. A callable ``register(ctx)`` owns its own
     registration, so its declarations are whatever new names it left in the registry. A
-    module-level ``MANIFEST`` (one manifest or an iterable of them) is registered here,
-    which lets a failure dispose the manifests this module already claimed.
+    module-level ``MANIFEST`` (one manifest or an iterable of them) is registered here.
+    Either way a failure disposes exactly the parser manifests this module claimed, so a
+    skipped plugin leaves no claim behind; other effects the plugin registered with
+    ``context`` (services, event handlers, its own disposers) stay the plugin's own
+    responsibility.
 
     A string loader may name its own file by stem (rewritten to the synthetic module name)
     or another importable module; callables work unchanged.
@@ -366,14 +369,25 @@ def _load_external(context: Context, path: Path,
     register = getattr(module, 'register', None)
     if callable(register):
         before = {manifest.name for manifest in registry.list()}
-        register(context)
-        manifests = [manifest for manifest in registry.list() if manifest.name not in before]
-        if not manifests:
-            raise PluginError(f'{path} register(ctx) declared no parser manifest')
-        for manifest in manifests:
-            _bind_loader(manifest, module_name, path)
-        return [_apply_entry(manifest, entries.get(manifest.name), loaded_from)
-                for manifest in manifests]
+        try:
+            register(context)
+            manifests = [manifest for manifest in registry.list()
+                         if manifest.name not in before]
+            if not manifests:
+                raise PluginError(f'{path} register(ctx) declared no parser manifest')
+            for manifest in manifests:
+                _bind_loader(manifest, module_name, path)
+            records = [_apply_entry(manifest, entries.get(manifest.name), loaded_from)
+                       for manifest in manifests]
+        except BaseException:
+            # `register(ctx)` may have claimed several manifests before it raised, and a
+            # later step (loader rewrite, config) can fail too: release everything this
+            # module added, in the reverse order the registry accepted it.
+            for manifest in reversed(registry.list()):
+                if manifest.name not in before:
+                    registry.unregister(manifest.name)
+            raise
+        return records
 
     disposers = []
     records: list[LoadedPlugin] = []

@@ -307,6 +307,56 @@ class RegistryTest(unittest.TestCase):
         self.assertIs(self.registry.lookup_by_extension('.pdf'), replacement)
         self.assertEqual(self.registry.capabilities('pdf'), ('native_text',))
 
+    def test_unregister_frees_the_names_and_allows_reregistration(self):
+        first = manifest()
+        self.registry.register(first)
+
+        self.assertIs(self.registry.unregister('pdf'), True)
+
+        self.assertEqual(self.registry.list(), ())
+        self.assertEqual(self.registry.known_extensions(), ())
+        with self.assertRaises(ManifestError) as caught:
+            self.registry.lookup_by_extension('.pdf')
+        self.assertEqual(caught.exception.error_code, 'PARSE_ADAPTER_UNKNOWN')
+
+        replacement = manifest()
+        self.registry.register(replacement)
+
+        self.assertIs(self.registry.lookup_by_extension('.pdf'), replacement)
+
+    def test_unregister_of_an_unknown_name_removes_nothing(self):
+        registered = manifest()
+        self.registry.register(registered)
+
+        self.assertIs(self.registry.unregister('ghost'), False)
+
+        self.assertEqual(self.registry.list(), (registered,))
+        self.assertIs(self.registry.lookup('application/pdf'), registered)
+        self.assertEqual(self.registry.known_extensions(), ('.pdf',))
+
+    def test_a_stale_release_leaves_a_replacement_that_owns_the_name(self):
+        first = manifest()
+        dispose = self.registry.register(first)
+        dispose()
+        replacement = manifest()
+        self.registry.register(replacement)
+
+        # The identity check the disposer and `unregister` share: a release captured for the
+        # old registration must not free the replacement's names.
+        dispose()
+
+        self.assertIs(self.registry.lookup('application/pdf'), replacement)
+        self.assertEqual(self.registry.known_extensions(), ('.pdf',))
+
+        # Releasing by name targets the manifest that owns the name now, and is idempotent.
+        self.assertIs(self.registry.unregister('pdf'), True)
+        self.assertIs(self.registry.unregister('pdf'), False)
+
+        self.assertEqual(self.registry.list(), ())
+        self.assertEqual(self.registry.known_extensions(), ())
+        with self.assertRaises(ManifestError):
+            self.registry.lookup('application/pdf')
+
     def test_disposing_one_plugin_leaves_the_other_and_its_manifest(self):
         def pdf_plugin(inner, config):
             inner.effect(inner.parser.register(manifest()))

@@ -26,6 +26,13 @@ from ingestion import plugins
 ROOT = Path(__file__).resolve().parents[1]
 PLUGIN_ENV_KEYS = (plugins.PLUGIN_PATH_ENV, plugins.PLUGIN_CONFIG_ENV)
 
+try:  # The worker's import chain needs the optional SQL stack; only its absence may skip.
+    import sqlglot  # noqa: F401
+except ImportError as worker_import_error:
+    WORKER_IMPORT_ERROR = worker_import_error
+else:  # pragma: no cover - the import probe itself defines the flag
+    WORKER_IMPORT_ERROR = None
+
 CSV_PLUGIN = '''\
 from datamind.plugin.manifest import ParserPluginManifest
 
@@ -55,6 +62,17 @@ def register(ctx):
     ctx.parser.register(ParserPluginManifest(
         'jsonl-demo', '1.0.0', ('application/x-jsonl',), ('.jsonl',),
         capabilities=('text',), loader='jsonl_plugin:parse'))
+'''
+
+REGISTER_THEN_RAISE_PLUGIN = '''\
+from datamind.plugin.manifest import ParserPluginManifest
+
+
+def register(ctx):
+    ctx.parser.register(ParserPluginManifest(
+        'jsonl-demo', '1.0.0', ('application/x-jsonl',), ('.jsonl',),
+        capabilities=('text',), loader='jsonl_plugin:parse'))
+    raise RuntimeError('boom after registering')
 '''
 
 DUPLICATE_PLUGIN = '''\
@@ -154,6 +172,29 @@ ensure_loaded()
 print('loaded')
 '''
 
+SCRIPT_REGISTER_THEN_RAISE = '''\
+import json
+from datamind.plugin.manifest import ManifestError
+from ingestion.plugins import default_context, ensure_loaded, loaded_plugins
+
+ensure_loaded()
+parser = default_context().parser
+outcomes = {}
+for label, lookup in (('extension', lambda: parser.lookup_by_extension('.jsonl')),
+                      ('media_type', lambda: parser.lookup('application/x-jsonl'))):
+    try:
+        lookup()
+    except ManifestError as error:
+        outcomes[label] = error.error_code
+    else:
+        outcomes[label] = 'resolved'
+print(json.dumps({
+    'outcomes': outcomes,
+    'extensions': list(parser.known_extensions()),
+    'loaded': [record.manifest.name for record in loaded_plugins()],
+}))
+'''
+
 
 def run_script(script, *, env=None):
     """Run ``script`` in a fresh interpreter with the two plugin variables controlled."""
@@ -162,6 +203,16 @@ def run_script(script, *, env=None):
                   'PYTHONIOENCODING': 'utf-8'})
     child.update(env or {})
     return subprocess.run([sys.executable, '-c', script], cwd=str(ROOT), env=child,
+                          capture_output=True, text=True, encoding='utf-8', timeout=180)
+
+
+def run_module(module, args, *, env=None):
+    """Run ``module`` as a fresh interpreter's main program, plugin variables controlled."""
+    child = {name: value for name, value in os.environ.items() if name not in PLUGIN_ENV_KEYS}
+    child.update({'PYTHONPATH': str(ROOT), 'PYTHONDONTWRITEBYTECODE': '1',
+                  'PYTHONIOENCODING': 'utf-8'})
+    child.update(env or {})
+    return subprocess.run([sys.executable, '-m', module, *args], cwd=str(ROOT), env=child,
                           capture_output=True, text=True, encoding='utf-8', timeout=180)
 
 
@@ -201,6 +252,23 @@ class DirectoryDiscoveryTests(unittest.TestCase):
         self.assertEqual(payload['manifest'], 'jsonl-demo')
         self.assertIn({'name': 'jsonl-demo', 'loaded_from': str(plugin_file)},
                       payload['loaded'])
+
+    def test_a_register_plugin_that_raises_after_registering_is_skipped_cleanly(self):
+        with tempfile.TemporaryDirectory() as root:
+            plugin_file = write_module(root, 'jsonl_plugin.py', REGISTER_THEN_RAISE_PLUGIN)
+            result = run_script(SCRIPT_REGISTER_THEN_RAISE,
+                                env={plugins.PLUGIN_PATH_ENV: str(Path(root))})
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        payload = json.loads(result.stdout)
+        # The manifest the failing `register(ctx)` managed to claim is rolled back, so the
+        # module is skipped with nothing left registered - not a half-applied plugin.
+        self.assertEqual(payload['outcomes'], {'extension': 'PARSE_ADAPTER_UNKNOWN',
+                                               'media_type': 'PARSE_ADAPTER_UNKNOWN'})
+        self.assertNotIn('.jsonl', payload['extensions'])
+        self.assertNotIn('jsonl-demo', payload['loaded'])
+        self.assertIn(str(plugin_file), result.stderr)
+        self.assertIn('boom after registering', result.stderr)
 
     def test_one_broken_module_does_not_stop_the_others(self):
         with tempfile.TemporaryDirectory() as root:
@@ -456,6 +524,35 @@ class InProcessLoadingTests(unittest.TestCase):
                           'xlsx-native', 'dxf-native', 'measurement-json'])
         self.assertEqual({record.loaded_from for record in loaded}, {'builtin'})
         self.assertTrue(all(record.config is None for record in loaded))
+
+
+@unittest.skipIf(WORKER_IMPORT_ERROR is not None,
+                 f'the optional SQL stack (sqlglot) is not installed here: {WORKER_IMPORT_ERROR}')
+class WorkerStartupTests(unittest.TestCase):
+    """`python -m ingestion.upload_worker` validates plugin config before anything else.
+
+    Needs no PostgreSQL: the bootstrap step runs before `_write_dsn()` and before any
+    connection, so a bad `DATAMIND_PLUGIN_CONFIG` must stop the process at startup instead
+    of surfacing later as an unattributed parse failure. That the worker never reaches its
+    heartbeat is what proves no database access happened.
+    """
+
+    def test_an_invalid_plugin_config_stops_the_worker_before_any_database_work(self):
+        with tempfile.TemporaryDirectory() as root:
+            plugin_dir = Path(root) / 'plugins'
+            plugin_dir.mkdir()
+            config = Path(root) / 'plugins.json'
+            config.write_text('{', encoding='utf-8')
+            result = run_module('ingestion.upload_worker', ['--once'],
+                                env={plugins.PLUGIN_PATH_ENV: str(plugin_dir),
+                                     plugins.PLUGIN_CONFIG_ENV: str(config)})
+
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn('plugin config error', result.stderr)
+        self.assertIn(str(config), result.stderr)
+        self.assertIn('is not valid JSON', result.stderr)
+        self.assertIn('refusing to start', result.stderr)
+        self.assertNotIn('heartbeat', result.stdout)
 
 
 class DisabledBuiltinDispatchTests(unittest.TestCase):

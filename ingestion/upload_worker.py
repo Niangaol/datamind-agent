@@ -25,12 +25,19 @@ running.
 Signals (SIGINT/SIGTERM) stop the loop **after** the wave in flight: the bounded parse child
 runs in its own session, so it is never abandoned half-way by a Ctrl-C.
 
+Before anything else — after argument validation, before the DSN is even resolved — the
+worker bootstraps plugin discovery (`ingestion.plugins.ensure_loaded()`). That applies
+`DATAMIND_PLUGIN_CONFIG` and imports the modules named by `DATAMIND_PLUGIN_PATH`, which is
+what lets this parent process attribute a wave timeout to an external plugin and refuse to
+start on a broken configuration rather than failing later, once a claim arrives.
+
 Progress is one `[upload_worker] <timestamp> ...` line per event on stdout, so a supervisor
 or a human can see what is happening without reading JSON. Exit codes:
 
 ===  ==================================================================================
 0    ran to completion — the queue was drained/empty, or a signal stopped the loop
-1    unexpected error (including a heartbeat that could not be registered)
+1    unexpected error (including a heartbeat that could not be registered, or a plugin
+     configuration `ConfigError` that stopped startup)
 2    invalid arguments (argparse)
 3    every cross-process parse slot is held by another worker; nothing was attempted
 ===  ==================================================================================
@@ -53,7 +60,9 @@ from fastapi import HTTPException
 
 from datamind import task_budget
 from datamind.agent import _write_dsn
+from datamind.plugin.context import ConfigError
 from ingestion import upload_pipeline
+from ingestion.plugins import ensure_loaded
 
 MARKER = '[upload_worker]'
 EXIT_OK = 0
@@ -148,6 +157,17 @@ def main(argv=None):
             deadline_s = task_budget.validate_deadline(args.deadline)
         except ValueError as error:
             parser.error(str(error))
+
+    # Discovery runs here, before the first claim and before the heartbeat writes anything:
+    # this process is the only writer of `_record_wave_timeout`/`_adapter_for`, so it must
+    # know the external plugins a claim's suffix may name, and a bad plugin config must
+    # stop the process instead of failing later as an unattributed error.
+    try:
+        ensure_loaded()
+    except ConfigError as error:
+        emit(f'plugin config error path={error.path} reason={error.reason}; refusing to start',
+             stream=sys.stderr)
+        return EXIT_ERROR
 
     dsn = _write_dsn()
     stopping = threading.Event()

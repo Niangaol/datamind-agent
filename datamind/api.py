@@ -6,6 +6,7 @@ import hashlib
 import os
 import queue
 import threading
+from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Literal
@@ -218,7 +219,24 @@ class SessionRenameRequest(BaseModel):
     title: str = Field(min_length=1, max_length=200)
 
 
-app = FastAPI(title="DataMind Agent", version="0.39.0")
+@asynccontextmanager
+async def _lifespan(_app: FastAPI):
+    """Validate plugin config and discover external plugins before serving a request.
+
+    Plugin discovery is not left to the first upload or the first ``GET /v1/parsers``: a
+    bad ``DATAMIND_PLUGIN_CONFIG`` (or a plugin path that is not a directory) raises
+    :class:`~datamind.plugin.ConfigError` here, so the process refuses to start instead of
+    answering an unlabelled 500 on the first request that needs a parser. The import stays
+    inside the function and the call is made here (not at module import), which keeps
+    ``import datamind.api`` as light as it was (G7): discovery imports the external modules
+    an operator configured, and nothing else.
+    """
+    from ingestion.plugins import ensure_loaded
+    ensure_loaded()
+    yield
+
+
+app = FastAPI(title="DataMind Agent", version="0.39.0", lifespan=_lifespan)
 
 
 # ---------- request authorisation surface (default deny) ----------
@@ -825,7 +843,8 @@ def upload_approve(upload_id: str,request: Request):
 # 什么、从哪加载、是否启用、是否同时是契约适配器；不解析 loader（G7），因此内置插件的
 # `pymupdf`/`ezdxf`/`python-docx` 都不会被拉进 API 进程。这条保证只覆盖内置插件：由
 # `DATAMIND_PLUGIN_PATH` 发现的外部插件模块是由发现流程本身（`ensure_loaded()`）导入的，
-# 运维自己放进来的代码在第一次请求这个端点时就已经在进程里执行过了。
+# 而发现已在进程启动时（`_lifespan`）跑过一次，所以运维放进来的代码在服务开始接受请求
+# 之前就已经执行过了，不是在这个端点的第一次请求时。
 @app.get('/v1/parsers')
 def parsers_listing():
     """Process-local parser inventory; each process reports its own plugins.
