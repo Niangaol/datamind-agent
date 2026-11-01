@@ -227,7 +227,7 @@ MANIFEST = ParserPluginManifest(..., loader='csv_parser:parse')   # 文件 csv_p
 
 | HTTP | `error_code` | `details.reason` | 触发 |
 | --- | --- | --- | --- |
-| 415 | `UNSUPPORTED_MEDIA_TYPE` | 无 / `plugin_disabled` | 上传后缀没有启用插件声明；停用时额外带 `plugin`。注册表原语对"没声明"和"声明了但停用"都抛 422 `PARSE_ADAPTER_UNSUPPORTED`（后者 `reason='plugin_disabled'`），`target`/`create`/`run_parse` 一律转成该 415 |
+| 415 | `UNSUPPORTED_MEDIA_TYPE` | 无 / `plugin_disabled` | 上传后缀没有启用插件声明；停用时额外带 `plugin`。注册表原语对"没声明"抛 422 `PARSE_ADAPTER_UNKNOWN`，对"声明了但停用"抛 422 `PARSE_ADAPTER_UNSUPPORTED`（`reason='plugin_disabled'`）；`target`/`create`/`run_parse` 一律转成该 415 |
 | 422 | `PARSE_ADAPTER_UNKNOWN` | `media_type_not_registered` / `extension_not_registered` / `invalid_media_type` / `invalid_extension` / `plugin_not_registered` | 注册表或契约适配器查询未声明的类型/插件 |
 | 422 | `PARSE_ADAPTER_UNSUPPORTED` | `library_missing` | handler 内 `ImportError`（可选解析库缺失） |
 | 422 | `PARSE_ADAPTER_UNSUPPORTED` | `handler_failed` | handler 抛其它异常 |
@@ -274,7 +274,7 @@ MANIFEST = ParserPluginManifest(..., loader='csv_parser:parse')   # 文件 csv_p
 
 ## 9. 可运行示例
 
-`examples/plugins/csv_parser/` 是一个最小第三方插件：CSV 每行一个 `table_row` 块，使用
+`examples/plugins/csv_parser/` 是一个最小第三方插件：CSV 每条非空记录一个 `table_row` 块，使用
 公开 manifest/契约接口，不进入 `builtin_manifests()`，只有设置路径才启用：
 
 ```bash
