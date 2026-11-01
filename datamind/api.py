@@ -247,6 +247,10 @@ PUBLIC_WRITE_PATHS = frozenset({'/v1/chat', '/v1/chat/stream'})
 _NO_STORE_PREFIXES = ('/v1/pdf-snapshots', '/v1/pdf-knowledge', '/v1/drawings',
                       '/v1/dimensions', '/v1/files', '/v1/uploads', '/v1/plans',
                       '/v1/model/profiles', '/v1/model/config',
+                      # 解析插件清单是**进程本地**的（发现路径与 DATAMIND_PLUGIN_CONFIG 都按进程读），
+                      # 且 `loaded_from` 是绝对路径：缓存一份就会把某个 worker 的答案当成全局事实，
+                      # 也会把部署目录结构留在共享缓存里，所以永不缓存。
+                      '/v1/parsers',
                       # 会话列表/详情就是聊天记录本身（问题与答案），一旦被浏览器或中间代理
                       # 缓存，下一位使用同一台机器的用户就能读到别人的对话，因此永不缓存。
                       '/v1/sessions',
@@ -325,6 +329,9 @@ def _required_permission(request) -> str | None:
     pdf_knowledge_path=path=='/v1/pdf-knowledge' or path.startswith('/v1/pdf-knowledge/')
     plan_path=path.startswith('/v1/plans')
     wiki_path=path=='/v1/wiki' or path.startswith('/v1/wiki/')
+    # 解析插件清单是只读的，但它暴露 `loaded_from` 绝对路径（部署目录结构），所以和模型配置
+    # 一样只给 `admin`；放在通用兜底之前，避免被任何后缀规则意外接住。
+    parser_path=path=='/v1/parsers' or path.startswith('/v1/parsers/')
     # 契约 §2/§3.1：`/v1/wiki/*` 的五条写路由走上表；**读接口不做角色门**（落到最后的
     # `None` = 任意已登录身份，与 `/v1/sessions` 同款）。没被上表列名的 wiki 写方法落到
     # 下面的 `admin` 兜底而不是"默认放开"，且放在两条通用后缀兜底之前，避免被
@@ -332,7 +339,8 @@ def _required_permission(request) -> str | None:
     wiki_write=_wiki_write_permission(path) if request.method=='POST' else None
     return (wiki_write if wiki_write else
             'admin' if wiki_path and request.method=='POST' else
-            'admin' if plan_path or files_path or upload_path or pdf_snapshot_path or pdf_knowledge_path else
+            'admin' if plan_path or files_path or upload_path or pdf_snapshot_path or
+            pdf_knowledge_path or parser_path else
             'approver' if dimension_path and request.method=='POST' and path.endswith('/approvals') else
             'admin' if dimension_path and (request.method=='POST' or path.endswith('/sources')) else
             'reviewer' if cad_path and request.method=='POST' and path.endswith('/reviews') else
@@ -811,6 +819,20 @@ def upload_detail(upload_id: str,request: Request):
 def upload_approve(upload_id: str,request: Request):
     from ingestion import upload_pipeline
     return jsonable_encoder(upload_pipeline.approve(upload_id,_write_dsn(),request.state.identity))
+
+
+# 只读的解析插件清单（admin-only，见 `_required_permission`）。它报告的是**本进程**装了
+# 什么、从哪加载、是否启用、是否同时是契约适配器；不解析 loader（G7），因此不会把
+# `pymupdf`/`ezdxf`/`python-docx` 拉进 API 进程。
+@app.get('/v1/parsers')
+def parsers_listing():
+    """Process-local parser inventory; each process reports its own plugins.
+
+    Annotated `process_local: true`: discovery and DATAMIND_PLUGIN_CONFIG are read per
+    process, so two workers can answer differently.
+    """
+    from ingestion.plugins import parser_inventory
+    return {'process_local': True, 'parsers': parser_inventory()}
 
 
 @app.get('/v1/auth/me')

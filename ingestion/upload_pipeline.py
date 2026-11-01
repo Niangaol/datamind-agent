@@ -96,6 +96,7 @@ from psycopg2.extras import Json, RealDictCursor
 from datamind import task_budget
 from datamind.auth import lock_identity
 from datamind.knowledge import ROOT
+from datamind.plugin.invocation import invoke_plugin
 from datamind.plugin.manifest import PARSE_ADAPTER_UNSUPPORTED, ManifestError
 
 from . import contract_store
@@ -483,12 +484,17 @@ def _item(job, asset, counts):
 
 
 def _analysis(job, asset):
-    """The stored parse analysis, or an honest "not parsed yet" placeholder."""
+    """The stored parse analysis, or an honest "not parsed yet" placeholder.
+
+    The placeholder carries the same ``adapter``/``plugin`` pair a stored analysis does, so
+    a client reads one shape whether the upload was parsed or not.
+    """
     stored = (asset.get('quality_detail') or {}).get('analysis')
     if isinstance(stored, dict):
         return stored
     suffix = '.' + str(asset.get('file_type') or '').lower()
-    return {'parse_status': job['status'], 'adapter': _adapter_for(suffix), 'blocks': 0,
+    adapter = _adapter_for(suffix)
+    return {'parse_status': job['status'], 'adapter': adapter, 'plugin': adapter, 'blocks': 0,
             'locators_written': 0, 'relations': 0, 'block_types': {},
             'unsupported_features': [], 'quality_findings': []}
 
@@ -691,6 +697,11 @@ def _record_wave_timeout(dsn, claim):
     table), so it survives a reclaim and is reset naturally when the upload is re-queued.
     It is a claim-dependent write: a generation that already lost the row increments
     nothing and reports `None` instead of overwriting the newer generation's metadata.
+
+    The same metadata names the plugin that owns the suffix (`upload['plugin']`), read from
+    the registry's declarations rather than from an enabled lookup: a wave that timed out
+    because a plugin was disabled mid-flight must still say which plugin it was, and the
+    manifest is the only record that survives the disable.
     """
     with psycopg2.connect(dsn) as conn, conn.cursor(cursor_factory=RealDictCursor) as cur:
         if not _lock_live_claim(cur, claim):
@@ -702,6 +713,7 @@ def _record_wave_timeout(dsn, claim):
         upload = dict(quality.get('upload') or {})
         attempts = int(upload.get('wave_timeouts') or 0) + 1
         upload['wave_timeouts'] = attempts
+        upload['plugin'] = _adapter_for(claim['suffix'])
         quality['upload'] = upload
         cur.execute('UPDATE document_assets SET quality_detail=%s WHERE document_id=%s',
                     (Json(quality), claim['document_id']))
@@ -1107,11 +1119,15 @@ def _plugin_parser(manifest):
     """A ``parse(path, claim)`` entry point for ``manifest``, loader resolved per call.
 
     Resolution stays inside the call because the loader is an import reference (G7) and
-    because a patched plugin function must be picked up by the next parse.
+    because a patched plugin function must be picked up by the next parse. The invocation
+    itself goes through ``invoke_plugin``, so every handler failure is attributed to this
+    plugin (``PARSE_ADAPTER_UNSUPPORTED`` with ``library_missing``/``handler_failed``)
+    instead of surfacing as whatever exception the third-party library raised.
     """
     def parse(path, claim):
         loader = manifest.resolve()
-        return loader(path, claim['document_id'], claim['source_sha256'], claim)
+        return invoke_plugin(manifest, loader, path, claim['document_id'],
+                             claim['source_sha256'], claim)
 
     return parse
 
@@ -1209,8 +1225,12 @@ def _analysis_of(claim, payload, stored, extra):
     block_types = {}
     for block in payload['blocks']:
         block_types[block['block_type']] = block_types.get(block['block_type'], 0) + 1
+    # The plugin that served the suffix, resolved from the declarations rather than from an
+    # enabled lookup, so a record parsed before a plugin was disabled keeps naming it.
+    manifest = _manifest_for(claim['suffix'])
     analysis = {'parse_status': payload['parse_status'],
                 'adapter': payload['manifest'].get('adapter') or _adapter_for(claim['suffix']),
+                'plugin': manifest.name if manifest is not None else None,
                 'blocks': stored['blocks'], 'locators_written': stored['locators'],
                 'relations': stored['relations'], 'block_types': block_types,
                 'unsupported_features': list(payload['unsupported_features']),

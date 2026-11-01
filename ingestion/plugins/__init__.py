@@ -39,7 +39,7 @@ from . import (dxf_plugin, measurement_json_plugin, office_plugin, ohr_json_plug
                pdf_plugin)
 
 __all__ = ['LoadedPlugin', 'builtin_manifests', 'default_context', 'ensure_loaded',
-           'loaded_plugins']
+           'loaded_plugins', 'parser_inventory']
 
 #: ``os.pathsep``-separated directories scanned for top-level ``*.py`` plugin modules.
 PLUGIN_PATH_ENV = 'DATAMIND_PLUGIN_PATH'
@@ -145,6 +145,46 @@ def loaded_plugins() -> tuple[LoadedPlugin, ...]:
     """
     ensure_loaded()
     return _loaded_plugins
+
+
+def parser_inventory() -> list[dict[str, Any]]:
+    """The read-only inventory a listing endpoint answers with, in registry order.
+
+    One item per *registered* manifest - enabled and disabled alike, because "installed but
+    switched off" is exactly what someone opens a listing to find out - carrying the eight
+    declaration fields and nothing else. The record's config is deliberately absent: it can
+    hold operator-specific values, and a read-only listing must not republish them.
+
+    ``loaded_from`` is ``'builtin'`` for the declarations this package ships and the
+    absolute file path of an external plugin's module; it is ``None`` for a manifest that
+    is registered without a :class:`LoadedPlugin` record (a caller that registered one
+    directly). ``registered_in_contract`` says whether the manifest's name is also a
+    registered ``datamind.parse_contract`` adapter, which is how a caller can spot a plugin
+    that parses but never enters the unified contract - ``measurement-json`` and the
+    OHR-Bench JSON plugin are declared that way on purpose (G10/G11).
+
+    Nothing here resolves a loader (G7): the item is declaration data only, so this call
+    never imports ``pymupdf``, ``ezdxf``, ``python-docx`` or ``qdrant_client``. The contract
+    module is imported lazily because it needs fastapi while this package does not.
+    """
+    records = {record.manifest.name: record for record in loaded_plugins()}
+    from datamind import parse_contract
+
+    registered = set(parse_contract.registered_adapters())
+    inventory: list[dict[str, Any]] = []
+    for manifest in default_context().parser.list():
+        record = records.get(manifest.name)
+        inventory.append({
+            'name': manifest.name,
+            'version': manifest.version,
+            'media_types': list(manifest.media_types),
+            'extensions': list(manifest.extensions),
+            'capabilities': list(manifest.capabilities),
+            'enabled': manifest.enabled,
+            'loaded_from': record.loaded_from if record is not None else None,
+            'registered_in_contract': manifest.name in registered,
+        })
+    return inventory
 
 
 # --------------------------------------------------------------------------------------
