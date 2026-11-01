@@ -30,13 +30,16 @@ PYTHONPATH=. .venv/Scripts/python.exe -m ingestion.upload_worker --once
 PYTHONPATH=. DATAMIND_PLUGIN_PATH=examples/plugins/csv_parser \
   .venv/Scripts/python.exe - <<'PY'
 from pathlib import Path
-from ingestion.plugins import ensure_loaded, default_context
+from ingestion.plugins import ensure_loaded
 
 manifest = (ensure_loaded().parser.lookup_by_extension('.csv'))
 result, extra = manifest.resolve()(Path('sample.csv'), 'doc-demo-1', 'a' * 64)
 print(result.payload['parse_status'], len(result.payload['blocks']), extra)
 PY
 ```
+
+上传管道本身走的是另一条缝：`upload_pipeline.target(name)` 做准入，`upload_pipeline.PARSERS[suffix]`
+执行解析（背后是 `invoke_plugin`，`tests/test_plugin_example.py` 的 `SCRIPT_DISPATCH` 就是这么调的）。
 
 （`sample.csv` 可自行创建，例如 `printf 'name,value\nalpha,1\n' > sample.csv`。）
 
@@ -45,12 +48,16 @@ PY
 - 设置路径后，`POST /v1/uploads` 接受 `.csv` 文件；未设置时该后缀返回 415
   `UNSUPPORTED_MEDIA_TYPE`（没有已启用插件声明它）。
 - 每条 CSV 记录产出一个 `table_row` 块：`text` 为逗号连接的各列、`native_attributes.cells`
-  为原始单元格列表、`reading_order = 行号 - 1`、`content_hash` 为 `text` 的 SHA-256；
-  locator 为 `sheet_range`，`sheet` 取文件主名（如 `sample`），`range` 为 `A{行}:Z{行}`。
+  为原始单元格列表、`reading_order = 序号 - 1`、`content_hash` 为 `text` 的 SHA-256；
+  locator 为 `sheet_range`，`sheet` 取文件主名（如 `sample`），`range` 为 `A{序号}:Z{序号}`。
+- **空行不是记录**：`csv` 对空行返回 `[]`，本插件跳过它——不产出空块、不计入 `rows`。
+  序号（`block_id`、`reading_order`、`range`）按保留下来的记录连续编号，因此
+  `a,b\n\nc,d\n` 得到两块，`range` 是 `A1:Z1`、`A2:Z2`。
 - `parse_status='parsed'`，`analysis.adapter` 与 `analysis.plugin` 都是 `csv-example`，
-  `quality_detail.analysis.rows` 为记录数。
+  `quality_detail.analysis.rows` 为非空记录数。
 - **空文件不伪造成功**：返回 `parse_status='unsupported'`、无块、
-  `unsupported_features=['empty_source']`，上传任务终态为 `partial_failure`。
+  `unsupported_features=['empty_source']`、`extra={'rows': 0}`，上传任务终态为
+  `partial_failure`。只有空行的文件与空文件等价。
 - 通过 `DATAMIND_PLUGIN_CONFIG` 可以停用它，停用后该后缀的上传返回 415 且
   `details.reason='plugin_disabled'`：
 

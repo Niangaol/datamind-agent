@@ -41,7 +41,9 @@ def parse(path, document_id, source_version, options=None):
     plugin signature's optional mapping (unused here: the CSV reader needs no options).
 
     Returns the ``(ParseResult, extra)`` pair the upload handler expects, where ``extra``
-    contributes ``rows`` to ``quality_detail.analysis``. An empty file is reported as
+    contributes ``rows`` to ``quality_detail.analysis``. Only non-blank records are rows: a
+    blank line yields ``[]`` from :mod:`csv` and would otherwise become an empty block. An
+    empty file - or one holding nothing but blank lines - is reported as
     ``parse_status='unsupported'`` instead of a fake success: there is nothing to parse and
     the contract requires at least one block for ``'parsed'``.
     """
@@ -51,7 +53,8 @@ def parse(path, document_id, source_version, options=None):
 
     source = Path(path)
     # utf-8-sig strips a leading BOM if one is present; a file without one is unaffected.
-    rows = list(csv.reader(io.StringIO(source.read_text(encoding='utf-8-sig'))))
+    content = source.read_text(encoding='utf-8-sig')
+    rows = [cells for cells in csv.reader(io.StringIO(content)) if cells]
     if not rows:
         return validate_parse_result({
             'classification': {'detected_media_type': SOURCE_MEDIA_TYPE,
@@ -71,6 +74,8 @@ def parse(path, document_id, source_version, options=None):
 
     sheet = source.stem or 'csv'
     blocks = []
+    # ``rows`` holds kept records only, so ``row`` numbers the blocks 1..N (and the locator
+    # rows with them) rather than pointing at physical lines that blank records occupied.
     for row, cells in enumerate(rows, start=1):
         text = ','.join(cells)
         blocks.append({

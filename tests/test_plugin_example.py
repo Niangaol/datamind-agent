@@ -36,8 +36,7 @@ INVENTORY_KEYS = {'name', 'version', 'media_types', 'extensions', 'capabilities'
 SCRIPT_DISCOVER = '''\
 import json
 from ingestion import upload_pipeline
-from ingestion.plugins import (default_context, ensure_loaded, loaded_plugins,
-                               parser_inventory)
+from ingestion.plugins import ensure_loaded, loaded_plugins, parser_inventory
 
 context = ensure_loaded()
 manifest = context.parser.lookup_by_extension('.csv')
@@ -58,7 +57,7 @@ import json
 import sys
 from pathlib import Path
 
-from ingestion.plugins import default_context, ensure_loaded
+from ingestion.plugins import ensure_loaded
 
 manifest = ensure_loaded().parser.lookup_by_extension('.csv')
 result, extra = manifest.resolve()(Path(sys.argv[1]), 'doc-csv-1', 'b' * 64)
@@ -84,7 +83,7 @@ import json
 import sys
 from pathlib import Path
 
-from ingestion.plugins import default_context, ensure_loaded
+from ingestion.plugins import ensure_loaded
 
 manifest = ensure_loaded().parser.lookup_by_extension('.csv')
 result, extra = manifest.resolve()(Path(sys.argv[1]), 'doc-csv-1', 'b' * 64)
@@ -96,6 +95,31 @@ print(json.dumps({
     'failed_scope': payload['failed_scope'],
     'parsed_scope': payload['parsed_scope'],
     'extra': extra,
+}))
+'''
+
+# The production seam: admission resolves the suffix, then `PARSERS` dispatches through the
+# `invoke_plugin` wrapper the upload pipeline itself uses. No database is touched because
+# the entry point only parses and returns `(ParseResult, extra)`.
+SCRIPT_DISPATCH = '''\
+import json
+import sys
+from pathlib import Path
+
+from ingestion import upload_pipeline
+
+claim = {'document_id': 'doc-csv-1', 'source_sha256': 'b' * 64}
+suffix = upload_pipeline.target('sample.csv')
+result, extra = upload_pipeline.PARSERS[suffix](Path(sys.argv[1]), claim)
+payload = result.payload
+print(json.dumps({
+    'parse_status': payload['parse_status'],
+    'extra': extra,
+    'texts': [block['text'] for block in payload['blocks']],
+    'reading_order': [block['reading_order'] for block in payload['blocks']],
+    'block_ids': [block['block_id'] for block in payload['blocks']],
+    'ranges': [block['locator']['range'] for block in payload['blocks']],
+    'plugin': payload['manifest']['adapter'],
 }))
 '''
 
@@ -197,6 +221,53 @@ class ContractOutputTests(unittest.TestCase):
         self.assertEqual(payload['block_types'], ['table_row'])
         self.assertEqual(payload['parser_versions'], ['csv-example-1.0.0'])
         self.assertTrue(payload['hashes_ok'])
+
+    def test_the_production_dispatch_entry_point_returns_the_same_contract(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'sample.csv'
+            path.write_text('name,value\nalpha,1\n', encoding='utf-8')
+
+            payload = json.loads(run_script(SCRIPT_DISPATCH, str(path),
+                                            plugin_path=EXAMPLE_DIR))
+
+        # `PARSERS['.csv']` is the seam `run_parse` dispatches through, so this asserts the
+        # callable the upload pipeline actually invokes, not just `manifest.resolve()`.
+        self.assertEqual(payload['parse_status'], 'parsed')
+        self.assertEqual(payload['extra'], {'rows': 2})
+        self.assertEqual(payload['texts'], ['name,value', 'alpha,1'])
+        self.assertEqual(payload['reading_order'], [0, 1])
+        self.assertEqual(payload['block_ids'], ['doc-csv-1:csv:1', 'doc-csv-1:csv:2'])
+        self.assertEqual(payload['ranges'], ['A1:Z1', 'A2:Z2'])
+        self.assertEqual(payload['plugin'], 'csv-example')
+
+    def test_a_blank_record_is_not_a_row(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'blanks.csv'
+            path.write_text('a,b\n\nc,d\n\n', encoding='utf-8')
+
+            payload = json.loads(run_script(SCRIPT_DISPATCH, str(path),
+                                            plugin_path=EXAMPLE_DIR))
+
+        # csv.reader yields `[]` for a blank line: no cells, so no block and no row count.
+        self.assertEqual(payload['parse_status'], 'parsed')
+        self.assertEqual(payload['texts'], ['a,b', 'c,d'])
+        self.assertEqual(payload['extra'], {'rows': 2})
+        self.assertEqual(payload['reading_order'], [0, 1])
+        self.assertEqual(payload['block_ids'], ['doc-csv-1:csv:1', 'doc-csv-1:csv:2'])
+        self.assertEqual(payload['ranges'], ['A1:Z1', 'A2:Z2'])
+
+    def test_a_file_of_only_blank_lines_is_unsupported_instead_of_a_fake_success(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'blank.csv'
+            path.write_text('\n\n\n', encoding='utf-8')
+
+            payload = json.loads(run_script(SCRIPT_EMPTY, str(path), plugin_path=EXAMPLE_DIR))
+
+        self.assertEqual(payload['parse_status'], 'unsupported')
+        self.assertEqual(payload['blocks'], 0)
+        self.assertEqual(payload['unsupported_features'], ['empty_source'])
+        self.assertEqual(payload['parsed_scope'], [])
+        self.assertEqual(payload['extra'], {'rows': 0})
 
     def test_an_empty_file_is_unsupported_instead_of_a_fake_success(self):
         with tempfile.TemporaryDirectory() as directory:

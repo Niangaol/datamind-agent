@@ -34,7 +34,7 @@ from datamind.plugin.manifest import ParserPluginManifest
 | `loader` | 是 | 关键字参数；可调用对象，或 `"module:function"` 引用。**声明时不 import** |
 | `priority` | 否 | 整数（拒绝 `bool`），默认 `100`；仅是声明元数据，注册表不据此排序 |
 | `config_schema` | 否 | 扁平声明式 schema，字段 spec 只允许 `type`/`default`/`required`/`choices` |
-| `enabled` | 否 | 布尔，默认 `True`；由插件配置翻转，见 §5.4 |
+| `enabled` | 否 | 布尔，默认 `True`；由插件配置翻转，见 §4.4 |
 
 注册表的约束与失败：
 
@@ -95,7 +95,7 @@ def register(ctx):
         capabilities=('native_text',), loader='acme_csv:parse'))
 ```
 
-两条形态都受 §5.2 的 stem loader 改写约束；`register(ctx)` 与 `MANIFEST` 同时存在时，
+三种形态都受 §4.2 的 stem loader 改写约束；`register(ctx)` 与 `MANIFEST` 同时存在时，
 `register` 优先。
 
 ## 3. Handler 契约
@@ -141,7 +141,10 @@ def parse(path, document_id, source_version, options=None):
 - 映射错误 `raise ... from error`，原始异常保留在 `__cause__`。
 - 每次调用产生一条结构化日志：`plugin`、`media_type`、`reason`、`duration_ms`；失败以
   `WARNING` + traceback 记录在**日志**里。
-- **HTTP 响应体绝不携带异常文本**：`str(error)` 可能泄露路径、连接串或 SQL。
+- **插件调用路径的 HTTP 响应体绝不携带异常文本**：`invoke_plugin` 只回传稳定的错误码与
+  `details`，`str(error)` 只进日志——它可能泄露路径、连接串或 SQL。唯一的例外在契约分发：
+  `parse_contract.dispatch` 的 `handler_signature` 失败会把 `detail=str(error)` 放进
+  `PARSE_RESULT_INVALID`，用于定位签名不符的适配器。
 - `KeyboardInterrupt`/`SystemExit` 不归插件报告，原样向上传播。
 
 ## 4. 发现与配置
@@ -224,9 +227,8 @@ MANIFEST = ParserPluginManifest(..., loader='csv_parser:parse')   # 文件 csv_p
 
 | HTTP | `error_code` | `details.reason` | 触发 |
 | --- | --- | --- | --- |
-| 415 | `UNSUPPORTED_MEDIA_TYPE` | 无 / `plugin_disabled` | 上传后缀没有启用插件声明；停用时额外带 `plugin` |
+| 415 | `UNSUPPORTED_MEDIA_TYPE` | 无 / `plugin_disabled` | 上传后缀没有启用插件声明；停用时额外带 `plugin`。注册表原语对"没声明"和"声明了但停用"都抛 422 `PARSE_ADAPTER_UNSUPPORTED`（后者 `reason='plugin_disabled'`），`target`/`create`/`run_parse` 一律转成该 415 |
 | 422 | `PARSE_ADAPTER_UNKNOWN` | `media_type_not_registered` / `extension_not_registered` / `invalid_media_type` / `invalid_extension` / `plugin_not_registered` | 注册表或契约适配器查询未声明的类型/插件 |
-| 422 | `PARSE_ADAPTER_UNSUPPORTED` | `plugin_disabled` | 插件声明了该类型但被配置停用 |
 | 422 | `PARSE_ADAPTER_UNSUPPORTED` | `library_missing` | handler 内 `ImportError`（可选解析库缺失） |
 | 422 | `PARSE_ADAPTER_UNSUPPORTED` | `handler_failed` | handler 抛其它异常 |
 | 422 | `PARSE_ADAPTER_UNSUPPORTED` | `no_handler` | 契约适配器只声明能力、没有 dispatch handler |
