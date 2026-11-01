@@ -143,6 +143,27 @@ class InjectTest(unittest.TestCase):
 
         self.assertEqual(calls, [])
 
+    def test_a_raising_deferred_injection_keeps_its_siblings_queued(self):
+        ctx = Context()
+        calls = []
+
+        def boom(inner):
+            calls.append('boom')
+            raise RuntimeError('boom')
+
+        ctx.inject(['db'], boom)
+        ctx.inject(['db'], lambda inner: calls.append(('sibling', inner.get('db'))))
+
+        with self.assertRaises(RuntimeError):
+            ctx.set('db', 'D1')
+
+        self.assertEqual(calls, ['boom'])
+        # The sibling never ran, so it must still be queued and reachable by the next
+        # registration; the callback that raised is consumed rather than retried.
+        ctx.set('cache', 'C1')
+
+        self.assertEqual(calls, ['boom', ('sibling', 'D1')])
+
     def test_plugin_declaring_a_missing_dependency_is_rejected(self):
         ctx = Context()
         calls = []
@@ -632,6 +653,61 @@ class EventTest(unittest.TestCase):
         root.emit('evt')
 
         self.assertEqual(seen, ['plugin'])
+
+
+class SharedStateThreadSafetyTest(unittest.TestCase):
+    """The service table and the pending list belong to the root, so one lock guards them."""
+
+    def test_sibling_contexts_cannot_both_register_the_same_service(self):
+        workers = 8
+        rounds = 50
+        failures = []
+        previous_interval = sys.getswitchinterval()
+        # A tight switch interval makes the check-then-insert window easy to hit, which is
+        # what a plugin calling ctx.set from a ``parallel`` handler does in production.
+        sys.setswitchinterval(1e-6)
+        try:
+            for round_index in range(rounds):
+                root = Context()
+                siblings = tuple(Context(parent=root) for _ in range(workers))
+                barrier = threading.Barrier(workers, timeout=10)
+                winners = []
+                conflicts = []
+
+                def register(inner, name=f'svc-{round_index}'):
+                    barrier.wait()
+                    try:
+                        inner.set(name, inner)
+                    except ServiceConflictError:
+                        conflicts.append(inner)
+                    else:
+                        winners.append(inner)
+
+                threads = [threading.Thread(target=register, args=(inner,))
+                           for inner in siblings]
+                for thread in threads:
+                    thread.start()
+                for thread in threads:
+                    thread.join(timeout=10)
+                if len(winners) != 1 or len(conflicts) != workers - 1:
+                    failures.append((round_index, len(winners), len(conflicts)))
+        finally:
+            sys.setswitchinterval(previous_interval)
+
+        self.assertEqual(failures, [], f'{len(failures)}/{rounds} rounds had no single winner')
+
+    def test_a_service_registered_on_one_sibling_is_visible_to_the_others(self):
+        root = Context()
+        first = Context(parent=root)
+        second = Context(parent=root)
+
+        first.set('shared', 'value')
+
+        self.assertEqual(second.get('shared'), 'value')
+        self.assertEqual(second.service_names, ('shared',))
+        with self.assertRaises(ServiceConflictError):
+            second.set('shared', 'other')
+        self.assertEqual(root.get('shared'), 'value')
 
 
 class SamplePluginRoundTripTest(unittest.TestCase):

@@ -115,12 +115,18 @@ class Context:
         self._disposed = False
         if parent is None:
             self._root: Context = self
+            # ``_lock`` guards this context's own state (disposers, children, disposed,
+            # ready). ``_state_lock`` is shared by the whole tree and guards the
+            # root-owned service table and pending list: two plugins on sibling contexts
+            # must serialize on the same lock or the check-then-insert in ``set`` races.
+            self._state_lock = threading.RLock()
             self._services: dict[str, Any] = {}
             self._bus = EventBus()
             self._pending: list[_PendingInjection] = []
             self._ready = True
         else:
             self._root = parent._root
+            self._state_lock = parent._state_lock
             self._services = parent._services
             self._bus = parent._bus
             self._pending = parent._pending
@@ -138,7 +144,8 @@ class Context:
     @property
     def ready(self) -> bool:
         """True once the plugin applied on this context finished loading."""
-        return self._ready
+        with self._lock:
+            return self._ready
 
     @property
     def disposed(self) -> bool:
@@ -148,7 +155,7 @@ class Context:
     @property
     def service_names(self) -> tuple[str, ...]:
         """Names of the services currently registered, in registration order."""
-        with self._lock:
+        with self._state_lock:
             return tuple(self._services)
 
     def plugins(self) -> tuple['Context', ...]:
@@ -165,10 +172,12 @@ class Context:
         context (or the plugin that owns it) frees the name again. Reusing a name that
         is still taken raises :class:`ServiceConflictError` instead of silently
         replacing another plugin's service - a replacement must be an explicit
-        dispose-then-set by whoever owns the first registration.
+        dispose-then-set by whoever owns the first registration. The existence check and
+        the insert happen under the one lock shared by every context of the tree, so two
+        threads registering the same name cannot both succeed.
         """
         _require_service_name(name)
-        with self._lock:
+        with self._state_lock:
             existing = self._services.get(name, _MISSING)
             if existing is not _MISSING:
                 raise ServiceConflictError(
@@ -177,7 +186,7 @@ class Context:
             self._services[name] = value
 
         def dispose() -> None:
-            with self._lock:
+            with self._state_lock:
                 if self._services.get(name, _MISSING) is value:
                     del self._services[name]
 
@@ -191,7 +200,7 @@ class Context:
         Raises :class:`ServiceNotFoundError` naming the services that *do* exist, so a
         misspelled dependency is diagnosable from the message alone.
         """
-        with self._lock:
+        with self._state_lock:
             try:
                 return self._services[name]
             except KeyError:
@@ -201,7 +210,7 @@ class Context:
 
     def has(self, name: str) -> bool:
         """True when a service called ``name`` is registered."""
-        with self._lock:
+        with self._state_lock:
             return name in self._services
 
     # -- effects ---------------------------------------------------------------
@@ -280,19 +289,20 @@ class Context:
 
         Returns a disposer that cancels a still-pending callback; disposing this context
         also cancels it. Cancelling an already-run callback does nothing. An exception
-        raised by a deferred callback propagates out of the ``set`` that satisfied it.
+        raised by a deferred callback propagates out of the ``set`` that satisfied it;
+        the callbacks that were still waiting stay queued, so a later ``set`` runs them.
         """
         names = _normalize_dependencies(deps)
         if not callable(callback):
             raise TypeError(f'inject() expects a callable, got {type(callback).__name__}')
         pending = _PendingInjection(owner=self, deps=names, callback=callback)
-        with self._lock:
+        with self._state_lock:
             satisfied = not self._disposed and all(dep in self._services for dep in names)
             if not satisfied and not self._disposed:
                 self._pending.append(pending)
 
         def cancel() -> None:
-            with self._lock:
+            with self._state_lock:
                 if pending in self._pending:
                     self._pending.remove(pending)
 
@@ -302,25 +312,27 @@ class Context:
         return cancel
 
     def _resolve_pending(self) -> None:
-        """Run every deferred injection whose dependencies are now all registered.
+        """Run the deferred injections whose dependencies are now all registered.
 
-        Called after a successful :meth:`set`. Callbacks run outside the lock and in
-        registration order; a callback that registers more services re-enters here.
+        Called after a successful :meth:`set`. One entry is unqueued at a time, outside
+        the lock, and the queue is re-read after each callback, so a callback that
+        registers more services re-enters here. Unqueueing one entry at a time is what
+        keeps a raising callback from discarding the siblings behind it: only the entry
+        that ran is consumed, the rest stay queued for a later :meth:`set`, and the
+        exception still propagates to the caller of that ``set``.
         """
         while True:
-            with self._lock:
+            with self._state_lock:
                 if self._disposed or not self._pending:
                     return
-                ready = [p for p in self._pending
-                         if all(dep in self._services for dep in p.deps)]
-                if not ready:
+                entry = next((p for p in self._pending
+                              if all(dep in self._services for dep in p.deps)), None)
+                if entry is None:
                     return
-                for entry in ready:
-                    self._pending.remove(entry)
-            for entry in ready:
-                if entry.owner.disposed:
-                    continue
-                entry.callback(entry.owner)
+                self._pending.remove(entry)
+            if entry.owner.disposed:
+                continue
+            entry.callback(entry.owner)
 
     # -- plugins ---------------------------------------------------------------
 
@@ -359,7 +371,9 @@ class Context:
 
         with self._lock:
             parent_disposed = self._disposed
-            if not parent_disposed:
+        if not parent_disposed:
+            # ``ready`` belongs to the child, so it is published under the child's lock.
+            with child._lock:
                 child._ready = True
         if parent_disposed:
             _dispose_quietly(child)
