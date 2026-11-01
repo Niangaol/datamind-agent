@@ -72,7 +72,8 @@ spec_text.txt
 # ===== 运行时产物与日志 =====
 /output/
 *.log
-/reports/project_audit_*
+# 评测、隔离回归与审计脚本的输出目录：每次运行自动生成，不入库
+/reports/
 
 # ===== Vue 前端构建产物 =====
 # 由 frontend/ 执行 `npm run deploy` 生成。文件名带内容哈希，每构建一次就是
@@ -80,10 +81,3 @@ spec_text.txt
 # 因此不入库：拉下来先跑一次 npm run deploy 即可（api.py 在产物缺失时会返回
 # 503 并提示去构建）。
 /web/vue/
-
-# ===== 便携交付包（scripts/build_delivery.ps1 的产物） =====
-# 交付包与运行时缓存都是本机打包产物：内含几百 MB 的 PostgreSQL / Qdrant / 嵌入式
-# Python 运行时与预置数据库，绝不入库。默认输出在仓库上一级的 delivery/ 与
-# delivery_cache/；若用 -OutDir / -CacheDir 指回仓库内，也一并忽略。
-delivery/
-delivery_cache/
