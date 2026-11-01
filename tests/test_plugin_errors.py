@@ -21,6 +21,8 @@ import sys
 import logging
 import subprocess
 import unittest
+import contextlib
+import io
 from pathlib import Path
 from types import SimpleNamespace
 from unittest import mock
@@ -222,6 +224,31 @@ class PluginParserEntryTests(unittest.TestCase):
         self.assertIs(parse(path, claim), sentinel)
 
         loader.assert_called_once_with(path, 'd', 's', claim)
+
+
+class RunParseStdoutChannelTests(unittest.TestCase):
+    """The bounded child writes exactly one JSON object to stdout, so bootstrap must be quiet.
+
+    ``ensure_loaded()`` imports every configured external plugin module; a module-level
+    ``print()`` in any of them would otherwise be the first thing the child writes and every
+    parse in that process would be reported as ``TASK_RESULT_INVALID``.
+    """
+
+    def test_a_noisy_bootstrap_print_never_reaches_the_stdout_channel(self):
+        def noisy_bootstrap():
+            print('noisy plugin banner')
+
+        buffer = io.StringIO()
+        with mock.patch.object(upload_pipeline, 'ensure_loaded', side_effect=noisy_bootstrap), \
+                contextlib.redirect_stdout(buffer):
+            with self.assertRaises(HTTPException) as caught:
+                # An undeclared suffix is refused before any database work, so this needs no
+                # PostgreSQL: the only thing under test is where the banner went.
+                upload_pipeline.run_parse({'suffix': '.zzz'}, 'dsn')
+
+        self.assertEqual(caught.exception.status_code, 415)
+        self.assertEqual(caught.exception.detail['error_code'], 'UNSUPPORTED_MEDIA_TYPE')
+        self.assertEqual(buffer.getvalue(), '')
 
 
 PAYLOAD = {'parse_status': 'parsed', 'contract_version': 1, 'blocks': [],

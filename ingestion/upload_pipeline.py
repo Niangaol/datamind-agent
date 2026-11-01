@@ -1158,8 +1158,10 @@ def run_parse(claim, dsn):
     `pymupdf_layout` on stdout the first time it runs layout analysis). In the bounded
     child the runner writes its one JSON result to stdout, so any library chatter would
     corrupt that channel and be reported as `TASK_RESULT_INVALID` even though the parse and
-    the contract write succeeded. The parse therefore runs with stdout redirected to
-    stderr: diagnostics survive, the result channel stays exactly one JSON object.
+    the contract write succeeded. Both steps therefore run with stdout redirected to
+    stderr: bootstrap (``ensure_loaded`` imports every configured external plugin module,
+    which may print at import time) and the parse itself. Diagnostics survive; the result
+    channel stays exactly one JSON object.
 
     **Claim generation (R04).** The parse itself runs outside any transaction (it can take
     the whole wave budget). Only afterwards — in **one** transaction — is the claim locked
@@ -1169,8 +1171,11 @@ def run_parse(claim, dsn):
     quality detail, no terminal state — it returns `claim_lost` instead.
     """
     # The parsing child owns its own process, so the table is bootstrapped here too (G8).
-    ensure_loaded()
-    _sync_parsers()
+    # Redirected: discovery imports plugin modules, and a module-level print() would
+    # otherwise land in the result channel this child writes its one JSON answer to.
+    with contextlib.redirect_stdout(sys.stderr):
+        ensure_loaded()
+        _sync_parsers()
     # The registry, not `PARSERS`, decides whether the suffix is served: a plugin disabled
     # after import keeps its entry point in the table and must be refused here instead.
     try:
