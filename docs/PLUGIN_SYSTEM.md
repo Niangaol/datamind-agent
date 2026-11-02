@@ -98,10 +98,11 @@ def register(ctx):
 三种形态都受 §4.2 的 stem loader 改写约束；`register(ctx)` 与 `MANIFEST` 同时存在时，
 `register` 优先。
 
-与 `MANIFEST` 形态一样，`register(ctx)` 形态也是可回滚的：只要 `register` 抛异常、它一个
-manifest 都没声明，或随后的 loader 改写/配置应用失败，该模块已注册的 parser manifest 会被
-全部撤销，模块被跳过（§4.1），注册表里不留半成品。`register` 用 `ctx` 注册的其它东西
-（服务、事件处理器、它自己的 disposer）不在此保证内，由插件自己负责。
+与 `MANIFEST` 形态一样，`register(ctx)` 形态也是可回滚的：它在**子上下文**中执行，因此只要
+`register` 抛异常、它一个 manifest 都没声明，或随后的 loader 改写/配置应用失败，该模块已
+注册的 parser manifest、以及它通过 `ctx` 应用的服务、事件处理器和 disposer 都会被撤销，
+模块被跳过（§4.1），注册表里不留半成品。成功加载时子上下文挂在根上下文下继续持有这些
+effect，整轮插件卸载时一并释放。
 
 ## 3. Handler 契约
 
@@ -118,10 +119,15 @@ def parse(path, document_id, source_version, options=None):
 - 返回 `(ParseResult, extra)`：`ParseResult` 由
   `datamind.parse_contract.validate_parse_result(payload)` 产出（或 `dispatch` 的返回值），
   `extra` 是附加的分析计数（例如 `{'rows': 3}`），会并入
-  `quality_detail.analysis`。
+  `quality_detail.analysis`；它是**增量**的，同名键不能覆盖契约写入的归属字段
+  （`plugin`/`adapter`/`parse_status`/计数等）。
 - 解析结果必须满足[统一解析契约](PARSE_CONTRACT.md)：`parse_status='parsed'` 至少一个
   block；空源不能伪造成功，应返回 `parse_status='unsupported'` 并声明
   `unsupported_features` 与 `failed_scope`。
+
+本节描述的是**上传路由**调用的 handler。只声明 media type、没有扩展名的清单（如
+`ohr-bench-json`）不经过上传路由，其 loader 由对应契约分发路径按 media type 显式调用，
+不保证采用上面的四参数签名。
 
 ### 3.2 惰性导入
 

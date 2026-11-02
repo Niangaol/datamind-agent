@@ -354,10 +354,9 @@ def _load_external(context: Context, path: Path,
     Two declaration shapes are accepted. A callable ``register(ctx)`` owns its own
     registration, so its declarations are whatever new names it left in the registry. A
     module-level ``MANIFEST`` (one manifest or an iterable of them) is registered here.
-    Either way a failure disposes exactly the parser manifests this module claimed, so a
-    skipped plugin leaves no claim behind; other effects the plugin registered with
-    ``context`` (services, event handlers, its own disposers) stay the plugin's own
-    responsibility.
+    Either way a failure leaves nothing behind: the manifests this module claimed are
+    released, and ``register(ctx)`` runs on a child context so the services, listeners and
+    disposers it applied are unwound with it.
 
     A string loader may name its own file by stem (rewritten to the synthetic module name)
     or another importable module; callables work unchanged.
@@ -369,8 +368,12 @@ def _load_external(context: Context, path: Path,
     register = getattr(module, 'register', None)
     if callable(register):
         before = {manifest.name for manifest in registry.list()}
+        handle = None
         try:
-            register(context)
+            # A child scope records every `ctx.effect`/`ctx.set`/`ctx.on` the plugin applies,
+            # so a failure below disposes them all. `Context.plugin` calls the applier with
+            # `(ctx, config)`; the one-argument discovery hook is adapted here.
+            handle = context.plugin(lambda child, config: register(child))
             manifests = [manifest for manifest in registry.list()
                          if manifest.name not in before]
             if not manifests:
@@ -382,7 +385,14 @@ def _load_external(context: Context, path: Path,
         except BaseException:
             # `register(ctx)` may have claimed several manifests before it raised, and a
             # later step (loader rewrite, config) can fail too: release everything this
-            # module added, in the reverse order the registry accepted it.
+            # module added, in the reverse order the registry accepted it. A manifest the
+            # plugin registered through `ctx.effect` was already released by disposing the
+            # child, so the explicit pass only catches the unrecorded ones.
+            if handle is not None:
+                try:
+                    handle.dispose()
+                except BaseException:  # noqa: BLE001 - the load error is the one that matters
+                    pass
             for manifest in reversed(registry.list()):
                 if manifest.name not in before:
                     registry.unregister(manifest.name)

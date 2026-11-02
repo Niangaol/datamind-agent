@@ -630,13 +630,14 @@ def register_adapter(name, *, media_types, capabilities, handler=None):
 def _unregister_adapter(name):
     """Free every media type held by the adapter record called ``name``.
 
-    Internal counterpart of `register_adapter`, used by the parser plugin registry when a
-    plugin is unloaded or reloaded: a reload must free the media types its previous record
-    claimed, otherwise `register_adapter` refuses the reload with
-    `media_type_already_registered`. Only the named record's media types are removed - a
-    sibling whose name merely starts with the same prefix stays registered - and the
-    removed record is returned, or None when nothing has that name. Running it twice is a
-    no-op the second time.
+    Internal counterpart of `register_adapter`, used by tests that need to undo a
+    registration in the same process: it frees the media types the record currently
+    claims, so a re-registration under the same name succeeds. It is **not** part of the
+    parser plugin registry's load/unload path - that registry releases a plugin's
+    declarations through the disposer `ParserRegistry.register` returns. Only the named
+    record's media types are removed - a sibling whose name merely starts with the same
+    prefix stays registered - and the removed record is returned, or None when nothing has
+    that name. Running it twice is a no-op the second time.
     """
     target = name.strip() if isinstance(name, str) else name
     media_types = [media_type for media_type, record in _ADAPTERS.items()

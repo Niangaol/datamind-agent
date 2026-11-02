@@ -69,6 +69,7 @@ from datamind.plugin.manifest import ParserPluginManifest
 
 
 def register(ctx):
+    ctx.set('jsonl_probe', object())
     ctx.parser.register(ParserPluginManifest(
         'jsonl-demo', '1.0.0', ('application/x-jsonl',), ('.jsonl',),
         capabilities=('text',), loader='jsonl_plugin:parse'))
@@ -177,8 +178,8 @@ import json
 from datamind.plugin.manifest import ManifestError
 from ingestion.plugins import default_context, ensure_loaded, loaded_plugins
 
-ensure_loaded()
-parser = default_context().parser
+context = ensure_loaded()
+parser = context.parser
 outcomes = {}
 for label, lookup in (('extension', lambda: parser.lookup_by_extension('.jsonl')),
                       ('media_type', lambda: parser.lookup('application/x-jsonl'))):
@@ -192,6 +193,7 @@ print(json.dumps({
     'outcomes': outcomes,
     'extensions': list(parser.known_extensions()),
     'loaded': [record.manifest.name for record in loaded_plugins()],
+    'has_probe_service': context.has('jsonl_probe'),
 }))
 '''
 
@@ -267,6 +269,8 @@ class DirectoryDiscoveryTests(unittest.TestCase):
                                                'media_type': 'PARSE_ADAPTER_UNKNOWN'})
         self.assertNotIn('.jsonl', payload['extensions'])
         self.assertNotIn('jsonl-demo', payload['loaded'])
+        # `register(ctx)` runs on a child scope, so its services are undone with it too.
+        self.assertFalse(payload['has_probe_service'])
         self.assertIn(str(plugin_file), result.stderr)
         self.assertIn('boom after registering', result.stderr)
 

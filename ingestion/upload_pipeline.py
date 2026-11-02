@@ -259,6 +259,22 @@ def _adapter_for(suffix):
     return manifest.name if manifest is not None else None
 
 
+def _served_manifest(suffix):
+    """The enabled manifest serving ``suffix``, or the one 415 body every gate emits.
+
+    Admission (`target`), enqueue and the parse child all ask the same question, so the
+    refusal shape - including the ``plugin_disabled`` details - is defined once instead of
+    three times.
+    """
+    try:
+        return default_context().parser.lookup_by_extension(suffix)
+    except ManifestError as error:
+        if error.error_code == PARSE_ADAPTER_UNSUPPORTED:
+            fail('UNSUPPORTED_MEDIA_TYPE', 415, suffix=suffix or None,
+                 reason='plugin_disabled', plugin=error.details.get('plugin'))
+        fail('UNSUPPORTED_MEDIA_TYPE', 415, suffix=suffix or None)
+
+
 def target(filename):
     """Validate the requested name and return its suffix, before any byte is read.
 
@@ -276,14 +292,8 @@ def target(filename):
         fail(DWG_ERROR_CODE, 415)
     # Config and discovery failures are startup errors and stay outside the routing try.
     ensure_loaded()
-    try:
-        _sync_parsers()
-        default_context().parser.lookup_by_extension(suffix)
-    except ManifestError as error:
-        if error.error_code == PARSE_ADAPTER_UNSUPPORTED:
-            fail('UNSUPPORTED_MEDIA_TYPE', 415, suffix=suffix or None,
-                 reason='plugin_disabled', plugin=error.details.get('plugin'))
-        fail('UNSUPPORTED_MEDIA_TYPE', 415, suffix=suffix or None)
+    _sync_parsers()
+    _served_manifest(suffix)
     return suffix
 
 
@@ -334,16 +344,9 @@ def enqueue(staged, provenance, dsn, identity):
     """
     suffix = staged['suffix']
     ensure_loaded()
-    try:
-        media_type = default_context().parser.lookup_by_extension(suffix).media_types[0]
-    except ManifestError as error:
-        # The suffix passed `target`; it can only have lost its plugin since then, and a
-        # disabled plugin must be refused here rather than queued into a failing parse.
-        # The body matches `target`'s so a client sees one refusal shape for one cause.
-        if error.error_code == PARSE_ADAPTER_UNSUPPORTED:
-            fail('UNSUPPORTED_MEDIA_TYPE', 415, suffix=suffix,
-                 reason='plugin_disabled', plugin=error.details.get('plugin'))
-        fail('UNSUPPORTED_MEDIA_TYPE', 415, suffix=suffix)
+    # The suffix passed `target`; it can only have lost its plugin since then, and a
+    # disabled plugin must be refused here rather than queued into a failing parse.
+    media_type = _served_manifest(suffix).media_types[0]
     ids = identities(staged['source_sha256'])
     # `document_assets.object_uri` follows the repository-wide convention of an **absolute**
     # path (every other row, e.g. the knowledge base, stores an absolute path). The old
@@ -1124,10 +1127,15 @@ def _plugin_parser(manifest):
     because a patched plugin function must be picked up by the next parse. The invocation
     itself goes through ``invoke_plugin``, so every handler failure is attributed to this
     plugin (``PARSE_ADAPTER_UNSUPPORTED`` with ``library_missing``/``handler_failed``)
-    instead of surfacing as whatever exception the third-party library raised.
+    instead of surfacing as whatever exception the third-party library raised. A resolution
+    failure keeps its own stable code (``PARSE_RESULT_INVALID``/``unresolvable_loader``)
+    instead of falling through to the generic parse-failed outcome.
     """
     def parse(path, claim):
-        loader = manifest.resolve()
+        try:
+            loader = manifest.resolve()
+        except ManifestError as error:
+            raise HTTPException(422, detail=error.as_detail()) from error
         return invoke_plugin(manifest, loader, path, claim['document_id'],
                              claim['source_sha256'], claim)
 
@@ -1178,13 +1186,7 @@ def run_parse(claim, dsn):
         _sync_parsers()
     # The registry, not `PARSERS`, decides whether the suffix is served: a plugin disabled
     # after import keeps its entry point in the table and must be refused here instead.
-    try:
-        manifest = default_context().parser.lookup_by_extension(claim['suffix'])
-    except ManifestError as error:
-        if error.error_code == PARSE_ADAPTER_UNSUPPORTED:
-            fail('UNSUPPORTED_MEDIA_TYPE', 415, suffix=claim['suffix'],
-                 reason='plugin_disabled', plugin=error.details.get('plugin'))
-        fail('UNSUPPORTED_MEDIA_TYPE', 415, suffix=claim['suffix'])
+    manifest = _served_manifest(claim['suffix'])
     # A patched entry still wins for an enabled extension; the lookup above only gates.
     parser_entry = PARSERS.get(claim['suffix']) or _plugin_parser(manifest)
     path = _staged_path(claim)
@@ -1235,15 +1237,19 @@ def _analysis_of(claim, payload, stored, extra):
     # The plugin that served the suffix, resolved from the declarations rather than from an
     # enabled lookup, so a record parsed before a plugin was disabled keeps naming it.
     manifest = _manifest_for(claim['suffix'])
+    owner = manifest.name if manifest is not None else None
     analysis = {'parse_status': payload['parse_status'],
-                'adapter': payload['manifest'].get('adapter') or _adapter_for(claim['suffix']),
-                'plugin': manifest.name if manifest is not None else None,
+                'adapter': payload['manifest'].get('adapter') or owner,
+                'plugin': owner,
                 'blocks': stored['blocks'], 'locators_written': stored['locators'],
                 'relations': stored['relations'], 'block_types': block_types,
                 'unsupported_features': list(payload['unsupported_features']),
                 'quality_findings': payload['quality_findings'],
                 'contract_version': payload['contract_version']}
-    analysis.update(extra)
+    # Plugin extras add analysis counters; they never replace a field the contract itself
+    # attributed, or a plugin could rename its own adapter in the stored record.
+    for key, value in extra.items():
+        analysis.setdefault(key, value)
     return analysis
 
 

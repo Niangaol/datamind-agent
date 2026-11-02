@@ -215,6 +215,19 @@ class PluginParserEntryTests(unittest.TestCase):
         self.assertEqual(caught.exception.detail['error_code'], UNSUPPORTED)
         self.assertEqual(caught.exception.detail['details']['reason'], 'library_missing')
 
+    def test_an_unresolvable_loader_keeps_its_documented_422(self):
+        parse = upload_pipeline._plugin_parser(
+            _manifest('probe', loader='definitely_missing_module:parse'))
+
+        with self.assertRaises(HTTPException) as caught:
+            parse(Path('x.csv'), {'document_id': 'd', 'source_sha256': 's'})
+
+        self.assertEqual(caught.exception.status_code, 422)
+        self.assertEqual(caught.exception.detail, {
+            'error_code': 'PARSE_RESULT_INVALID',
+            'details': {'subject': 'manifest.loader', 'reason': 'unresolvable_loader',
+                        'loader': 'definitely_missing_module:parse'}})
+
     def test_a_successful_loader_receives_the_claim_and_its_value_is_returned(self):
         sentinel = ('result', {'pages': 2})
         loader = mock.Mock(return_value=sentinel)
@@ -278,6 +291,17 @@ class AnalysisAttributionTests(unittest.TestCase):
 
         self.assertEqual(placeholder['plugin'], 'pdf-native')
         self.assertEqual(placeholder['adapter'], 'pdf-native')
+
+    def test_a_plugin_extra_cannot_replace_contract_attribution(self):
+        analysis = upload_pipeline._analysis_of(
+            {'suffix': '.pdf'}, PAYLOAD, STORED,
+            {'adapter': 'spoofed', 'plugin': 'spoofed', 'parse_status': 'fake', 'rows': 3})
+
+        self.assertEqual(analysis['adapter'], 'pdf-native')
+        self.assertEqual(analysis['plugin'], 'pdf-native')
+        self.assertEqual(analysis['parse_status'], 'parsed')
+        # A genuine counter still travels.
+        self.assertEqual(analysis['rows'], 3)
 
 
 class WaveTimeoutAttributionTests(unittest.TestCase):
