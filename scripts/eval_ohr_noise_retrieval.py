@@ -219,7 +219,7 @@ def run(labels_path: Path) -> dict:
             "evidence_rule": "Every frozen GT excerpt must remain a continuous substring after the same production normalization in both conditions; no markup repair",
             "chunk_difference_rule": "Compare text by sample_id plus chunk index; extra tail chunks counted separately. This is not an edit distance or semantic alignment.",
             "real_model_calls": 0, "api_calls": 0, "database_connections": 0, "database_or_index_writes": 0},
-        "limitations": ["Existing 14 extracted pages with manually selected questions/excerpts, not the complete OHR-Bench or official QA benchmark.",
+        "limitations": ["Existing 14 extracted pages with manually selected questions/excerpts, not the complete OHR-Bench nor a public QA benchmark.",
             "This is an offline lexical component test, not end-to-end generation, hybrid/dense retrieval, or answer accuracy.",
             "Provided gt_text and noise_text are evaluated directly. No image rendering or real OCR inference is run.",
             "Strict unchanged-excerpt retention can fail because of formatting even if a reader could reconstruct meaning; it is not a semantic correctness test.",

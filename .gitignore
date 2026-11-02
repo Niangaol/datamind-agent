@@ -22,11 +22,10 @@ Thumbs.db
 # ===== 上游仓库自身的 git 元数据（防止误嵌套提交） =====
 */.git/
 
-# ===== 竞赛资料（非数据库内容，暂不入库） =====
+# ===== 外部参考资料（非数据库内容，暂不入库） =====
 /*.pdf
 
 # ===== 临时提取文件 =====
-saiti_text.txt
 spec_text.txt
 
 # 页面预览由摄取/评测生成；历史已跟踪预览不受影响。
@@ -45,9 +44,6 @@ spec_text.txt
 
 # 通用上传管道（scripts/eval_qa_samples.py 等）的暂存文件是运行时数据，不是仓库内容
 /data/uploads/
-
-# 交付材料的生成中间产物（DOCX/PPTX 构建脚本保持入库以便复现，只挡编译缓存）
-/交付/_build/__pycache__/
 
 # Native PDF preparation sources and private attempt products are runtime data.
 /data/object_store/pdf_prepared/

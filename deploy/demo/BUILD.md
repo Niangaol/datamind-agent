@@ -2,7 +2,7 @@
 
 运行包使用 Linux 容器，分别提供 `linux/arm64` 与 `linux/amd64` 镜像。
 Windows、Intel Mac 使用 amd64，Apple 芯片 Mac 使用 arm64。
-源码与测试另外随源码交付包提供；镜像仅收录运行所需的源码、演示样例、前端产物和模型。
+源码与测试随仓库提供；镜像仅收录运行所需的源码、演示样例、前端产物和模型。
 
 在能够构建两个架构的 Docker 环境中，从项目根目录执行：
 
@@ -24,7 +24,7 @@ Python 3.12 公式环境，满足根目录 `requirements-formula.txt`；这样�
 成品镜像中的 `/opt/runtime-manifests/main.freeze.txt` 和 `formula.freeze.txt`
 记录实际安装版本。`Dockerfile` 在运行时镜像上追加当前应用与模型，并检查导入。
 
-构建上下文在项目上一级的 `delivery_crossplatform/build_context/`，由白名单生成，
+构建上下文在项目上一级的 `datamind-demo-build/build_context/`，由 `build_images.py` 的白名单生成，
 不复制 Git 历史、本机虚拟环境、私有上传、真实 `.env`、模型 API 密钥或开发数据库。
 三个模型缓存目录从项目的 `.cache/` 复制到镜像 `/opt/app/.cache/`：
 `fastembed/`、`ocr_models/`、`formula_models/`。这三个目录必须先准备齐全。

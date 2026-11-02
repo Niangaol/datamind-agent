@@ -6,7 +6,7 @@
 
   为适配本项目改了这些（逐条对照上游）：
   1. **去掉 Lenis**。上游用 `lenis` 做平滑滚动（滚动容器模式与 window 模式各一套）。
-     `frontend/package.json` 里没有 lenis，装它要改 lock、交付包要重装 —— 本组件的
+     `frontend/package.json` 里没有 lenis，装它要改 lock、打包产物要重装 —— 本组件的
      transform 数学本身与 Lenis 无关，Lenis 只负责把 scrollTop 变平滑。这里换成
      原生 `window` 滚动事件 + requestAnimationFrame 合帧，逐张卡的位移/缩放公式与
      上游一字不差（triggerStart / triggerEnd / pinStart / pinEnd / scaleProgress 全保留）。

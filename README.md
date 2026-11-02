@@ -2,11 +2,11 @@
 
 **多模态数据驱动的可解释问数与问答智能体。** 将自然语言问题转成只读 SQL、文档检索或限定工业核验，并保留执行过程、来源版本和证据，帮助用户核查答案。
 
-本项目面向“中国电子杯”高校 ICT 产教融合创新大赛赛题八。当前使用 **Vue 3 + TypeScript + Vite** 前端、**FastAPI** 服务、**PostgreSQL** 元数据与业务库、**Qdrant** 文档向量索引；生成模型直连上游，支持 OpenAI 兼容接口与 Anthropic Messages。
+本项目面向企业文档与业务库，提供可解释的问数与问答能力：自然语言问题落到只读 SQL、文档检索或限定工业核验，执行过程、来源版本与证据一并保留。当前使用 **Vue 3 + TypeScript + Vite** 前端、**FastAPI** 服务、**PostgreSQL** 元数据与业务库、**Qdrant** 文档向量索引；生成模型直连上游，支持 OpenAI 兼容接口与 Anthropic Messages。
 
 [快速开始](#快速开始) · [新版前端](#新版前端) · [开发与验证](#开发与验证) · [文档导航](#文档导航)
 
-**项目状态（2026-11-01）**：面向赛题八的参赛版本已归档冻结。本仓库保留可运行的源码、演示数据、测试与设计文档；竞赛交付包、过程报告与评审计分材料已从工作区移除，如需追溯可查阅 Git 历史。Windows / macOS 一键演示包不再随仓库提供，本机运行方式见下文。
+**项目状态（2026-11-01）**：本仓库是该项目当前的工作状态。保留可运行的源码、演示数据、测试与设计文档；阶段性过程材料与打包产物已从工作区移除，如需追溯可查阅 Git 历史。Windows / macOS 一键演示包不再随仓库提供，本机运行方式见下文。
 
 ## 能力与边界
 
@@ -201,8 +201,9 @@ Chinook SQL 随仓库提供，演示知识库见 [manifest](data/knowledge_base/
 
 | 主题 | 入口 |
 | --- | --- |
+| 产品定位与路线 | [产品说明](docs/PRODUCT.md) · [路线图](docs/ROADMAP.md) |
 | 当前实现与下一阶段 | [项目进度](PROGRESS.md) · [新版前端计划](docs/FRONTEND_NEXT_STEPS_20261010.md) |
-| 技术设计与历史记录 | [V1.3 整合版](技术文档/DataMind_Agent_技术设计说明书_V1.3.md) · [V1.2 历史说明书](技术文档/DataMind_Agent_技术设计说明书_V1.2.md) |
+| 技术设计与历史记录 | [V1.3 整合版](技术文档/DataMind_Agent_技术设计说明书_V1.3.md)（已整合并取代早期 V1.2；历史阶段记录见其 §18） |
 | 部署与依赖 | [部署边界](docs/DEPLOYMENT_BOUNDARIES.md) · [模型权重与缓存](docs/MODEL_WEIGHTS.md) |
 | 文件解析与上传 | [统一解析契约](docs/PARSE_CONTRACT.md) · [上传管道](docs/UPLOAD_PIPELINE.md) · [多文件并发](docs/MULTIFILE_CONCURRENCY.md) |
 | 私有 PDF | [离线准备](docs/PDF_PREPARATION.md) · [快照登记](docs/PDF_SNAPSHOT_REGISTRY.md) · [知识发布](docs/PDF_KNOWLEDGE_PUBLICATION.md) · [私有检索与回答](docs/PDF_PRIVATE_SEARCH.md) |

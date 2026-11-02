@@ -10,7 +10,6 @@ No local virtual environment, API key, private upload or Git history is copied.
 from __future__ import annotations
 
 import argparse
-import importlib.util
 import os
 from pathlib import Path
 import shutil
@@ -18,8 +17,27 @@ import subprocess
 
 
 ROOT = Path(__file__).resolve().parents[2]
-CONTEXT = ROOT.parent / "delivery_crossplatform" / "build_context"
-IMAGE_DIRS = {"datamind", "ingestion", "db", "scripts", "data", "web", "deploy"}
+CONTEXT = ROOT.parent / "datamind-demo-build" / "build_context"
+
+# 只收运行所需的目录，构建上下文由这份白名单生成，不做整仓库拷贝。
+APP_DIRS = ("datamind", "ingestion", "db", "scripts", "deploy", "data", "web")
+APP_ROOT_FILES = ("README.md", "requirements.lock", "requirements-formula.txt")
+SKIP_DIR_NAMES = {
+    "__pycache__", ".pytest_cache", ".mypy_cache", ".ruff_cache",
+    "node_modules", ".venv", ".venv-formula", ".git", ".cache", "dist", ".vite",
+}
+SKIP_REL_PREFIXES = ("data/uploads", "data/object_store")
+# 冻结评测 JSON 引用的三份源 PDF 位于 output/（不入库），评测样本需要它们随镜像提供。
+EXTRA_FILES = (
+    "output/pdf/industrial_forms_holdout_v1.pdf",
+    "output/pdf/industrial_forms_development_v2.pdf",
+    "output/pdf/industrial_forms_acceptance_v2.pdf",
+)
+
+
+def _ignore(_directory: str, names: list[str]) -> set[str]:
+    return {name for name in names
+            if name in SKIP_DIR_NAMES or name.endswith((".pyc", ".pyo", ".log"))}
 
 
 def prepare_context() -> None:
@@ -28,17 +46,21 @@ def prepare_context() -> None:
     if app.exists():
         shutil.rmtree(app)
     app.mkdir()
-    spec = importlib.util.spec_from_file_location("delivery_plan", ROOT / "scripts/build_delivery_zip.py")
-    module = importlib.util.module_from_spec(spec)
-    assert spec.loader is not None
-    spec.loader.exec_module(module)
-    for rel in module.walk_files():
-        if (rel.split("/")[0] not in IMAGE_DIRS and "/" in rel
-                and rel not in module.REQUIRED_OUTPUT_SAMPLES):
+    for name in APP_DIRS:
+        source = ROOT / name
+        if not source.is_dir():
             continue
-        target = app / rel
-        target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(ROOT / rel, target)
+        shutil.copytree(source, app / name, ignore=_ignore)
+    for name in APP_ROOT_FILES:
+        shutil.copy2(ROOT / name, app / name)
+    for rel in EXTRA_FILES:
+        source = ROOT / rel
+        if source.is_file():
+            target = app / rel
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source, target)
+    for prefix in SKIP_REL_PREFIXES:
+        shutil.rmtree(app / prefix, ignore_errors=True)
     cache = CONTEXT / "model_cache"
     cache.mkdir(exist_ok=True)
     for name in ("fastembed", "ocr_models", "formula_models"):
@@ -59,35 +81,3 @@ def prepare_context() -> None:
     for name in ("requirements.lock", "requirements-formula.txt"):
         shutil.copy2(ROOT / name, CONTEXT / name)
     shutil.copy2(ROOT / "deploy/demo/requirements-formula.lock", CONTEXT / "requirements-formula.lock")
-
-
-def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--platform", choices=("arm64", "amd64"), required=True)
-    parser.add_argument("--target", choices=("runtime", "application"), default="application")
-    parser.add_argument("--prepare-only", action="store_true")
-    args = parser.parse_args()
-    prepare_context()
-    if args.prepare_only:
-        print(CONTEXT)
-        return
-    kind = "app" if args.target == "application" else "runtime"
-    tag = f"datamind-demo-{kind}:20261019-{args.platform}"
-    command = ["docker", "buildx", "build", "--load", "--progress=plain",
-               "--platform", f"linux/{args.platform}",
-               "--file", str(CONTEXT / ("Dockerfile.runtime" if args.target == "runtime" else "Dockerfile")),
-               "--build-arg", "HTTP_PROXY=", "--build-arg", "HTTPS_PROXY=",
-               "--build-arg", "ALL_PROXY="]
-    if args.target == "application":
-        command += ["--build-arg", f"RUNTIME_IMAGE=datamind-demo-runtime:20261019-{args.platform}"]
-    command += ["-t", tag, str(CONTEXT)]
-    print("Building", tag, flush=True)
-    # The desktop host may have stale localhost proxy variables. They must not
-    # reach the builder or be baked into the container configuration.
-    environment = {key: value for key, value in os.environ.items()
-                   if key.lower() not in {"http_proxy", "https_proxy", "all_proxy"}}
-    subprocess.run(command, check=True, env=environment)
-
-
-if __name__ == "__main__":
-    main()

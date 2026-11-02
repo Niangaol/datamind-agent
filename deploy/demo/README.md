@@ -1,6 +1,6 @@
 # DataMind Agent 双平台演示包
 
-本目录是演示包入口模板。完整交付包还应包含 `images/arm64.tar.gz`、`images/amd64.tar.gz` 和 `seed/`，源码仓库中的模板本身不包含这些大文件。
+本目录是演示包的入口模板。完整离线演示包还应包含 `images/arm64.tar.gz`、`images/amd64.tar.gz` 和 `seed/`，源码仓库中的模板本身不包含这些大文件。
 
 ## 启动
 

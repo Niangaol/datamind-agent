@@ -104,7 +104,7 @@
         {"kind": "metrics_contains", "ids": ["demo_retail.sales_amount"]}
       ],
       "must_not_ask": false,
-      "notes": "「表现」可指销售额或订单数（官方口径歧义样例）；线上规则不覆盖。"
+      "notes": "「表现」可指销售额或订单数（口径歧义样例）；线上规则不覆盖。"
     },
     {
       "case_id": "cl-metric-04",

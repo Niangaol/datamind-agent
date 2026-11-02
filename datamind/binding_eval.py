@@ -1361,7 +1361,7 @@ def judge(per_arm):
         return {'criterion': criterion, 'plain_misbinding_rate': plain,
                 'full_misbinding_rate': full, 'relative_drop': None, 'meets': False,
                 'reason': 'PLAIN_HAS_NO_MISBINDING:基线本来就不犯错，下降幅度无法定义，'
-                          '本项不得申报技术突破领先性'}
+                          '本项不构成技术领先性证据'}
     drop = round((plain - full) / plain, 4)
     meets = drop >= 0.5 and full <= 0.05
     return {'criterion': criterion, 'plain_misbinding_rate': plain,
