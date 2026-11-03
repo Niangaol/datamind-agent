@@ -63,7 +63,7 @@
 | 显式多文件问答（1–8 份） | 已实现 | `datamind/knowledge.py`、[多文件并发](MULTIFILE_CONCURRENCY.md) | 相关片段覆盖 ≠ 全文审阅；缺证文件在调用模型前阻断 |
 | 结构化问数（Catalog / SQL Guard / 只读执行 / 回放） | 已实现 | `datamind/catalog.py`、`datamind/sql_guard.py`、`datamind/sql_engine.py`、[性能](PERFORMANCE.md) | 演示 schema 上验收充分，真实业务库泛化需单独验收 |
 | 工业跨源核验 | 部分 | `datamind/industrial_rules.py`、`datamind/cross_source.py`、`datamind/authority.py` | 限定规则与合成材料；当前库没有跨源运行样本，权威需人工登记 |
-| 上传、复核与"可检索"判定 | 已实现 | `ingestion/upload_pipeline.py`、`ingestion/upload_worker.py`、[上传管道](UPLOAD_PIPELINE.md) | 上传后默认不建索引；PDF/OCR 未接入并发队列 |
+| 上传、复核与"可检索"判定 | 已实现 | `ingestion/upload_pipeline.py`、`ingestion/upload_index.py`、`ingestion/upload_worker.py`、[上传管道](UPLOAD_PIPELINE.md) | 解析波次内建索引，审批后才可检索；建索引失败如实报告、不回退解析结果；PDF/OCR 未接入并发队列 |
 | 私有 PDF 全链路（准备 / 登记 / 发布 / 检索 / 回答） | 已实现 | `datamind/pdf_*.py`、[私有检索](PDF_PRIVATE_SEARCH.md) | 与公开知识库隔离；不自动并入问答范围 |
 | Wiki 知识图谱（词条 / 版本 / 关系图 / 深链） | 已实现 | `datamind/wiki*.py`、`db/migrations/021_wiki_knowledge.sql`、[接口契约](WIKI_API.md) | 受控回填未做；中文正文检索策略未定 |
 | 可解释执行（V-CAR 依赖计划 / 预算 / 断点恢复） | 已实现 | `datamind/vcar.py`、`datamind/task_budget.py`、[V-CAR](VCAR.md)、[任务预算](TASK_BUDGET.md) | 同主机进程组隔离，非 cgroup 硬隔离；真实视觉载荷未接入 |

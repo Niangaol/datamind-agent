@@ -39,6 +39,7 @@ CLIENT_TS = FRONTEND / 'api' / 'client.ts'
 MODEL_PAGE = FRONTEND / 'views' / 'ModelPage.vue'
 PROFILE_EDITOR = FRONTEND / 'components' / 'model' / 'ProfileEditor.vue'
 FILES_PAGE = FRONTEND / 'views' / 'FilesPage.vue'
+CHAT_PANEL = FRONTEND / 'components' / 'chat' / 'ChatPanel.vue'
 AUTHORITY_PAGE = FRONTEND / 'views' / 'AuthorityPage.vue'
 FIELDS_PAGE = FRONTEND / 'views' / 'FieldsPage.vue'
 MAIN_PAGE = FRONTEND / 'views' / 'MainPage.vue'
@@ -597,13 +598,35 @@ class HonestyCopyTests(unittest.TestCase):
                          if '审批' in text and '可检索' in text)
         self.assertTrue(holders, '「审批」与「可检索」必须同框出现，说明二者不是同一件事')
 
-    def test_the_files_screen_states_the_vector_index_is_deferred(self):
-        # 本管道 vector_index=deferred、不写 chunks：不说这句话，
-        # 用户会把「已复核」读成「已可问答」。
-        holders = sorted(str(path.relative_to(ROOT))
-                         for path, text in files_view_modules(FILES_PAGE).items()
-                         if '未建立向量索引' in text)
-        self.assertTrue(holders, '缺少「未建立向量索引」的诚实提示')
+    def test_the_files_screen_reports_the_vector_index_honestly(self):
+        # 解析波次现在真的会写 chunks 与向量（ingestion/upload_index.py），所以界面
+        # **不得**再说「vector_index 恒为 deferred / 未建立向量索引」——那是旧事实。
+        # 但也不能反过来把「复核通过」当成「索引已建立」：建索引失败必须单独说清。
+        # 用 strip_comments 判定真正的代码，避免只有注释里提到这些词也能变绿。
+        code = '\n'.join(strip_comments(text)
+                         for text in files_view_modules(FILES_PAGE).values())
+        self.assertNotIn('vector_index 恒为', code,
+                         '解析波次已建立索引，不能说 vector_index 恒为某个值')
+        self.assertIn('建索引失败', code, '建索引失败必须有一句可读的说明')
+        self.assertIn('indexErrorText', code, '建索引失败码必须经过映射函数渲染')
+
+    def test_the_chat_screen_can_limit_the_answer_to_selected_files(self):
+        """上传闭环的用户可见终点：按文件提问，并提交 document_refs 四元组。
+
+        没有这块，用户上传并复核了文件，问答仍然只会用固定集合——文件「可用」这件事
+        在界面上不存在。四条必须留在代码里的事实：拉取 /v1/documents、只允许
+        searchable 的文件、组装四元组、以文档问答提交。
+        """
+        chat = strip_comments(read(CHAT_PANEL))
+        main = strip_comments(read(MAIN_PAGE))
+        self.assertIn('listDocuments', chat, '文件选择器必须从 /v1/documents 拉取')
+        self.assertIn('d.searchable === true', chat,
+                      '只有检索器读得到的文件才允许勾选')
+        for field in ('document_id', 'document_version', 'source_sha256', 'parser_version'):
+            self.assertIn(field, chat, f'document_refs 四元组缺 {field}')
+        self.assertIn('document_refs', main, '选中的文件必须真正随问答提交')
+        self.assertIn("mode: 'rag'", main,
+                      '指定文件只能走文档问答路由（服务端对其它路由 fail closed）')
 
     def test_authority_page_keeps_the_registry_integrity_warning(self):
         # 注册表里有校验不过的规则时，运行时整体 fail closed——必须明说，

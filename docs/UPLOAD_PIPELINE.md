@@ -213,20 +213,21 @@ python -m ingestion.upload_worker --watch
 `review_required` 是布尔镜像（= `needs_review`），与 `review_state` 同时出现在列表项与
 详情中。**没有** `not_applicable` / `rejected` 取值；失败的上传仍为 `pending_review`。
 
-### 可检索性 `searchable` / `index_state` / `index_note`（R05，本版新增）
+### 可检索性 `searchable` / `index_state` / `index_note`（R05）
 
-「解析完成」「人工复核」「检索就绪」是**三件独立的事**，本管道此前把它们混为一个
-`status='indexed'`：审批只要求契约有块，而检索器（`datamind/knowledge.py`）**只读
-`chunks`**，本管道又不写 `chunks`（`vector_index` 恒为 `deferred`）。结果是一份审批后的
-上传会出现在问答文件选择器里，却永远检索不到。
+「解析完成」「人工复核」「检索就绪」是**三件独立的事**。审批只要求上传成功，而检索器
+（`datamind/knowledge.py`）**只读 `chunks`**。本版起，解析波次在终态提交之后调用
+`ingestion/upload_index.py` 写入切片与向量（见 §4 的顺序协议），资产仍保持
+`needs_review=TRUE`、`status='parsed'`；只有 `approve` 才解除复核门，并且**仅当
+`chunks>0`** 才把资产置为 `indexed`。因此可检索是派生判定，不是存储的状态。
 
-从本版起，**可检索是派生判定，不是存储的状态**。列表项、详情与 approve 响应统一新增：
+列表项、详情与 approve 响应统一新增：
 
 ```json
 {
-  "searchable": false,
-  "index_state": "no_chunks",
-  "index_note": "UPLOAD_HAS_NO_CHUNKS"
+  "searchable": true,
+  "index_state": "indexed",
+  "index_note": null
 }
 ```
 
@@ -239,7 +240,7 @@ python -m ingestion.upload_worker --watch
   | 值 | 含义 |
   | --- | --- |
   | `indexed` | 已复核、已发布、且 `chunks` 非空——真正可检索 |
-  | `no_chunks` | 已复核，但检索器要读的切片存储为空（本管道审批后的正常状态） |
+  | `no_chunks` | 已复核，但检索器要读的切片存储为空（建索引失败或无可索引文本） |
   | `not_approved` | 复核门未打开（`needs_review=true`），无论切片是否存在 |
 
 - `index_note`（str \| null）：机器可读的**原因码**，人类可读文案由消费方映射，**不要
@@ -259,11 +260,12 @@ python -m ingestion.upload_worker --watch
   不各自写一份条件（守护测试：
   `test_upload_searchability.py::test_documents_and_upload_detail_agree_on_the_index_state`
   —— 同一文档在两个端点上必须得到相同的 `index_state`/`index_note`）。它们**都不改变**
-  既有字段（`status`/`review_state`/`review_required`/`vector_index`/计数）的含义。
-- **诚实**：`vector_index` 仍为 `"deferred"`——本管道确实不建向量，也不写 `chunks`。
-  `searchable` 不会因此撒谎：将来某条路径真的写入切片并标记 `indexed` 后，同一判定会**自动**
-  变为 `true`（无需再加状态字段），`tests/test_upload_searchability.py` 的反向对照正是这么
-  断言的。
+  既有字段（`status`/`review_state`/`review_required`/计数）的含义。
+- **`index_error_code`**（str \| null，本版新增）：建索引失败时的稳定原因码
+  （`UPLOAD_INDEX_FAILED` / `UPLOAD_ASSET_MISSING`），未失败时为 `null`。它和
+  `error_code`（**解析**失败）是两个字段：解析成功而索引失败时，`status='succeeded'`、
+  `error_code=null`，只有 `index_error_code` 非空——失败不能被洗成解析失败，成功的解析
+  也不能被洗成成功的索引。
 
 ### `GET /v1/documents` 的 `searchable` / `index_state` / `index_note`
 
@@ -315,8 +317,10 @@ R05 的症状。
     "dimensions": 1
   },
   "error_code": null,
-  "vector_index": "deferred",
-  "vector_index_note": "上传管道只落元数据与契约证据，不写 chunks/Qdrant 行；向量索引由离线路径完成（scripts/pdf_index_worker.py、ingestion/ingest.py）。",
+  "vector_index": "embedded",
+  "vector_index_note": "上传管道在解析波次内建立切片与向量（ingestion/upload_index.py），与知识库摄取共用同一发布顺序协议；未建立时如实报告 deferred/failed。",
+  "index_error_code": null,
+  "chunk_count": 3,
   "wave_deadline_seconds": 45.0,
   "wave_timeouts": 0,
   "locator_stores": {"contract_blocks": 8, "page_shaped": 0},
@@ -391,13 +395,32 @@ R05 的症状。
 
 ### `vector_index`
 
-- 取值恒为字符串 `"deferred"`：**上传管道不做向量索引**，不写 `chunks`，不写 Qdrant。
-- `vector_index_note` 是**规范字段**（说明离线路径）。当前值见上方示例。
-- 离线向量化路径：`scripts/pdf_index_worker.py`、`ingestion/ingest.py`（PDF 资产离线
-  publish）。前端不得把 `status='indexed'` 解读为「已向量化」；要判断「能否用于问答」
-  只看 §2 派生的 `searchable`。
-- 一旦某条路径真的写入 `chunks` 并把资产标为 `indexed`，上述派生判定会**自动**变为
-  `searchable=true`——本字段无需迁移、无需回填，也不会因历史数据而撒谎。
+索引**事实**字段（与 §2 派生的 `index_state` 是两件事），取值集合：
+
+| 值 | 含义 |
+| --- | --- |
+| `embedded` | 解析波次已写入该文档的 `chunks` 行与 Qdrant 向量 |
+| `failed` | 尝试建索引但失败（`index_error_code` 非空）；没有可用索引 |
+| `deferred` | 没有可索引的内容（无契约块或切不出切片），未尝试建索引 |
+
+- 建索引由 `ingestion/upload_index.py::index_document` 完成，与知识库摄取
+  （`ingestion/ingest.py::publish_document`）共用同一发布顺序协议（F10）：
+  ① 先置不可检索态并 commit → ② Qdrant `delete(document_id)` + `upsert` →
+  ③ 写 `chunks` 元数据并 commit。任一步失败都停在不可检索态，绝不出现
+  「旧文本 + 新向量」或「新文本 + 无向量」被读者看到。
+- 建索引**不发布**文档：资产保持 `needs_review=TRUE`、`status='parsed'`；只有
+  `approve` 才可能把它置为 `indexed`，且**仅当 `chunks>0`**。
+- 索引在**领取代次栅栏**内写：`ingest_job_claims.attempt` 是只增不减的代次计数，
+  被更新代次超越的旧代次不会写入任何向量或切片（`index_state='superseded'`，
+  只在管道内部可见，不落库）。
+- 前端不得把 `status='indexed'` 单独解读为「已向量化」；要判断「能否用于问答」只看
+  §2 派生的 `searchable`。
+
+### 失败原因码：`error_code` vs `index_error_code`
+
+`error_code` 只描述**解析**；`index_error_code` 只描述**建索引**。两者可以独立出现：
+解析成功（`status='succeeded'`、`error_code=null`）而建索引失败（`vector_index='failed'`、
+`index_error_code='UPLOAD_INDEX_FAILED'`）是合法且必须如实呈现的状态。
 
 ### 失败的 `error_code`
 
@@ -425,32 +448,39 @@ R05 的症状。
 - 权限：admin + CSRF + 同源。
 - 成功：200，响应体 = **详情对象**（§3）的完整字段，另加 `indexed`（bool），并始终带
   `searchable` / `index_state` / `index_note`。**`indexed == searchable`**，仅为 true 时
-  才是真的可检索。关键字段示例（本管道不写 `chunks`，所以审批后的正常结果是**不可检索**）：
+  才是真的可检索。关键字段示例（文件已建索引，审批后即可用于问答）：
 
 ```json
 {
   "upload_id": "upl-b2408306ce5fae7c07a62f5a733bc986cc2f20f1",
-  "status": "succeeded",
+  "status": "indexed",
   "review_state": "approved",
   "review_required": false,
-  "indexed": false,
-  "searchable": false,
-  "index_state": "no_chunks",
-  "index_note": "UPLOAD_HAS_NO_CHUNKS",
+  "indexed": true,
+  "searchable": true,
+  "index_state": "indexed",
+  "index_note": null,
   "block_count": 8,
-  "vector_index": "deferred",
+  "chunk_count": 3,
+  "vector_index": "embedded",
+  "index_error_code": null,
   "approval": {
     "user_id": "user-...",
     "display_name": "本机管理员",
     "roles": ["admin"],
     "approved_at": "2026-10-08T12:20:55.665966+00:00",
     "reason": null,
-    "indexed": false,
+    "indexed": true,
     "block_count": 8,
-    "chunk_count": 0
+    "chunk_count": 3
   }
 }
 ```
+
+若解析波次没能建索引（`vector_index='failed'`、`index_error_code='UPLOAD_INDEX_FAILED'`），
+同一请求仍返回 200，但 `indexed=false`、`searchable=false`、`index_state="no_chunks"`、
+`index_note="UPLOAD_HAS_NO_CHUNKS"`，`status` 保持 `parsed`——复核门已开，文件仍不可检索，
+原因是索引缺失而非复核缺失，两者在响应里可区分。
 
 行为：
 
@@ -459,14 +489,13 @@ R05 的症状。
 2. `needs_review := false`（复核门打开；这是 approve 唯一无条件做的事）。
 3. **当且仅当**检索器真正读取的切片存储非空（`chunks` 行数 > 0）时 `status := 'indexed'`；
    否则 `status` **保持原值**（解析成功即 `parsed`），并返回 `indexed=false` +
-   `searchable=false` + `index_state="no_chunks"` + `index_note`（见 §2 的取值表；契约有块
-   时为 `UPLOAD_HAS_NO_CHUNKS`）。**契约块数 > 0 不再等于 `indexed`**——块是证据，不是索引。
-   因此本管道的审批结果**不会**出现在 `GET /v1/documents`（它按 `status='indexed'` 过滤），
-   也就不会出现在问答文件选择器里。
+   `searchable=false` + `index_state="no_chunks"` + `index_note`（见 §2 的取值表）。**契约块数
+   > 0 不再等于 `indexed`**——块是证据，不是索引。因此只有 `chunks>0` 的上传才会出现在
+   `GET /v1/documents`（它按 `status='indexed'` 过滤）与问答文件选择器里。
 4. **幂等**：重复 approve 只是重新记录一次操作者与时间，仍返回 200，`needs_review` 保持
-   false，不产生第二次状态变更、不新建 job。已 `indexed` 的资产不会被后续慢 worker 降级
-   （`_finish` 带 `status<>'indexed'` 保护）。若两次调用之间确有 `chunks` 写入，第二次
-   approve 会如实变为 `indexed=true`（判定是派生的，不是缓存的）。
+   false，不产生第二次状态变更、不新建 job，也不会产生第二份 `chunks`/向量。已 `indexed`
+   的资产不会被后续慢 worker 降级（`_finish` 带 `status<>'indexed'` 保护）。若首次审批时索引
+   尚未落地而之后补齐，第二次 approve 会如实变为 `indexed=true`（判定是派生的，不是缓存的）。
 
 失败：
 
@@ -489,12 +518,13 @@ R05 的症状。
   （解析成功）, `failed`}。因此
   - `GET /v1/documents` **不列出**它；
   - `GET /v1/documents/{id}` 返回 404 `DOCUMENT_NOT_FOUND`；
-  - 向量检索（RAG）选不中它（无 chunks，且 gate 为 indexed）。
-- approve 后：`needs_review=false`；`status='indexed'` **仅当** `chunks>0`。本管道不写
-  `chunks`，所以审批后的上传**仍然不可检索**、**不出现在** `GET /v1/documents`
-  （`index_state='no_chunks'`），这正是 R05 的修复点。
-- 只有真正存在切片（例如离线路径写完 `chunks` 并把资产标为 `indexed`）后，`searchable`
-  才为 true、文档才出现在 `/v1/documents` 并被检索器选中。
+  - 向量检索（RAG）选不中它（发布门未开；即使解析波次已写入 `chunks` 也选不中）。
+- approve 后：`needs_review=false`；`status='indexed'` **仅当** `chunks>0`。解析波次会为能切出
+  切片的文档写入 `chunks` 与 Qdrant 向量，所以审批后的正常结果是 **`searchable=true`**、
+  出现在 `GET /v1/documents`，并被检索器选中。
+- 若建索引失败（`vector_index='failed'`）或无可索引内容（`vector_index='deferred'`），审批后
+  仍是 `index_state='no_chunks'`、**不可检索**——失败被如实呈现，不会被复核动作掩盖。
+- 无论哪种情况，复核门都先于切片：未审批的文档即使已有 `chunks`，检索器也选不中它。
 - **唯一例外**：`GET /v1/documents/{id}/contract` 对 `origin='upload'` 的行在
   approve **之前**也可读（契约是证据浏览，不是检索；上传详情的 `contract_url` 指向
   它）。其它 `/v1/documents*` 路由的门保持不变。
@@ -593,11 +623,19 @@ python -m ingestion.upload_worker --watch --interval 5 --workers 2 --deadline 60
 - 手动：`.venv/bin/python -m ingestion.upload_worker --watch`。若任务停在 `queued` 且
   `worker.alive=false`，先启动它。
 
-### `run_parse` 不会做的事
+### `run_parse` 的建索引边界
 
-- 不调用 embedding 模型，不写 `chunks`/Qdrant（`vector_index` 恒为 `deferred`）。
+- 解析事务**提交之后**，`run_parse` 调用 `ingestion/upload_index.py::index_document` 建索引
+  （切片 + 向量）。它**不在**解析事务内：Qdrant 无法与 PG 同事务，且嵌入调用不能持有该 job 的
+  行锁。
+- 建索引发生在**同一波次子进程**内，因此受同一个 `--deadline` 约束；实测嵌入模型加载
+  0.34s、吞吐约 784 texts/s，最大的真实样本（1307 块 DXF）约 1.7s，远在 45s 预算内。
+- 建索引失败**不改写**解析结果（`status`/`error_code` 保持成功态），只写
+  `quality_detail.index` 并在接口上以 `vector_index='failed'` / `index_error_code` 如实呈现；
+  检索可用性仍由 §2 派生，继续报 `no_chunks`。
 - 不在 API 进程内解析：worker 的每一波默认走子进程（`datamind.task_budget.run_bounded`）；
-  `in_process=True` 是**显式**选项（测试与已自带一次性进程的宿主），默认不可达。
+  `in_process=True` 是**显式**选项（测试与已自带一次性进程的宿主），默认不可达。子进程的
+  stdout 只承载那一个 JSON 结果，`index_document` 会把任何打印重定向到 stderr。
 
 
 ---

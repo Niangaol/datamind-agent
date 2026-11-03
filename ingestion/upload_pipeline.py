@@ -64,8 +64,11 @@ worker that already owns a disposable process).
 
 Honesty rules enforced here
 ---------------------------
-* `vector_index` is always the string `"deferred"`: the upload path writes metadata and
-  contract evidence only, never `chunks`/Qdrant rows, so it never claims an index.
+* `vector_index` reports what really happened to the index, never a claim: `embedded`
+  once the parse wave has written this document's `chunks` rows and Qdrant points
+  (`ingestion/upload_index.py`), `failed` when indexing was attempted and did not
+  complete, and `deferred` when there was nothing to index. The index is **not** the
+  review gate: `embedded` still means "not retrievable" until an administrator approves.
 * Retrievability is **derived, never stored** (R05): every item carries
   `searchable = (status == 'indexed') and not needs_review and chunk_count > 0`, plus the
   reason as `index_state` (`indexed`/`no_chunks`/`not_approved`) and `index_note`.
@@ -152,10 +155,18 @@ MEDIA_TYPES = {'.dxf': parse_contract.DXF_MEDIA_TYPE, '.json': 'application/json
                '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}
 ADAPTERS = {'.dxf': 'dxf-native', '.json': 'measurement-json', '.pdf': 'pdf-native',
             '.docx': 'docx-native', '.pptx': 'pptx-native', '.xlsx': 'xlsx-native'}
-#: The upload path builds no vector index; the offline path owns it.
+#: The vector index state of an upload. These are **index** facts, a different thing from
+#: the derived `index_state` (retrievability) below:
+#:   * `embedded` — the parse wave wrote this document's chunks and Qdrant points;
+#:   * `failed`   — indexing was attempted and did not complete, so no index exists;
+#:   * `deferred` — there was nothing to index (no text, no chunks).
 VECTOR_INDEX = 'deferred'
-VECTOR_INDEX_NOTE = ('上传管道只落元数据与契约证据，不写 chunks/Qdrant 行；'
-                     '向量索引由离线路径完成（scripts/pdf_index_worker.py、ingestion/ingest.py）。')
+VECTOR_INDEX_NOTE = ('上传管道在解析波次内建立切片与向量（ingestion/upload_index.py），'
+                     '与知识库摄取共用同一发布顺序协议；未建立时如实报告 deferred/failed。')
+#: The vector index state once the upload's chunks and vectors exist.
+VECTOR_INDEX_EMBEDDED = 'embedded'
+#: The vector index state when indexing was attempted and failed.
+VECTOR_INDEX_FAILED = 'failed'
 #: Derived searchability (R05). `index_state` is the frozen trichotomy; `index_note` is the
 #: machine-readable reason a caller maps to human text (never shown raw in a UI).
 INDEX_STATE_INDEXED = 'indexed'
@@ -403,9 +414,9 @@ def searchability(status, needs_review, chunks, *, block_count=0):
     Retrievability is three independent facts and they must not be conflated: the review
     gate is open (`NOT needs_review`), the asset is published (`status == 'indexed'`), and
     the chunk store the retriever actually reads (`datamind.knowledge` reads `chunks` only)
-    is non-empty. `approve` clears only the first; because this path writes no chunks
-    (`vector_index='deferred'`), a freshly approved upload is honestly reported as
-    `no_chunks`, not as `indexed`.
+    is non-empty. `approve` clears only the first; because the parse wave now writes
+    chunks and `approve` promotes the asset to `indexed` **only when chunks exist**, a
+    document whose index failed is honestly reported as `no_chunks`, not as `indexed`.
     """
     approved = not needs_review
     chunks = int(chunks or 0)
@@ -434,6 +445,7 @@ def _item(job, asset, counts):
     upload = _upload_meta(asset)
     summary = (asset.get('quality_detail') or {}).get('parse_contract') or {}
     searchable, index_state, index_note = _searchability(asset, counts)
+    index_report = _index_report(asset)
     return {'upload_id': upload['upload_id'], 'job_id': job['job_id'],
             'document_id': asset['document_id'], 'filename': upload.get('filename'),
             'media_type': upload.get('media_type'), 'provenance': upload.get('provenance'),
@@ -441,6 +453,7 @@ def _item(job, asset, counts):
             'review_state': 'approved' if not asset['needs_review'] else 'pending_review',
             'review_required': bool(asset['needs_review']),
             'searchable': searchable, 'index_state': index_state, 'index_note': index_note,
+            'index_error_code': index_report.get('error_code'),
             'block_count': counts['block_count'], 'locator_count': counts['locator_count'],
             'unsupported_features': list(summary.get('unsupported_features') or [])}
 
@@ -459,11 +472,15 @@ def _analysis(job, asset):
 def _detail(job, asset, counts):
     quality = asset.get('quality_detail') or {}
     item = _item(job, asset, counts)
+    index_report = _index_report(asset)
     item.update({'source_sha256': asset['sha256'], 'parser_version': asset['parser_version'],
                  'page_count': asset['page_count'], 'collection': asset['collection'],
                  'analysis': _analysis(job, asset), 'error_code': job['error'],
                  'attempt': int(job.get('attempt') or 0),
-                 'vector_index': VECTOR_INDEX, 'vector_index_note': VECTOR_INDEX_NOTE,
+                 'vector_index': _vector_index_state(asset, counts),
+                 'vector_index_note': VECTOR_INDEX_NOTE,
+                 'index_error_code': index_report.get('error_code'),
+                 'chunk_count': counts['chunks'],
                  'wave_deadline_seconds': wave_deadline(),
                  'wave_timeouts': int(_upload_meta(asset).get('wave_timeouts') or 0),
                  'locator_stores': {'contract_blocks': counts['contract_blocks'],
@@ -472,6 +489,28 @@ def _detail(job, asset, counts):
                  'approval': quality.get('review_approval'),
                  'started_at': job['started_at'], 'finished_at': job['finished_at']})
     return item
+
+
+def _index_report(asset):
+    """The stored indexing outcome for this upload, or an empty report."""
+    stored = (asset.get('quality_detail') or {}).get('index')
+    return stored if isinstance(stored, dict) else {}
+
+
+def _vector_index_state(asset, counts):
+    """Whether this upload's chunks and vectors actually exist.
+
+    The chunks row count is the fact, not a stored flag: a `chunks` row is what the
+    retriever reads, and the vector is written in the same publishing step. When there is
+    no chunk row the stored index report says *why*: an attempted-and-failed index is
+    reported as `failed`, and only a document that had nothing to index is `deferred`.
+    A failure must never be laundered into "nothing to do".
+    """
+    if counts['chunks'] > 0:
+        return VECTOR_INDEX_EMBEDDED
+    if _index_report(asset).get('error_code'):
+        return VECTOR_INDEX_FAILED
+    return VECTOR_INDEX
 
 
 def _load(cur, upload_id, *, locked=False):
@@ -1213,9 +1252,58 @@ def run_parse(claim, dsn):
         # `indexed` is the approved terminal state and is never downgraded by a late worker.
         cur.execute("UPDATE document_assets SET status=%s WHERE document_id=%s AND status<>'indexed'",
                     (ASSET_TERMINAL[terminal], claim['document_id']))
+    # --- Indexing runs **after** the parse transaction has committed. ---
+    #
+    # Indexing writes to Qdrant, which cannot share a PostgreSQL transaction, and it does
+    # network I/O; holding the claim's row lock across it would block every other writer on
+    # the same job for the duration of an embedding call.
+    #
+    # A failed index does **not** change the parse result. The parse really did succeed,
+    # and the contract blocks really were written. Reporting it as a failed parse would
+    # misstate what happened; the failure is carried separately as `index_error_code`, and
+    # `searchability()` keeps saying `no_chunks` — the truth about retrievability.
+    index_report = _index_parsed_document(dsn, claim['document_id'], claim=claim)
     return {'status': terminal, 'finalized': True, 'claim_lost': False,
             'parse_status': parse_status, 'analysis': analysis, 'blocks': stored['blocks'],
-            'locators': stored['locators'], 'relations': stored['relations']}
+            'locators': stored['locators'], 'relations': stored['relations'],
+            'index_state': index_report.get('index_state'),
+            'index_error_code': index_report.get('error_code'),
+            'chunk_count': index_report.get('chunk_count', 0)}
+
+
+def _index_parsed_document(dsn, document_id, *, claim=None):
+    """Index a freshly parsed document and record the outcome on the asset.
+
+    The report is written into `quality_detail.index` so the upload surfaces can state
+    what happened to the index without re-deriving it, and so a failure is visible instead
+    of silently leaving the document unretrievable.
+
+    `claim` fences the index write on the claim generation that owns the document (see
+    `upload_index.index_document`). A superseded generation reports `superseded` and
+    writes neither vectors nor chunks — the newer generation owns the document's index.
+    """
+    from . import upload_index
+    report = upload_index.index_document(dsn, document_id, claim=claim)
+    if report.get('index_state') == upload_index.INDEX_SUPERSEDED:
+        # The newer generation owns this document's index; recording a report here would
+        # overwrite the newer generation's own report with a stale one.
+        return report
+    try:
+        with psycopg2.connect(dsn) as conn, conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute('SELECT quality_detail FROM document_assets WHERE document_id=%s',
+                        (document_id,))
+            row = cur.fetchone()
+            quality = dict((row or {}).get('quality_detail') or {})
+            quality['index'] = {'index_state': report.get('index_state'),
+                                'chunk_count': report.get('chunk_count', 0),
+                                'error_code': report.get('error_code'),
+                                'vector_index': upload_index.COLLECTION}
+            cur.execute('UPDATE document_assets SET quality_detail=%s WHERE document_id=%s',
+                        (Json(quality), document_id))
+    except Exception:
+        # The report is a convenience; failing to store it must not fail the parse.
+        pass
+    return report
 
 
 def _analysis_of(claim, payload, stored, extra):

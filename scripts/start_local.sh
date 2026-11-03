@@ -21,6 +21,17 @@ fi
 if [[ "$rag_enabled" == 1 ]] && ! .venv/bin/python -c 'import pymupdf,fastembed,qdrant_client,rapidocr; from importlib.metadata import version; assert version("qdrant-client").startswith("1.12."); assert version("rapidocr") == "3.9.2"' 2>/dev/null; then
   .venv/bin/python -m pip install -r requirements-ocr.txt
 fi
+# The upload pipeline routes .dxf/.docx/.pptx/.xlsx through their native adapters
+# (ingestion/cad_adapter.py, ingestion/office.py). Without these packages an upload fails
+# with CAD_DEPENDENCY_MISSING / PARSE_ADAPTER_UNSUPPORTED — which reads like a product
+# defect rather than a missing optional dependency. Install them when absent, just like
+# the OCR set above.
+if ! .venv/bin/python -c 'import ezdxf' 2>/dev/null; then
+  .venv/bin/python -m pip install -r requirements-cad.txt
+fi
+if ! .venv/bin/python -c 'import docx,openpyxl,pptx' 2>/dev/null; then
+  .venv/bin/python -m pip install -r requirements-office.txt
+fi
 
 docker compose -f deploy/compose.yaml up -d postgres
 for _ in {1..30}; do

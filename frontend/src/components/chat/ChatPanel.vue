@@ -2,8 +2,9 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import VerificationTable from '../industrial/VerificationTable.vue'
-import { csrf } from '../../api/client'
-import type { ChatMessage, Citation, TraceEvent } from '../../api/types'
+import { csrf, listDocuments } from '../../api/client'
+import type { ChatMessage, Citation, DocumentRef, DocumentSummary, TraceEvent } from '../../api/types'
+import { errorTextFrom, indexNoteText } from '../files/uploadHonesty'
 
 const props = defineProps<{
   messages: ChatMessage[]
@@ -11,7 +12,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'send', payload: { question: string; mode: string }): void
+  (e: 'send', payload: { question: string; mode: string; documentRefs?: DocumentRef[] }): void
   /**
    * 「整理为知识词条」的生命周期事件。
    *
@@ -90,10 +91,107 @@ function eventLabel(ev: TraceEvent): string {
 
 const isEmpty = computed(() => props.messages.length === 0)
 
+/* ══════════════════════════════════════════════════════════════════════════
+   「限定文件」：把 `document_refs` 的四元组从 `/v1/documents` 交给问答。
+
+   WHY 必须有这一块：上传的文件只有在 `searchable === true` 时才可以被回答引用，
+   而在此之前前端根本没有 `document_refs` 的调用方 —— 用户传了文件、也复核了，
+   问答却永远只用固定集合，选择文件这件事在界面上不存在。
+
+   四条不许含糊的规则：
+   1. **只在可检索时才能勾选**：`searchable===false` 的行照常列出（并说明原因），
+      但勾选框禁用 —— 不给一个「选了也不会有证据」的入口；
+   2. **四元组必须齐全**：`document_id` / `document_version` / `source_sha256` /
+      `parser_version` 缺一不可（服务端 `document_selection` 逐字段校验）。缺
+      `parser_version` 的行同样禁用并说明原因，不拿空串去撞 422；
+   3. **最多 8 个**（服务端 `MAX_SELECTED_DOCUMENTS`），超出由本地拦下；
+   4. **指定文件只对文档问答有意义**：一旦选中文件，本次请求按 `rag` 提交，
+      模式选择器同时禁用并说明原因（服务端对其它路由返回
+      `DOCUMENT_SELECTION_MODE_INVALID`，不在客户端制造这次失败）。
+   ══════════════════════════════════════════════════════════════════════════ */
+const MAX_SELECTED_DOCUMENTS = 8
+const documents = ref<DocumentSummary[]>([])
+const documentsLoading = ref(false)
+const documentsError = ref('')
+const documentsLoaded = ref(false)
+const fileMenuOpen = ref(false)
+const selectedIds = ref<string[]>([])
+
+const selectedDocuments = computed(() =>
+  documents.value.filter((d) => selectedIds.value.includes(d.document_id)),
+)
+
+/** 只有检索器真的读得到、且四元组齐全的文件才允许勾选。 */
+function selectable(d: DocumentSummary): boolean {
+  return d.searchable === true
+    && typeof d.parser_version === 'string'
+    && d.parser_version.length > 0
+}
+
+function unselectableReason(d: DocumentSummary): string {
+  if (d.searchable !== true) return indexNoteText(d.index_note)
+  if (!selectable(d)) return '缺少 parser_version，不能作为显式来源提交'
+  return ''
+}
+
+function isSelected(d: DocumentSummary): boolean {
+  return selectedIds.value.includes(d.document_id)
+}
+
+function toggleDoc(d: DocumentSummary): void {
+  if (!selectable(d)) return
+  if (isSelected(d)) {
+    selectedIds.value = selectedIds.value.filter((id) => id !== d.document_id)
+    return
+  }
+  if (selectedIds.value.length >= MAX_SELECTED_DOCUMENTS) return
+  selectedIds.value = [...selectedIds.value, d.document_id]
+}
+
+function clearDocs(): void {
+  selectedIds.value = []
+}
+
+/** `/v1/documents` 的列表口径（doc_version / sha256）→ 请求口径（document_version / source_sha256）。 */
+const documentRefs = computed<DocumentRef[]>(() =>
+  selectedDocuments.value.map((d) => ({
+    document_id: d.document_id,
+    document_version: d.doc_version,
+    source_sha256: d.sha256,
+    parser_version: d.parser_version as string,
+  })),
+)
+
+async function loadDocuments(force = false): Promise<void> {
+  if (documentsLoading.value) return
+  if (documentsLoaded.value && !force) return
+  documentsLoading.value = true
+  documentsError.value = ''
+  try {
+    const result = await listDocuments()
+    documents.value = result.documents ?? []
+    documentsLoaded.value = true
+    // 已选文件若已从列表中消失（被撤回/改版），不要继续带着一份过期的引用提交。
+    const present = new Set(documents.value.map((d) => d.document_id))
+    selectedIds.value = selectedIds.value.filter((id) => present.has(id))
+  } catch (e) {
+    documentsError.value = errorTextFrom(e, '读取文件列表失败')
+  } finally {
+    documentsLoading.value = false
+  }
+}
+
+function toggleFileMenu(): void {
+  fileMenuOpen.value = !fileMenuOpen.value
+  if (fileMenuOpen.value) void loadDocuments()
+}
+
 function submit() {
   const q = input.value.trim()
   if (!q || props.running) return
-  emit('send', { question: q, mode: mode.value })
+  const refs = documentRefs.value
+  // 指定了文件就按文档问答提交（服务端只在该路由接受 document_refs）。
+  emit('send', { question: q, mode: refs.length ? 'rag' : mode.value, documentRefs: refs })
   input.value = ''
   nextTick(() => {
     if (textarea.value) textarea.value.style.height = 'auto'
@@ -102,6 +200,8 @@ function submit() {
 
 function askChip(c: { question: string; mode: string }) {
   if (props.running) return
+  // 建议问题自带模式：清掉限定文件，避免「点了销售额却仍只查文件」。
+  clearDocs()
   mode.value = c.mode
   emit('send', { question: c.question, mode: c.mode })
 }
@@ -796,7 +896,12 @@ function openDraft(m: ChatMessage): void {
             ></textarea>
 
             <label class="scope" title="问数范围：决定查库、查文档还是两者联合">
-              <select v-model="mode" aria-label="问数范围">
+              <select
+                v-model="mode"
+                aria-label="问数范围"
+                :disabled="selectedDocuments.length > 0"
+                :title="selectedDocuments.length > 0 ? '已限定文件：本次按文档问答提交（document_refs 只在文档问答路由生效）' : '问数范围'"
+              >
                 <option v-for="m in MODES" :key="m.value" :value="m.value">{{ m.label }}</option>
               </select>
             </label>
@@ -812,6 +917,55 @@ function openDraft(m: ChatMessage): void {
               <span v-if="running" class="pulse-dot"></span>
               <span v-else>↑</span>
             </button>
+          </div>
+
+          <!-- 限定文件：只列检索器读得到的文件；不可选的行也照常列出并说明原因 -->
+          <div class="docsel">
+            <div class="docsel-bar">
+              <button
+                class="docsel-toggle"
+                type="button"
+                data-testid="chat-doc-toggle"
+                :aria-expanded="fileMenuOpen"
+                @click="toggleFileMenu"
+              >
+                限定文件<span v-if="selectedDocuments.length">（{{ selectedDocuments.length }}）</span>
+              </button>
+              <span v-if="selectedDocuments.length" class="docsel-active">
+                已限定 {{ selectedDocuments.length }} 个文件 · 本次按文档问答提交
+                <button class="docsel-clear" type="button" data-testid="chat-doc-clear" @click="clearDocs">清除</button>
+              </span>
+              <span v-else class="docsel-hint">不选则按上面的问数范围检索全部已发布文档</span>
+            </div>
+
+            <div v-if="fileMenuOpen" class="docsel-menu" data-testid="chat-doc-menu">
+              <p v-if="documentsLoading" class="docsel-state">正在读取文件列表…</p>
+              <p v-else-if="documentsError" class="docsel-state is-error">{{ documentsError }}</p>
+              <p v-else-if="!documents.length" class="docsel-state">
+                没有可选择的文件。上传的文件需要在「我的文件」里复核通过并建立索引后才会出现在这里。
+              </p>
+              <template v-else>
+                <label
+                  v-for="d in documents"
+                  :key="d.document_id"
+                  class="docsel-item"
+                  :class="{ 'is-disabled': !selectable(d) }"
+                >
+                  <input
+                    type="checkbox"
+                    :checked="isSelected(d)"
+                    :disabled="!selectable(d)"
+                    @change="toggleDoc(d)"
+                  />
+                  <span class="docsel-name">{{ d.title || d.document_id }}</span>
+                  <span class="docsel-meta">{{ d.origin }} · v{{ d.doc_version }}</span>
+                  <span v-if="!selectable(d)" class="docsel-why">{{ unselectableReason(d) }}</span>
+                </label>
+                <p v-if="selectedIds.length >= MAX_SELECTED_DOCUMENTS" class="docsel-state">
+                  最多同时选择 {{ MAX_SELECTED_DOCUMENTS }} 个文件（服务端上限）。
+                </p>
+              </template>
+            </div>
           </div>
         </div>
 
@@ -1002,6 +1156,101 @@ function openDraft(m: ChatMessage): void {
   background: rgba(15, 23, 42, 0.12);
   color: #ffffff;
   cursor: default;
+}
+
+/* ── 限定文件 ── */
+.docsel {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed var(--color-line);
+}
+.docsel-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--color-muted);
+}
+.docsel-toggle {
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  background: var(--color-panel);
+  color: var(--color-body);
+  font-family: inherit;
+  font-size: 12.5px;
+  padding: 3px 10px;
+  cursor: pointer;
+}
+.docsel-toggle:hover {
+  color: var(--color-text);
+}
+.docsel-active {
+  color: var(--color-text);
+}
+.docsel-clear {
+  margin-left: 6px;
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--color-accent);
+  font-family: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.docsel-hint {
+  color: var(--color-muted);
+}
+.docsel-menu {
+  margin-top: 8px;
+  max-height: 240px;
+  overflow-y: auto;
+  border: 1px solid var(--color-line);
+  border-radius: 10px;
+  background: var(--color-ink);
+  padding: 6px;
+}
+.docsel-item {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.docsel-item:hover {
+  background: var(--color-panel);
+}
+.docsel-item.is-disabled {
+  cursor: default;
+  opacity: 0.75;
+}
+.docsel-name {
+  font-size: 13.5px;
+  color: var(--color-text);
+  word-break: break-word;
+}
+.docsel-meta {
+  font-size: 12px;
+  color: var(--color-muted);
+}
+.docsel-why {
+  width: 100%;
+  padding-left: 22px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #b45309;
+}
+.docsel-state {
+  margin: 4px 8px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--color-muted);
+}
+.docsel-state.is-error {
+  color: #b91c1c;
 }
 
 /* ── 建议胶囊 ── */

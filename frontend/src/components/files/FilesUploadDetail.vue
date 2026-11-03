@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 
 import type { UploadDetail } from '../../api/types'
-import { RETRY_HONESTY_TEXT, formatWhen, statusLabel } from './uploadHonesty'
+import { RETRY_HONESTY_TEXT, formatWhen, indexErrorText, statusLabel, vectorIndexText } from './uploadHonesty'
 
 /**
  * 一条上传的**详情**块（纯展示）。
@@ -224,14 +224,16 @@ const approval = computed(() => props.detail?.approval ?? null)
           <span class="fud-k">向量索引</span>
           <span class="fud-v">
             <code>{{ vectorIndex || '未给出' }}</code>
-            <template v-if="vectorIndex === 'deferred'">
-              本管道不写 chunks，也不写向量库：未建立向量索引，索引由离线流程另外完成。
-            </template>
-            <template v-else-if="vectorIndex">
-              这个取值不是本管道预期的（应为 deferred），这里按服务端原样显示。
-            </template>
+            {{ vectorIndexText(vectorIndex) }}
           </span>
         </div>
+        <div v-if="detail.chunk_count != null" class="fud-row">
+          <span class="fud-k">切片行数</span>
+          <span class="fud-v" data-testid="files-detail-chunk-count">{{ detail.chunk_count }}</span>
+        </div>
+        <p v-if="detail.index_error_code" class="fud-warn" data-testid="files-detail-index-error">
+          {{ indexErrorText(detail.index_error_code) }}
+        </p>
         <p v-if="detail.vector_index_note" class="fud-note">{{ detail.vector_index_note }}</p>
 
         <!-- 契约链接：只接受以 / 开头的站内相对路径 -->
@@ -386,5 +388,12 @@ const approval = computed(() => props.detail?.approval ?? null)
   font-size: 13.5px;
   color: #e11d48;
   word-break: break-all;
+}
+.fud-warn {
+  margin: 8px 0 0;
+  font-size: 13px;
+  line-height: 1.7;
+  color: #b45309;
+  word-break: break-word;
 }
 </style>

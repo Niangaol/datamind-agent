@@ -326,11 +326,12 @@
 
 * **只用 `/v1/uploads`，上传就是原始字节。** 不做 multipart；把请求包装成表单会直接失败。
   退役的 file_jobs 契约不接。
-* **审批不是可检索。** `approve` 只解开复核闸门；本管道 `vector_index` 恒为 `'deferred'`、
-  不写 chunks，所以 approve 之后 `searchable` / `indexed` 仍可能是 `false`。页面必须显示
-  `index_state` / `index_note`，且不能在索引未建立时说「已可检索」。
-* **本管道永远只有词法索引（lexical-only）。** `vector_index` 在本管道中总是 deferred，
-  页面不得暗示已建立向量索引或语义检索。
+* **审批是检索的前提，但不是充分条件。** `approve` 只解开复核闸门；能否检索还取决于解析
+  波次是否成功写入 `chunks`。正常路径下审批后 `searchable=true`、文件进入问答文件选择器；
+  建索引失败时 `index_error_code` 非空、`index_state='no_chunks'`，页面必须如实显示，不能在
+  索引未建立时说「已可检索」。
+* **索引状态如实呈现。** `vector_index` 取值 `embedded` / `failed` / `deferred`；页面
+  不得在 `failed` 或 `deferred` 时暗示已建立向量索引或语义检索。
 * **`worker.alive=false` 时排队中的任务不会自己前进。** 解析只由独立 worker 进程推进，
   没有任何 HTTP 路由会推进它；此时 `queued` 必须说「后台处理器未运行」，不能渲染成「解析中」。
 * **列表数量就是本页大小（page size），不是总数。** `GET /v1/uploads` 不返回 total；

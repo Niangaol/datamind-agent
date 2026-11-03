@@ -16,9 +16,10 @@ import type { UploadDetail, UploadProvenance, UploadWorkerStatus } from '../../a
  *   2. 解析只由独立 worker（`python -m ingestion.upload_worker --watch`）推进，
  *      没有任何 HTTP 路由会推进它，所以 `queued` + `worker.alive=false` 必须说
  *      「后台处理器未运行」，**不能**渲染成「解析中」；
- *   3. 审批只解开复核闸门。本管道 `vector_index` 恒为 `'deferred'`、不写 chunks，
- *      所以 approve 之后 `searchable`/`indexed` 仍可能是 false —— 那时**不能说**
- *      「复核已通过」。
+ *   3. 审批只解开复核闸门。解析波次会建立切片与向量（vector_index='embedded'），但未复核
+ *      内容对检索器不可见；approve 之后 `searchable` 才可能为 true。建索引失败时
+ *      vector_index='failed'、index_error_code 非空，此时 approve 只会得到
+ *      index_state='no_chunks' —— 那时**不能说**「复核已通过、可用于问答」。
  */
 
 /* ── 服务端硬约束：与 datamind/file_uploads.py::UPLOAD_LIMITS 一一对应 ──────
@@ -150,14 +151,37 @@ export function searchableText(searchable?: boolean | null): string {
   return '能否被检索：未知（该响应没有这个字段）'
 }
 
-/** 本管道**只**落契约证据与元数据，不写 chunks / Qdrant 行：vector_index 恒为
- *  `deferred`。所以即使 searchable=true，也只能说「靠词法检索可用」。
- *  绝不写「向量索引已建立」—— 那是本管道没有做过的事。 */
-export const SEARCHABLE_DEFERRED_CAVEAT =
-  '本管道 vector_index=deferred：靠词法检索可用，未建立向量索引'
+/** 本管道**真的**在解析波次内建立切片与向量（ingestion/upload_index.py），且与知识库摄取
+ *  共用同一发布顺序协议：向量 upsert 成功之后才写 chunks。所以这里**不再**挂
+ *  「未建立向量索引」的旧说明 —— 它在本次改动后会是假话。 */
+export function searchableCaveat(_searchable?: boolean | null): string {
+  return ''
+}
 
-export function searchableCaveat(searchable?: boolean | null): string {
-  return searchable === true ? SEARCHABLE_DEFERRED_CAVEAT : ''
+/* ── 索引事实（vector_index）与失败原因 ─────────────────────────────────────
+   `index_state` 是**可检索性**（派生判断）；`vector_index` 是**索引事实**：
+   embedded = 切片与向量已写入；failed = 尝试过但失败；deferred = 没有可索引内容。
+   两者不是同一件事，界面也不能用一句话把它们混在一起。 */
+export const VECTOR_INDEX_LABELS: Record<string, string> = {
+  embedded: '已建立切片与向量索引',
+  failed: '建索引失败：没有可用于问答的索引',
+  deferred: '没有可索引的内容（未建立索引）',
+}
+
+export function vectorIndexText(state?: string | null): string {
+  if (!state) return '索引事实：未知（该响应没有 vector_index 字段）'
+  return VECTOR_INDEX_LABELS[state] ?? `索引事实：${state}`
+}
+
+export const INDEX_ERROR_LABELS: Record<string, string> = {
+  UPLOAD_INDEX_FAILED: '建索引失败：文件已解析入库，但没有写入检索索引，因此暂不可用于问答。重新上传同一文件会重新解析并重建索引。',
+  UPLOAD_ASSET_MISSING: '建索引失败：找不到这份上传资产的记录。',
+}
+
+/** 未知原因码必须原样带出，绝不吞成「没问题」。 */
+export function indexErrorText(code?: string | null): string {
+  if (code == null || String(code).trim() === '') return ''
+  return INDEX_ERROR_LABELS[code] ?? `建索引失败（错误码：${code}）`
 }
 
 /* ── worker 诚实（mandatory）────────────────────────────────────────────── */
@@ -180,16 +204,13 @@ export const APPROVE_GATE_NOTE = '未复核前不会出现在可检索文档中�
 export interface FilesApproveNotice {
   text: string
   tone: 'ok' | 'warn' | 'bad'
-  /** 附注：仅 searchable=true 时出现，说明本管道没有向量索引 */
-  caveat?: string
 }
 
 export function approveResultText(indexed: boolean): FilesApproveNotice {
   if (indexed === true) {
     return {
       tone: 'ok',
-      text: '复核已通过：该文件才会进入可检索文档集合。',
-      caveat: SEARCHABLE_DEFERRED_CAVEAT,
+      text: '复核已通过：该文件已进入可检索文档集合，可用于问答。',
     }
   }
   // indexed=false：**不得**出现「复核已通过」。闸门开了，但检索器仍然读不到它。
@@ -316,6 +337,8 @@ export interface FilesRowInput {
   searchable: boolean | null
   indexState: string | null
   indexNote: string | null
+  /** 建索引失败的原因码（列表/详情都会带）；未失败时为 null */
+  indexErrorCode: string | null
   blockCount: number | null
   locatorCount: number | null
   /** 列表行用接口顶层的 worker；本批上传行用详情的 worker（没有就 null=未知）。 */
@@ -342,6 +365,7 @@ export interface FilesRowVM extends FilesRowInput {
   searchableCaveat: string
   indexStateText: string
   indexNoteText: string
+  indexErrorText: string
   workerWarning: string
 }
 
@@ -358,6 +382,7 @@ export function buildFilesRow(input: FilesRowInput): FilesRowVM {
     searchableCaveat: searchableCaveat(input.searchable),
     indexStateText: indexStateText(input.indexState),
     indexNoteText: indexNoteText(input.indexNote),
+    indexErrorText: indexErrorText(input.indexErrorCode),
     workerWarning: workerHonesty(input.status, input.worker),
   }
 }
