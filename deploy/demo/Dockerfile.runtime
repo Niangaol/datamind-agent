@@ -1,0 +1,31 @@
+FROM python:3.12-slim-bookworm AS runtime
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUTF8=1 \
+    PYTHONIOENCODING=utf-8 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PYTHONPATH=/opt/app \
+    DATAMIND_FORMULA_PYTHON=/opt/formula/bin/python3.12
+
+RUN sed -i 's|http://deb.debian.org|https://deb.debian.org|g' /etc/apt/sources.list.d/debian.sources \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+       ca-certificates tzdata libglib2.0-0 libgl1 libgomp1 libsm6 libxext6 libxrender1 \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.lock /tmp/main.lock
+COPY requirements-formula.txt /tmp/formula.txt
+COPY requirements-formula.lock /tmp/formula.lock
+# The formula adapter has its own NumPy/OpenCV requirements and interpreter.
+# Keeping it isolated prevents those pins from changing the main application.
+RUN --mount=type=bind,source=wheelhouse,target=/wheels \
+    if [ -f /wheels/READY ]; then \
+      python -m pip install --no-cache-dir --no-index --find-links=/wheels -r /tmp/main.lock; \
+    else python -m pip install --no-cache-dir -r /tmp/main.lock; fi \
+    && python -m venv /opt/formula \
+    && if [ -f /wheels/FORMULA_READY ]; then \
+      /opt/formula/bin/python3.12 -m pip install --no-cache-dir --no-index --find-links=/wheels --no-deps -r /tmp/formula.lock; \
+    else \
+      /opt/formula/bin/python3.12 -m pip install --no-cache-dir --no-deps -r /tmp/formula.lock; \
+    fi

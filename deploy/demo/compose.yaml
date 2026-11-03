@@ -1,0 +1,138 @@
+name: datamind-demo
+
+x-app-image: &app-image
+  image: datamind-demo-app:20261019-${DATAMIND_DEMO_ARCH:-amd64}
+  platform: linux/${DATAMIND_DEMO_ARCH:-amd64}
+  pull_policy: never
+
+x-app-environment: &app-environment
+  TZ: Asia/Shanghai
+  PYTHONUNBUFFERED: "1"
+  PYTHONDONTWRITEBYTECODE: "1"
+  HF_HUB_OFFLINE: "1"
+  TRANSFORMERS_OFFLINE: "1"
+  PGHOST: postgres
+  PGPORT: "5432"
+  PGUSER: postgres
+  PGPASSWORD: datamind_dev
+  DATAMIND_META_DSN: host=postgres port=5432 dbname=datamind_meta user=readonly_user password=readonly_dev
+  DATAMIND_META_WRITE_DSN: host=postgres port=5432 dbname=datamind_meta user=datamind_app password=datamind_app_dev
+  DATAMIND_WRITE_DSN: host=postgres port=5432 dbname=datamind_meta user=datamind_app password=datamind_app_dev
+  DATAMIND_DB_HOST: postgres
+  DATAMIND_DB_PORT: "5432"
+  DATAMIND_DB_USER: readonly_user
+  DATAMIND_DB_PASSWORD: readonly_dev
+  DATAMIND_QUERY_USER: readonly_user
+  DATAMIND_QUERY_PASSWORD: readonly_dev
+  DATAMIND_QDRANT_URL: http://qdrant:6333
+  DATAMIND_PDF_QDRANT_URL: http://127.0.0.1:6333
+  DATAMIND_PDF_QDRANT_API_KEY: datamind-demo-private-20261019
+  DATAMIND_FORMULA_PYTHON: /opt/formula/bin/python
+  DATAMIND_LOCAL_NO_LOGIN: "1"
+  DATAMIND_DEMO_SEED_DIR: /seed
+
+services:
+  postgres:
+    image: datamind-demo-postgres:20261019-${DATAMIND_DEMO_ARCH:-amd64}
+    platform: linux/${DATAMIND_DEMO_ARCH:-amd64}
+    pull_policy: never
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: datamind_dev
+      POSTGRES_DB: datamind_meta
+      TZ: Asia/Shanghai
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U postgres -d datamind_meta -q"]
+      interval: 3s
+      timeout: 3s
+      retries: 40
+
+  qdrant:
+    image: datamind-demo-qdrant:20261019-${DATAMIND_DEMO_ARCH:-amd64}
+    platform: linux/${DATAMIND_DEMO_ARCH:-amd64}
+    pull_policy: never
+    restart: unless-stopped
+    environment:
+      QDRANT__TELEMETRY_DISABLED: "true"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    healthcheck:
+      test: [CMD-SHELL, "bash -c ':> /dev/tcp/127.0.0.1/6333'"]
+      interval: 3s
+      timeout: 3s
+      retries: 40
+
+  private-qdrant:
+    image: datamind-demo-qdrant:20261019-${DATAMIND_DEMO_ARCH:-amd64}
+    platform: linux/${DATAMIND_DEMO_ARCH:-amd64}
+    pull_policy: never
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      QDRANT__SERVICE__API_KEY: datamind-demo-private-20261019
+      QDRANT__TELEMETRY_DISABLED: "true"
+    volumes:
+      - private_qdrant_data:/qdrant/storage
+    healthcheck:
+      test: [CMD-SHELL, "bash -c ':> /dev/tcp/127.0.0.1/6333'"]
+      interval: 3s
+      timeout: 3s
+      retries: 40
+
+  bootstrap:
+    <<: *app-image
+    restart: "no"
+    working_dir: /opt/app
+    network_mode: service:private-qdrant
+    entrypoint: [python, /opt/app/deploy/demo/bootstrap.py]
+    environment: *app-environment
+    volumes:
+      - ./seed:/seed:ro
+      - object_store:/opt/app/data/object_store
+      - uploads:/opt/app/data/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+      private-qdrant:
+        condition: service_healthy
+
+  app:
+    <<: *app-image
+    restart: unless-stopped
+    stop_grace_period: 90s
+    working_dir: /opt/app
+    network_mode: service:private-qdrant
+    entrypoint: [python, /opt/app/deploy/demo/entrypoint.py]
+    env_file:
+      - path: ./data/model_config.env
+        required: false
+    environment: *app-environment
+    volumes:
+      - object_store:/opt/app/data/object_store
+      - uploads:/opt/app/data/uploads
+    depends_on:
+      bootstrap:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import json,urllib.request; o=urllib.request.build_opener(urllib.request.ProxyHandler({})); d=json.load(o.open('http://127.0.0.1:8000/health', timeout=5)); assert d.get('status')=='ok' and d.get('database')=='ready' and d.get('knowledge')=='ready' and d.get('vector_store')=='ready'"
+      interval: 5s
+      timeout: 8s
+      start_period: 30s
+      retries: 30
+
+volumes:
+  postgres_data:
+  qdrant_data:
+  private_qdrant_data:
+  object_store:
+  uploads:

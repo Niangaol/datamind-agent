@@ -539,8 +539,7 @@ class L5EventPersistenceParityTest(_RunCleanup):
 
 
 class H2RetiredCodeDocumentationTest(unittest.TestCase):
-    DOCS = ('docs/OFFICIAL_REQUIREMENTS_MAPPING.md', 'docs/MULTI_TURN.md',
-            'docs/SCORE_GAP_LEDGER.md')
+    DOCS = ('docs/MULTI_TURN.md',)
 
     def test_the_runtime_no_longer_produces_the_old_code(self):
         for path in sorted((ROOT / 'datamind').glob('*.py')):
@@ -552,10 +551,10 @@ class H2RetiredCodeDocumentationTest(unittest.TestCase):
             for line in text.splitlines():
                 if 'ROUTE_UNSUPPORTED' in line:
                     self.assertIn('退役', line, f'{name} 仍把旧码描述成现行行为：{line[:80]}')
-        mapping = (ROOT / self.DOCS[0]).read_text(encoding='utf-8')
-        self.assertIn('CROSS_SOURCE_EVIDENCE_INSUFFICIENT', mapping)
-        self.assertIn('DOC_BINDING_MISSING', mapping)
-        self.assertIn('CONFLICT_UNRESOLVED', mapping)
+        doc = (ROOT / self.DOCS[0]).read_text(encoding='utf-8')
+        self.assertIn('CROSS_SOURCE_EVIDENCE_INSUFFICIENT', doc)
+        self.assertIn('DOC_BINDING_MISSING', doc)
+        self.assertIn('CONFLICT_UNRESOLVED', doc)
 
 
 if __name__ == '__main__':

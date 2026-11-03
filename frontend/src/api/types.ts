@@ -1439,8 +1439,10 @@ export interface DimensionComparisonInput {
      2. 解析由**独立 worker 进程**推进（`python -m ingestion.upload_worker`），关闭页面
         不会推进它，所以 worker.alive=false 时必须说「后台处理器未运行」，
         不能把 queued 渲染成「解析中」；
-     3. 审批只解除「未复核」闸门；本管道 **不写 chunks**（vector_index='deferred'），
-        所以 approve 之后 searchable 仍可能是 false（index_state='no_chunks'）。
+     3. 审批只解除「未复核」闸门；解析波次会建立 chunks 与向量（vector_index='embedded'），
+       但未复核内容对检索器不可见。approve 之后 searchable 才可能为 true；
+        建索引失败时 vector_index='failed' 且 index_error_code 非空，approve 只会得到
+        index_state='no_chunks'（不会把没有索引的文档说成可检索）。
    `indexed`（approve 响应）就是 `searchable`，任一为 false 都不能说「已可检索」。 */
 
 export type UploadJobStatus =
@@ -1486,6 +1488,8 @@ export interface UploadListItem {
   searchable: boolean
   index_state: 'indexed' | 'no_chunks' | 'not_approved' | string
   index_note: string | null
+  /** 建索引失败的原因码（UPLOAD_INDEX_FAILED …）；未失败/未尝试时为 null */
+  index_error_code: string | null
   block_count: number
   locator_count: number
   unsupported_features: string[]
@@ -1525,8 +1529,11 @@ export interface UploadDetail extends UploadListItem {
   /** 失败时的原因码 */
   error_code: string | null
   attempt: number
+  /** 索引事实：embedded（切片+向量已写入）/ failed（尝试过但失败）/ deferred（无可索引内容） */
   vector_index: string
   vector_index_note: string
+  /** 检索器实际读到的 chunks 行数 */
+  chunk_count: number
   wave_deadline_seconds: number
   wave_timeouts: number
   locator_stores: { contract_blocks: number; page_shaped: number }

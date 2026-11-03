@@ -71,14 +71,20 @@
 - **无 worker 时任务会停在 `queued`**；旧版前端曾据此提示"后台处理器未运行：任务不会自行推进"。新版文件管理入口尚未接入，目前应从上述 API 检查 worker 状态。
 - 优雅退出会释放心跳；崩溃后租约自然过期。
 
-## 7. 上传的文档默认**不可问答**
+## 7. 上传的文档**复核通过后可问答**，但索引失败时不可问答
 
-上传管道**不建立向量索引**（`vector_index: "deferred"`，不写 `chunks`）。因此：
+解析波次会在契约写入提交后为文档建立切片与向量（`ingestion/upload_index.py`），资产仍保持
+未复核态，因此**复核门先于检索**：
 
 - 复核通过**不等于**可问答；判据是 `searchable == (status=='indexed' AND NOT needs_review AND chunks>0)`。
-- 没有切片的文档不会出现在问答文件选择器的可选列表里，但仍会出现在 `GET /v1/documents`（该接口同时服务文档状态视图），并带 `searchable=false` 与原因码。
-- 若把它作为选中文档提交，**服务端会拒绝**（`DOCUMENT_SELECTION_NOT_SEARCHABLE`），而不是返回一个没有证据的答案。
-- 要让上传的文档真正可问答，需要另行建立切片与索引（离线路径）。
+- 正常路径：上传 → 解析并建索引（`vector_index: "embedded"`）→ approve → `searchable=true`，
+  文档出现在 `GET /v1/documents` 与问答文件选择器里。
+- 建索引失败（`vector_index: "failed"`、`index_error_code` 非空）或无可索引内容
+  （`"deferred"`）时：approve 仍会成功，但 `index_state='no_chunks'`、`searchable=false`；
+  该文档不出现在 `GET /v1/documents`（按 `status='indexed'` 过滤）。失败原因在
+  `/v1/uploads/{id}` 的 `index_error_code` 中如实报告，不会被复核动作掩盖。
+- 若把不可检索的文档作为选中文档提交，**服务端会拒绝**（`DOCUMENT_SELECTION_NOT_SEARCHABLE`），
+  而不是返回一个没有证据的答案。
 
 ## 8. 适用范围
 

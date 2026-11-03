@@ -1,4 +1,4 @@
-"""Multi-scale timing and peak-memory report (official item E7/F6: system efficiency).
+"""Multi-scale timing and peak-memory report (system efficiency at several data scales).
 
 Everything here is measured, not estimated. Each scale runs in its **own subprocess** so the
 reported peak RSS belongs to that scale instead of being the high-water mark of every earlier
@@ -253,7 +253,7 @@ MODEL_SEGMENT_REASON = (
     "`{\"detail\":{\"error_code\":\"CSRF_REQUIRED\"}}`，取会话要写 datamind_meta 的 auth_sessions，"
     "超出本轮允许的写入范围。完整问答/首字时延因此留空（null），不用 mock 延迟冒充。")
 
-#: 固定查询集：单表过滤 / 两表 JOIN 聚合 / 三表 JOIN（对应官方「复杂度 + 规模」要求）。
+#: 固定查询集：单表过滤 / 两表 JOIN 聚合 / 三表 JOIN（对应「复杂度 + 规模」两项设计目标）。
 FIXED_QUERIES = (
     {"id": "q1_single_filter", "label": "单表过滤：orders.created_at 区间 + 状态计数",
      "sql": "SELECT count(*) AS orders, "

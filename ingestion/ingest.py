@@ -530,12 +530,17 @@ def build_chunks(blocks, doc_id):
         # 嵌入文本带标题路径前缀（提升检索召回）
         sec_path = [t for _, t in heading_stack]
         embed_text = (" > ".join(sec_path) + "\n" + text) if sec_path else text
+        # 只有**确实带页码**的块才参与页码区间计算。格式没有页概念时（Office/DXF 的
+        # 契约块 page_no 为 NULL），区间是「没有页码」这个事实，不是「第 0 页」——
+        # 写成 0 会凭空造出一个不存在的定位。PDF 路径每个块都有页码，行为不变。
+        known_pages = [page for page in buf_pages if page is not None]
         chunks.append({
             "chunk_id": f"chk-{md5(doc_id + str(len(chunks)))}",
             "document_id": doc_id,
             "chunk_type": "text",
             "section_path": sec_path,
-            "page_start": min(buf_pages), "page_end": max(buf_pages),
+            "page_start": min(known_pages) if known_pages else None,
+            "page_end": max(known_pages) if known_pages else None,
             "block_ids": list(buf_blocks),
             "text_for_embedding": embed_text[:4000],
             "exact_text": text,

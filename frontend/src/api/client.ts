@@ -874,8 +874,9 @@ export async function getComparison(comparisonId: string): Promise<DimensionComp
         （那是退役的 file_jobs 契约）；
      2. 解析由**独立 worker 进程**推进，关页面不会推进它 → worker.alive=false 时
         UI 必须说「后台处理器未运行」，不能把 queued 说成「解析中」；
-     3. 审批只解开复核闸门；本管道 vector_index='deferred'、不写 chunks，
-        所以 approve 之后 searchable/indexed 仍可能是 false。
+     3. 审批只解开复核闸门；解析波次会建立 chunks 与向量（vector_index='embedded'），
+        但未复核内容对检索器不可见。approve 之后 searchable/indexed 才可能为 true；
+        建索引失败（vector_index='failed'）时 approve 只会得到 no_chunks。
    ══════════════════════════════════════════════════════════════════════════ */
 
 /**
@@ -923,7 +924,7 @@ export async function getUpload(uploadId: string): Promise<UploadDetail> {
 }
 
 /** 审批通过（admin）：解除复核闸门。返回体多一个 `indexed`（= searchable）；
-    它和 searchable 都为 false 时不能说「已可检索」（通常是没有 chunks）。 */
+    它和 searchable 都为 false 时不能说「已可检索」（通常是没有 chunks / 建索引失败）。 */
 export async function approveUpload(uploadId: string): Promise<UploadApproveResult> {
   return write<UploadApproveResult>(`/v1/uploads/${encodeURIComponent(uploadId)}/approve`)
 }

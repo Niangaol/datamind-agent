@@ -3,9 +3,9 @@
 **日期**：2026-10-10（北京时间）
 **基线提交**：`e4e2ebf`（`git rev-parse --short HEAD` 只读读取）
 **API 版本**：0.39.0（见 `/openapi.json`，本文件不改动运行时代码）
-**对应官方要求**：中级任务难题②「可扩展要素提取：不依赖 Few-Shot 大提示词，新增领域可低成本扩展」（赛题 PDF 第 5 页）
-**机读报告**：[reports/extensible_fields_v1.json](../reports/extensible_fields_v1.json)
-**结论卡**：[reports/cards/wp5a_extensible.md](../reports/cards/wp5a_extensible.md)
+**对应能力目标**：可扩展要素提取——不依赖 Few-Shot 大提示词，新增领域可低成本扩展
+**机读报告**：reports/extensible_fields_v1.json
+**结论卡**：reports/cards/wp5a_extensible.md
 
 ---
 
@@ -142,7 +142,7 @@ cd "/Users/caicai/DataMind Agent"
    不计入这个 0；端到端生产接入的改动量**未测量**。
 3. **stub 臂是替身**：它证明「示例只买到拼写覆盖」，不等于真实 few-shot 提示词的收益。
 4. **自建冻结小集**：6 份材料、20 条记录、3 种格式，均为本项目合成材料；
-   不能外推为真实工单系统的准确率或官方评测成绩。
+   不能外推为真实工单系统的准确率或任何外部评测成绩。
 5. **确定性依赖归一化**：`.docx/.xlsx` 的 zip 时间戳与 `docProps/core.xml` 的 `modified` 被统一改写为
    2026-01-01，才有逐字节可复现；未归一化时同一天内重复生成也会得到不同字节（已在文档与测试中记录）。
 6. **原领域守卫是只读计数比对**：工作区同时存在其他工作包的改动（例如 `datamind/industrial_rules.py`），
@@ -150,13 +150,13 @@ cd "/Users/caicai/DataMind Agent"
 
 ---
 
-## 7. 评分联动
+## 7. 外部评审项与本文件证据
 
-| 官方项 | 本文件能提供的材料 | 不能提供的 |
+| 外部评审项 | 本文件能提供的材料 | 不能提供的 |
 |---|---|---|
-| 中级任务难题②（E8/F8 第三项） | 一个新领域的成本清单 + 三档对照 + 冻结集 + 失败清单 + 复现命令 | 「低成本」的官方主观判定 |
-| E8/F8 质量加分 | 引擎 0 行改动、原领域不受影响的可核对证据 | 官方分数 |
+| 可扩展要素提取（E8/F8 第三项） | 一个新领域的成本清单 + 三档对照 + 冻结集 + 失败清单 + 复现命令 | 「低成本」的主观判定 |
+| E8/F8 质量项 | 引擎 0 行改动、原领域不受影响的可核对证据 | 评审方给出的分数 |
 | F4（复杂 NL2SQL 支撑） | 字段定位复用同一 `Catalog.retrieve` 的证据 | 跨库泛化结论 |
 
-> 所有数字来自 [reports/extensible_fields_v1.json](../reports/extensible_fields_v1.json) 的实测输出；
-> 本文件不声明任何官方分值。
+> 所有数字来自 reports/extensible_fields_v1.json 的实测输出；
+> 本文件不声明任何评审分值。

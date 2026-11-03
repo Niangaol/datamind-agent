@@ -215,8 +215,12 @@ class UploadPipelineTests(unittest.TestCase):
         body = self.detail(upload_id)
         self.assertIn(body['status'], ('succeeded', 'partial_failure'))
         self.assertEqual(body['error_code'], None)
-        self.assertEqual(body['vector_index'], 'deferred')
-        self.assertIn('ingestion/ingest.py', body['vector_index_note'])
+        # The parse wave indexes the document, but indexing is not publishing: the asset
+        # still waits behind the review gate.
+        self.assertEqual(body['vector_index'], 'embedded')
+        self.assertGreater(body['chunk_count'], 0)
+        self.assertIsNone(body['index_error_code'])
+        self.assertIn('ingestion/upload_index.py', body['vector_index_note'])
         self.assertTrue(body['review_required'])
         self.assertEqual(body['review_state'], 'pending_review')
         self.assertEqual(body['contract_url'], f'/v1/documents/{document_id}/contract')
@@ -289,25 +293,26 @@ class UploadPipelineTests(unittest.TestCase):
         body = approved.json()
         self.assertFalse(body['review_required'])
         self.assertEqual(body['review_state'], 'approved')
-        # R05: approve clears the review gate; it does not invent an index. This path writes
-        # no `chunks`, and `datamind.knowledge` reads `chunks` only, so `indexed`/`searchable`
-        # must stay false and the reason must be stated, not implied.
-        self.assertFalse(body['indexed'])
-        self.assertFalse(body['searchable'])
-        self.assertEqual(body['index_state'], 'no_chunks')
-        self.assertEqual(body['index_note'], 'UPLOAD_HAS_NO_CHUNKS')
-        self.assertEqual(body['vector_index'], 'deferred')
+        # The parse wave wrote this document's chunks, so approve promotes it to `indexed`
+        # and the retriever can select it. Approval did not *create* the index; it opened
+        # the gate in front of an index that already existed (see §2 of UPLOAD_PIPELINE.md).
+        self.assertTrue(body['indexed'])
+        self.assertTrue(body['searchable'])
+        self.assertEqual(body['index_state'], 'indexed')
+        self.assertIsNone(body['index_note'])
+        self.assertEqual(body['vector_index'], 'embedded')
         operator = body['approval']
         self.assertEqual(operator['user_id'], self.admin._fixture_users[0])
         self.assertTrue(operator['approved_at'])
         self.assertEqual(operator['roles'], ['admin'])
-        self.assertFalse(operator['indexed'], 'the recorded decision must not claim an index')
+        self.assertTrue(operator['indexed'], 'the recorded decision must match the derived state')
 
-        # And it stays out of the Q&A selector until something actually builds chunks.
-        self.assertNotIn(document_id, self.listed_document_ids())
-        self.assertEqual(self.admin.get(f'/v1/documents/{document_id}').status_code, 404)
+        # And it now appears in the Q&A selector, with the same derived judgment.
+        self.assertIn(document_id, self.listed_document_ids())
+        listed = self.admin.get(f'/v1/documents/{document_id}')
+        self.assertEqual(listed.status_code, 200)
         status, needs_review, detail, _uri, _parser = self.asset_row(document_id)
-        self.assertEqual((status, needs_review), ('parsed', False))
+        self.assertEqual((status, needs_review), ('indexed', False))
         self.assertEqual(detail['review_approval']['user_id'], self.admin._fixture_users[0])
 
     def test_a_queued_upload_cannot_be_approved(self):
@@ -348,7 +353,7 @@ class UploadPipelineTests(unittest.TestCase):
         self.assertEqual(body['error_code'], 'UPLOAD_STAGED_SOURCE_CHANGED')
 
     # --------------------------------------------- 6. honest vector_index + listing
-    def test_vector_index_is_deferred_and_no_chunks_are_claimed(self):
+    def test_a_document_with_nothing_to_index_is_reported_as_deferred(self):
         created = self.measurement()
         self.assertEqual(created.status_code, 201, created.text)
         upload_id = created.json()['upload_id']
@@ -357,8 +362,12 @@ class UploadPipelineTests(unittest.TestCase):
         body = self.detail(upload_id)
         # A measurement record carries no page/region geometry: the gap is declared, not faked.
         self.assertEqual(body['status'], 'partial_failure')
+        # No contract blocks means nothing to index. That is `deferred`, not `failed`:
+        # the pipeline did not try and fail, it had nothing to do.
         self.assertEqual(body['vector_index'], 'deferred')
-        self.assertIn('ingestion/ingest.py', body['vector_index_note'])
+        self.assertEqual(body['chunk_count'], 0)
+        self.assertIsNone(body['index_error_code'])
+        self.assertIn('ingestion/upload_index.py', body['vector_index_note'])
         self.assertIn('locator_unavailable', body['unsupported_features'])
         self.assertEqual(body['analysis']['adapter'], 'measurement-json')
         self.assertEqual(body['block_count'], 0)
@@ -392,8 +401,8 @@ class UploadPipelineTests(unittest.TestCase):
         self.assertEqual(set(item), {'upload_id', 'job_id', 'document_id', 'filename',
                                       'media_type', 'provenance', 'status', 'created_at',
                                       'review_state', 'review_required', 'searchable',
-                                      'index_state', 'index_note', 'block_count',
-                                      'locator_count', 'unsupported_features'})
+                                      'index_state', 'index_note', 'index_error_code',
+                                      'block_count', 'locator_count', 'unsupported_features'})
         # R05: the list states retrievability per item instead of leaving it to be inferred
         # from `status`/`review_state`.
         self.assertFalse(item['searchable'])

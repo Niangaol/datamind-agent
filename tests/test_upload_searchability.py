@@ -1,25 +1,30 @@
 """R05: "parsed", "approved" and "searchable" are three different facts.
 
-The upload pipeline writes a validated contract but never `chunks`, while
-`datamind.knowledge.KnowledgeRetriever` reads `chunks` and nothing else. Before the fix
-`approve` published an asset as `status='indexed'` as soon as the contract held one block,
-so the document showed up in the Q&A file selector (`GET /v1/documents`) and could never be
-retrieved. These tests drive the real endpoints against a real parse and assert the
-*reason* per state, never a bare boolean.
+The parse wave now writes `chunks` and Qdrant points (`ingestion/upload_index.py`), so the
+searchable state is finally reachable. This does **not** collapse the three facts:
 
-Non-vacuity (what would fail if `approve` went back to `status='indexed' iff
-block_count > 0`):
+* a parsed upload has chunks but is still unapproved — the retriever's own publication
+  gate (`datamind.knowledge`) refuses to select it;
+* `approve` clears only the review gate; it publishes the asset (`status='indexed'`) iff
+  the retriever's own store (`chunks`) is non-empty. A document whose index failed keeps
+  `no_chunks` and stays out of `GET /v1/documents`;
+* `searchable` is derived on every surface from those three facts, never stored as a flag.
 
-* `test_approved_upload_without_chunks_stays_unsearchable_and_unlisted` fails on
-  `searchable`, on `index_state`, on the asset still being `parsed`, and on the central
-  `document_id not in GET /v1/documents` assertion;
-* the unapproved case (①) would still pass, which is exactly why the reverse control in
-  `test_chunks_make_the_same_document_searchable_and_retrievable` is required — it proves
-  the derived flag is not a blanket "false" and that it follows the retriever's own store.
+These tests drive the real endpoints against a real parse and assert the *reason* per
+state, never a bare boolean.
 
-Every fixture is real: bytes go through `POST /v1/uploads`, the parse runs through
-`upload_pipeline` (in-process because the staging root is a temp dir), and the chunk
-insertion in the reverse control plays the role of the offline publisher. Rows and staged
+Non-vacuity:
+
+* `test_approved_upload_without_chunks_stays_unsearchable_and_unlisted` pins the original
+  defect guard — `approve` must key on `chunks`, not on `block_count`. If it went back to
+  `status='indexed' iff block_count > 0`, this test fails on `searchable`, `index_state`,
+  the asset status and the `document_id not in GET /v1/documents` assertion;
+* `test_chunks_from_the_parse_wave_make_the_document_searchable_and_retrievable` is the
+  reverse control: it proves the flag is not a blanket "false" and that it follows the
+  retriever's own store — deleting the chunks flips it back to false.
+
+Every fixture is real: bytes go through `POST /v1/uploads` and the parse runs through
+`upload_pipeline` (in-process because the staging root is a temp dir). Rows and staged
 files are removed in teardown.
 """
 import hashlib
@@ -35,14 +40,35 @@ from datamind import file_uploads
 from datamind.agent import _write_dsn
 from datamind.api import app
 from datamind.knowledge import KnowledgeRetriever
-from ingestion import upload_pipeline
+from ingestion import upload_index, upload_pipeline
 import auth_fixtures
 
 ROOT = Path(__file__).resolve().parents[1]
 DXF = ROOT / 'data/cad_demo/development/dev-mm.dxf'
-#: Shares CJK bigrams with the question below so the lexical retriever really scores it.
-CHUNK_TEXT = '铝合金板 8K 工艺温度 840 度，人工复核后由离线路径切片。'
-QUESTION = '铝合金板 8K 工艺温度是多少'
+#: Real text in the DXF, so the lexical retriever really scores this chunk.
+QUESTION = 'CAD-DEV-1 图号'
+
+
+class _FailingClient:
+    """A Qdrant client whose write fails, without a Qdrant."""
+
+    def collection_exists(self, name):
+        return True
+
+    def create_collection(self, *args, **kwargs):
+        return None
+
+    def create_payload_index(self, *args, **kwargs):
+        return None
+
+    def delete(self, collection, points_selector=None, wait=False):
+        return None
+
+    def upsert(self, collection, points):
+        raise RuntimeError('R05_STUB_QDRANT_UNAVAILABLE')
+
+    def close(self):
+        return None
 
 
 class UploadSearchabilityTests(unittest.TestCase):
@@ -87,13 +113,21 @@ class UploadSearchabilityTests(unittest.TestCase):
                 hashlib.sha256(data).hexdigest())['document_id'])
         return response
 
-    def parsed_dxf(self):
-        """A fully parsed, still unapproved DXF: the state every test here starts from."""
+    def parsed_dxf(self, *, index_client=None):
+        """A fully parsed, still unapproved DXF: the state every test here starts from.
+
+        `index_client` lets a test make the index fail while the parse succeeds.
+        """
         created = self.upload()
         self.assertEqual(created.status_code, 201, created.text)
         upload_id = created.json()['upload_id']
         document_id = self.documents[-1]
-        self.assertEqual(upload_pipeline.drain(self.dsn, upload_id, in_process=True)['claimed'], 1)
+        if index_client is None:
+            result = upload_pipeline.drain(self.dsn, upload_id, in_process=True)
+        else:
+            with patch.object(upload_index, '_qdrant_client', return_value=index_client):
+                result = upload_pipeline.drain(self.dsn, upload_id, in_process=True)
+        self.assertEqual(result['claimed'], 1)
         return upload_id, document_id
 
     def detail(self, upload_id):
@@ -124,23 +158,10 @@ class UploadSearchabilityTests(unittest.TestCase):
         rows = self.admin.get('/v1/uploads', params={'limit': 200}).json()['uploads']
         return next(row for row in rows if row['document_id'] == document_id)
 
-    def publish_chunks(self, document_id, text=CHUNK_TEXT):
-        """Play the offline publisher: real `chunks` rows plus the `indexed` head.
-
-        The upload path deliberately owns neither (its `vector_index` stays `deferred`), so
-        the reverse control has to produce the retrievable state the pipeline cannot.
-        """
-        status, _review, version, _parser, _sha = self.asset(document_id)
-        self.assertTrue(version >= 1 and status)
-        digest = hashlib.sha256(text.encode()).hexdigest()
+    def delete_chunks(self, document_id):
+        """Emulate an empty retriever store (an index that never completed)."""
         with psycopg2.connect(self.dsn) as conn, conn.cursor() as cur:
-            cur.execute('''INSERT INTO chunks(chunk_id,document_id,document_version,chunk_index,
-                text_for_embedding,exact_text,embedding_model,content_hash,page_start,page_end,acl)
-                VALUES (%s,%s,%s,0,%s,%s,'r05-fixture',%s,1,1,'{public}')''',
-                        (document_id + '-c0', document_id, version, text, text, digest))
-            cur.execute("UPDATE document_assets SET status='indexed' WHERE document_id=%s",
-                        (document_id,))
-        return digest
+            cur.execute('DELETE FROM chunks WHERE document_id=%s', (document_id,))
 
     # ------------------------------------------- 1. parsed but not approved: not_approved
     def test_a_parsed_but_unapproved_upload_is_not_searchable(self):
@@ -149,13 +170,14 @@ class UploadSearchabilityTests(unittest.TestCase):
         self.assertIn(body['status'], ('succeeded', 'partial_failure'))
         self.assertTrue(body['review_required'])
         self.assertEqual(body['review_state'], 'pending_review')
+        # The parse wave really did build the index — and that still does not publish it.
+        self.assertEqual(body['vector_index'], 'embedded')
+        self.assertGreaterEqual(self.chunk_count(document_id), 1)
         # The reason is the missing approval, not the missing index.
         self.assertFalse(body['searchable'])
         self.assertEqual(body['index_state'], 'not_approved')
         self.assertEqual(body['index_note'], 'UPLOAD_NOT_APPROVED')
         self.assertGreaterEqual(body['block_count'], 1, 'the real parse stored contract blocks')
-        self.assertEqual(self.chunk_count(document_id), 0, 'this path writes no chunks')
-        self.assertEqual(body['vector_index'], 'deferred')
         # The list agrees with the detail, in both directions.
         item = self.upload_row(document_id)
         self.assertFalse(item['searchable'])
@@ -165,7 +187,10 @@ class UploadSearchabilityTests(unittest.TestCase):
 
     # ------------------------- 2. approved but nothing to retrieve: no_chunks (the defect)
     def test_approved_upload_without_chunks_stays_unsearchable_and_unlisted(self):
-        upload_id, document_id = self.parsed_dxf()
+        """A failed index leaves contract blocks but no chunk store; approval must not lie."""
+        upload_id, document_id = self.parsed_dxf(index_client=_FailingClient())
+        self.assertGreaterEqual(self.detail(upload_id)['block_count'], 1)
+        self.assertEqual(self.chunk_count(document_id), 0)
         approved = self.approve(upload_id)
         self.assertEqual(approved.status_code, 200, approved.text)
         body = approved.json()
@@ -178,6 +203,7 @@ class UploadSearchabilityTests(unittest.TestCase):
         self.assertEqual(body['index_note'], 'UPLOAD_HAS_NO_CHUNKS')
         self.assertGreaterEqual(body['block_count'], 1, 'blocks alone must not imply retrieval')
         self.assertFalse(body['approval']['indexed'])
+        self.assertEqual(body['index_error_code'], upload_index.INDEX_ERROR_CODE)
         # The asset is *not* published, so the selector cannot offer it.
         status, needs_review, _version, _parser, _sha = self.asset(document_id)
         self.assertEqual((status, needs_review), ('parsed', False))
@@ -191,14 +217,12 @@ class UploadSearchabilityTests(unittest.TestCase):
         self.assertFalse(item['searchable'])
         self.assertEqual(item['index_state'], 'no_chunks')
         self.assertEqual(item['index_note'], 'UPLOAD_HAS_NO_CHUNKS')
+        self.assertEqual(item['index_error_code'], upload_index.INDEX_ERROR_CODE)
 
     # ------------------------------- 3. reverse control: a real chunk store flips it to true
-    def test_chunks_make_the_same_document_searchable_and_retrievable(self):
+    def test_chunks_from_the_parse_wave_make_the_document_searchable_and_retrievable(self):
         upload_id, document_id = self.parsed_dxf()
         self.assertEqual(self.approve(upload_id).status_code, 200)
-        self.assertFalse(self.detail(upload_id)['searchable'], 'precondition: no chunks yet')
-
-        self.publish_chunks(document_id)
         body = self.detail(upload_id)
         self.assertTrue(body['searchable'])
         self.assertEqual(body['index_state'], 'indexed')
@@ -213,13 +237,6 @@ class UploadSearchabilityTests(unittest.TestCase):
         self.assertEqual(item['index_state'], 'indexed')
         self.assertIsNone(item['index_note'])
 
-        # `approve` now sees a non-empty chunk store, so a repeat publishes (still idempotent).
-        again = self.approve(upload_id)
-        self.assertEqual(again.status_code, 200, again.text)
-        self.assertTrue(again.json()['indexed'])
-        self.assertTrue(again.json()['searchable'])
-        self.assertEqual(again.json()['index_state'], 'indexed')
-
         # The flag is not a label: the real retriever returns this document's chunk.
         _status, _review, version, parser_version, sha = self.asset(document_id)
         result = KnowledgeRetriever(self.dsn, mode='lexical').retrieve(
@@ -229,6 +246,14 @@ class UploadSearchabilityTests(unittest.TestCase):
         self.assertGreaterEqual(result['eligible_chunks'], 1)
         self.assertEqual(result['coverage']['all_covered'], True, result['coverage'])
         self.assertIn(document_id, {hit['document_id'] for hit in result['hits']})
+
+        # ...and an empty retriever store flips it back: it is derived, not stored.
+        self.delete_chunks(document_id)
+        self.assertFalse(self.detail(upload_id)['searchable'])
+        self.assertEqual(self.detail(upload_id)['index_state'], 'no_chunks')
+        # The row may still be *visible* (it is approved and published), but it is reported
+        # as not searchable — which is what the Q&A selector gates on.
+        self.assertFalse(self.listed_documents()[document_id]['searchable'])
 
     # ------------------------------------------------- 4. `searchable` on every listed row
     def test_every_documents_item_carries_searchable(self):
@@ -251,9 +276,7 @@ class UploadSearchabilityTests(unittest.TestCase):
         self.assertEqual(self.approve(upload_id).status_code, 200)
         # Emulate the historical/hand-marked row this fix is about: published as `indexed`
         # while the retriever's own store is still empty.
-        with psycopg2.connect(self.dsn) as conn, conn.cursor() as cur:
-            cur.execute("UPDATE document_assets SET status='indexed' WHERE document_id=%s",
-                        (document_id,))
+        self.delete_chunks(document_id)
         item = self.listed_documents()[document_id]
         body = self.detail(upload_id)
         self.assertEqual(item['index_state'], body['index_state'])
@@ -264,7 +287,8 @@ class UploadSearchabilityTests(unittest.TestCase):
         self.assertEqual((body['index_state'], body['index_note']),
                          ('no_chunks', 'UPLOAD_HAS_NO_CHUNKS'))
         # With a real chunk store both surfaces flip together, to the same values.
-        self.publish_chunks(document_id)
+        report = upload_index.index_document(self.dsn, document_id)
+        self.assertEqual(report['index_state'], upload_index.INDEX_EMBEDDED)
         item = self.listed_documents()[document_id]
         body = self.detail(upload_id)
         self.assertTrue(item['searchable'] and body['searchable'])
@@ -272,19 +296,22 @@ class UploadSearchabilityTests(unittest.TestCase):
         self.assertEqual((body['index_state'], body['index_note']), ('indexed', None))
 
     # ---------------------------------------------------------------- 5. approve idempotent
-    def test_approve_is_idempotent_without_chunks(self):
+    def test_approve_is_idempotent_and_never_creates_a_second_index(self):
         upload_id, document_id = self.parsed_dxf()
         first = self.approve(upload_id)
         second = self.approve(upload_id)
         for response in (first, second):
             self.assertEqual(response.status_code, 200, response.text)
-            self.assertFalse(response.json()['indexed'])
-            self.assertFalse(response.json()['searchable'])
-            self.assertEqual(response.json()['index_state'], 'no_chunks')
-            self.assertEqual(response.json()['index_note'], 'UPLOAD_HAS_NO_CHUNKS')
+            self.assertTrue(response.json()['indexed'])
+            self.assertTrue(response.json()['searchable'])
+            self.assertEqual(response.json()['index_state'], 'indexed')
+            self.assertIsNone(response.json()['index_note'])
             self.assertEqual(response.json()['review_state'], 'approved')
-        self.assertEqual(self.asset(document_id)[0], 'parsed', 'no second state change')
-        self.assertEqual(self.chunk_count(document_id), 0)
+        self.assertEqual(self.asset(document_id)[0], 'indexed', 'no second state change')
+        first_count = self.chunk_count(document_id)
+        self.assertGreaterEqual(first_count, 1)
+        self.assertEqual(self.chunk_count(document_id), first_count,
+                         'approving twice must not duplicate the index')
         with psycopg2.connect(self.dsn) as conn, conn.cursor() as cur:
             cur.execute('SELECT count(*) FROM document_assets WHERE document_id=%s', (document_id,))
             self.assertEqual(cur.fetchone()[0], 1)
@@ -293,7 +320,6 @@ class UploadSearchabilityTests(unittest.TestCase):
             cur.execute("SELECT quality_detail->'review_approval'->>'user_id' "
                         'FROM document_assets WHERE document_id=%s', (document_id,))
             self.assertEqual(cur.fetchone()[0], self.admin._fixture_users[0])
-        self.assertNotIn(document_id, self.listed_documents())
 
     # --------------------------------- 6. a failed parse can never be approved into retrieval
     def test_a_failed_parse_cannot_be_approved_into_a_searchable_document(self):

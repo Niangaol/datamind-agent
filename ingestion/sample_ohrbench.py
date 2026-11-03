@@ -2,7 +2,7 @@
 """
 sample_ohrbench.py — OHR-Bench 分层抽样，导出真实语料作为 RAG 鲁棒性评测素材
 每领域抽 2 页: gt_text(人工校准) + formatting_noise_moderate(模拟 OCR 噪声) 成对导出。
-对应赛题推荐数据集 OHR-Bench (ICCV 2025)。
+使用公开基准数据集 OHR-Bench (ICCV 2025) 作为外部评测来源。
 
 用法: py -3.13 ingestion/sample_ohrbench.py
 输出: data/ohr_bench_samples/*.json + manifest.json

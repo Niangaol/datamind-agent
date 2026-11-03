@@ -11,6 +11,7 @@ import { useSessions } from '../composables/useSessions'
 import type {
   ChatMessage,
   ChatPayload,
+  DocumentRef,
   EvidenceGraph,
   EvidenceNode,
   FinalResult,
@@ -195,7 +196,12 @@ watch(
   { immediate: true },
 )
 
-function buildPayload(question: string, mode: string): ChatPayload {
+function buildPayload(question: string, mode: string, documentRefs?: DocumentRef[]): ChatPayload {
+  // 指定文件 = 只看这几份文档：服务端只在文档问答路由接受 document_refs
+  // （其它路由会以 DOCUMENT_SELECTION_MODE_INVALID 失败，客户端不制造这次失败）。
+  if (documentRefs && documentRefs.length) {
+    return { question, mode: 'rag', scope: { document_refs: documentRefs } }
+  }
   switch (mode) {
     case 'retail':
       return { question, mode: 'sql', scope: { database_sources: ['demo_retail'] } }
@@ -234,7 +240,7 @@ function selectNode(node: EvidenceNode | null) {
   selectedNode.value = node
 }
 
-async function send(payload: { question: string; mode: string }) {
+async function send(payload: { question: string; mode: string; documentRefs?: DocumentRef[] }) {
   if (running.value || !payload.question.trim()) return
   const question = payload.question.trim()
 
@@ -262,7 +268,7 @@ async function send(payload: { question: string; mode: string }) {
 
   // conversation_id 只在真有会话时才写进 body：没有会话时请求体与旧版逐字节一致
   //（后端也只在收到该键时才给 run() 传 conversation_id，见 api.py::_chat_kwargs）。
-  const body: ChatPayloadWithSession = buildPayload(question, payload.mode)
+  const body: ChatPayloadWithSession = buildPayload(question, payload.mode, payload.documentRefs)
   if (conversationId) body.conversation_id = conversationId
 
   try {

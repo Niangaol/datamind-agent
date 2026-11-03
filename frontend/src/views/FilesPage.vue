@@ -37,8 +37,9 @@ import {
  *
  * 这一屏存在的意义是**把三件常被混为一谈的事分开说清**：
  *   解析完成（status）≠ 人工复核（review_state）≠ 可检索（searchable）。
- * 本管道 vector_index 恒为 'deferred'、不写 chunks，所以一份「已入库（待复核）」甚至
- * 「已复核」的文件，仍然可能 select 不进问答 —— 界面必须如实说出来，而不是给一个
+ * 解析波次会写 chunks 与向量（vector_index='embedded'），但未复核内容对检索器不可见；
+ * 复核通过后 `searchable` 才可能为 true。建索引失败（vector_index='failed'）时，
+ * 即使复核通过也只能得到 index_state='no_chunks' —— 界面必须如实说出来，而不是给一个
  * 让人以为「传完就能问」的绿灯。
  *
  * 另外两条硬事实（写在这里是因为它们决定了整个交互，而不是注释级的细节）：
@@ -408,6 +409,7 @@ const batchRows = computed<FilesRowVM[]>(() =>
       searchable: detail ? detail.searchable : null,
       indexState: detail ? detail.index_state : null,
       indexNote: detail ? detail.index_note : null,
+      indexErrorCode: detail ? detail.index_error_code : null,
       blockCount: detail ? detail.block_count : null,
       locatorCount: detail ? detail.locator_count : null,
       worker: detail?.worker ?? null,
@@ -438,6 +440,7 @@ const listRows = computed<FilesRowVM[]>(() =>
       searchable: u.searchable,
       indexState: u.index_state,
       indexNote: u.index_note,
+      indexErrorCode: u.index_error_code,
       blockCount: u.block_count,
       locatorCount: u.locator_count,
       // 列表行只有接口顶层的 worker（逐行没有自己的心跳）。

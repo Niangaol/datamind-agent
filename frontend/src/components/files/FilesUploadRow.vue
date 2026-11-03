@@ -82,8 +82,10 @@ function onApprove(): void {
       </span>
     </div>
 
-    <p v-if="row.searchableCaveat" class="fur-note" data-testid="files-row-vector-caveat">
-      {{ row.searchableCaveat }}
+    <!-- 建索引失败：解析成功但索引没写成，必须单独说清（不能伪装成解析失败，
+         也不能换一句「暂不可问答」把原因码丢掉） -->
+    <p v-if="row.indexErrorText" class="fur-warn" data-testid="files-row-index-error">
+      {{ row.indexErrorText }}
     </p>
 
     <!-- 本地阶段（预检被拒 / 上传中 / 轮询中）——本来就不是服务端状态，单独一行说明 -->
@@ -107,9 +109,6 @@ function onApprove(): void {
         data-testid="files-approval-notice"
       >
         {{ row.approveNotice.text }}
-      </p>
-      <p v-if="row.approveNotice.caveat" class="fur-note" data-testid="files-approval-caveat">
-        {{ row.approveNotice.caveat }}
       </p>
     </template>
 

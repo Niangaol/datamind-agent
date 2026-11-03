@@ -45,6 +45,20 @@ def main():
                                    # excluded above; keeping session rows would make pg_restore fail
                                    # when it re-adds the FK (owner missing), aborting the whole run.
                                    '--exclude-table-data=chat_sessions',
+                                   # Same rule, second family: every wiki row hangs off
+                                   # wiki_entries (owner_id -> auth_users) or off a wiki
+                                   # revision. Excluding only the three heads left
+                                   # wiki_provenance_links.revision_id dangling and the
+                                   # restore still aborted on the re-added FK. The wiki
+                                   # tests build their own entries, so no fixture is lost.
+                                   '--exclude-table-data=wiki_entries',
+                                   '--exclude-table-data=wiki_revisions',
+                                   '--exclude-table-data=wiki_assertions',
+                                   '--exclude-table-data=wiki_evidence_refs',
+                                   '--exclude-table-data=wiki_provenance_links',
+                                   '--exclude-table-data=wiki_relations',
+                                   '--exclude-table-data=wiki_review_events',
+                                   '--exclude-table-data=wiki_build_jobs',
                                    '--exclude-table-data=source_authority_rules','--exclude-table-data=source_authority_events',
                                    '--exclude-table-data=cad_assets','--exclude-table-data=cad_versions',
                                    '--exclude-table-data=cad_association_reviews',
@@ -112,6 +126,10 @@ def main():
         summary.update(commit=_git_commit(), ran_at=datetime.now(timezone.utc).isoformat(),
                        failed_tests=sorted(test.id() for test, _ in
                                            list(result.failures) + list(result.errors)))
+        # `reports/` is entirely ignored as a run-artifact directory (it may not exist in a
+        # fresh checkout or after `git clean`); create it instead of losing a finished run's
+        # numbers to a FileNotFoundError.
+        (ROOT/'reports').mkdir(parents=True, exist_ok=True)
         (ROOT/'reports/latest_regression.json').write_text(
             json.dumps(summary,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
         print(json.dumps(summary))

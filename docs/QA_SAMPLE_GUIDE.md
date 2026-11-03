@@ -2,7 +2,7 @@
 
 **前端版本补充（2026-10-10）**：下文界面主线是旧版前端的历史演示脚本；旧版已退役删除，不能按其旧深链或管理菜单操作新版。后端接口与样本集保留，当前页面范围及迁移计划见 [前端评估](FRONTEND_NEXT_STEPS_20261010.md)。
 
-> 用途：答辩/演示主线，以及现场排障。所有命令都在仓库根目录执行：
+> 用途：演示主线与现场排障。所有命令都在仓库根目录执行：
 > `cd "/Users/caicai/DataMind Agent"`，Python 一律用 `.venv/bin/python`。
 > 本文只描述**当前版本真实能做与不能做**的事；不能做的部分在 §5 明确标注，演示时不得含糊带过。
 
@@ -98,18 +98,21 @@ curl -s -X POST "http://127.0.0.1:8000/v1/uploads?filename=05_service_sla_manual
 ```bash
 curl -s http://127.0.0.1:8000/v1/uploads/<upload_id> | .venv/bin/python -m json.tool
 # 期望：status=succeeded；review_state=pending_review；searchable=false；index_state=not_approved；
-#       block_count=6；locator_count=6；vector_index="deferred"
+#       block_count=6；locator_count=6；vector_index="embedded"；chunk_count>0；
+#       index_error_code=null
 ```
 
 **2.5 复核（approve）**
 
 ```bash
 curl -s -X POST http://127.0.0.1:8000/v1/uploads/<upload_id>/approve -H "X-CSRF-Token: $CSRF"
-# 期望：review_state=approved，但 searchable=false、index_state="no_chunks"、index_note="UPLOAD_HAS_NO_CHUNKS"
+# 期望：review_state=approved、status=indexed、indexed=true、searchable=true、index_state="indexed"
 ```
 
-**这一步就是「无切片，不可问答」的服务端表达**：审批清的是复核门，不是索引。
-`vector_index` 恒为 `deferred`（`ingestion/upload_pipeline.py` 的常量 + 说明）。
+**审批清的是复核门，索引在解析波次里已建立**：`vector_index` 取 `embedded`（已建立）、
+`failed`（建立失败，`index_error_code` 非空）或 `deferred`（无可索引内容）。若为后两者，
+approve 仍返回 200，但 `searchable=false`、`index_state="no_chunks"`——不可检索的原因必须
+如实呈现，不能冒充成功。
 
 **2.6 契约定位（解析证据确实存在，可指回原位）**
 

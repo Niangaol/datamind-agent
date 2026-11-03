@@ -125,7 +125,7 @@ RETAIL_ALIASES = [
     ("channel.app", "app", "channel", "手机APP"),
 ]
 
-# Chinook 中文业务词表（赛题推荐库，用于中文问数）
+# Chinook 中文业务词表（公开示例库，用于中文问数）
 CHINOOK_TABLES = {
     "artist":        {"cn": "艺术家", "aliases": ["歌手", "艺人", "音乐人"]},
     "album":         {"cn": "专辑", "aliases": ["唱片", "碟"]},

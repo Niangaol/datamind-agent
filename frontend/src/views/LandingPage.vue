@@ -63,7 +63,7 @@ const navItems = [
 ]
 
 /**
- * 右下角那个大文件夹里飞出的三张纸——赛题的三条核心主张。
+ * 右下角那个大文件夹里飞出的三张纸——产品的三条核心主张。
  * 原来是顶部粘稠导航的三项，用户要求移进文件夹并删掉导航。
  *
  * Folder 的纸张是向左、向右、向上扇形展开的，左右两张展开后仍有部分压在
@@ -345,7 +345,7 @@ const steps = [
     </section>
 
     <footer class="foot">
-      <span>DataMind Agent · 赛题八 多模态数据驱动的可解释精准问数/问答智能体</span>
+      <span>DataMind Agent · 多模态数据驱动的可解释精准问数/问答智能体</span>
       <span>演示数据，不代表真实生产环境</span>
     </footer>
   </div>
